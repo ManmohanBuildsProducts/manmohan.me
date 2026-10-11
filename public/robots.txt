@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://manmohan.me/sitemap-index.xml
+Sitemap: https://manmohan.work/sitemap-index.xml
