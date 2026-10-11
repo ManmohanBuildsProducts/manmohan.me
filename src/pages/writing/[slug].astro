@@ -1,0 +1,35 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Share from '../../components/Share.astro';
+import { posts, fmt } from '../../lib';
+export async function getStaticPaths() {
+  return (await posts()).map((p) => ({ params: { slug: p.id }, props: { p } }));
+}
+const { p } = Astro.props;
+const { Content } = await render(p);
+const url = new URL(`/writing/${p.id}/`, Astro.site).toString();
+---
+<Base title={`${p.data.title} · Manmohan`} description={p.data.description} type="article">
+  <article>
+    <a class="back" href="/writing/">← Writing</a>
+    <h1>{p.data.title}</h1>
+    <time datetime={p.data.date.toISOString()}>{fmt(p.data.date)}</time>
+    <div class="prose"><Content /></div>
+    <Share title={p.data.title} url={url} />
+  </article>
+</Base>
+<style>
+.back{font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);text-decoration:none}.back:hover{color:var(--gold)}
+article h1{margin-top:.6em}
+article>time{display:block;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:40px}
+.prose :global(p),.prose :global(li){color:#ddd7cc}
+.prose :global(h2){font:400 1.7rem/1.25 Newsreader,Georgia,serif;margin:2em 0 .4em}
+.prose :global(h3){font:500 1.05rem Inter,sans-serif;margin:1.8em 0 .3em}
+.prose :global(a){color:var(--gold);text-underline-offset:3px}
+.prose :global(blockquote){margin:1.6em 0;padding-left:20px;border-left:2px solid var(--gold);font:italic 300 1.35rem/1.45 Newsreader,Georgia,serif;color:var(--ink)}
+.prose :global(img){max-width:100%;height:auto;border-radius:6px}
+.prose :global(code){font-size:.88em;background:var(--panel);padding:2px 6px;border-radius:4px}
+.prose :global(pre){background:var(--panel)!important;padding:18px;border-radius:8px;overflow-x:auto}
+.prose :global(hr){border:0;border-top:1px solid var(--line);margin:3em 0}
+</style>

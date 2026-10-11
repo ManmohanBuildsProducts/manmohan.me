@@ -1,0 +1,29 @@
+---
+import Base from '../../layouts/Base.astro';
+import { posts, fmt } from '../../lib';
+const list = await posts();
+---
+<Base title="Writing · Manmohan" description="Notes on making messy systems legible, for people and for models.">
+  <div class="kick">Writing</div>
+  <h1>Notes from the <em>messy world.</em></h1>
+  {list.length === 0 && <p class="empty">First essays are on the way. <a href="/rss.xml">Follow the RSS feed</a> to get them.</p>}
+  <ol class="posts">
+    {list.map((p) => (
+      <li><a href={`/writing/${p.id}/`}>
+        <time datetime={p.data.date.toISOString()}>{fmt(p.data.date)}</time>
+        <h2>{p.data.title}</h2>
+        <p>{p.data.description}</p>
+      </a></li>
+    ))}
+  </ol>
+</Base>
+<style>
+.empty{color:var(--muted)}
+.posts{list-style:none;padding:0;margin:48px 0 0}
+.posts li{border-top:1px solid var(--line)}
+.posts a{display:block;padding:28px 0;text-decoration:none}
+.posts time{font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.posts h2{font:400 1.6rem/1.25 Newsreader,Georgia,serif;margin:.3em 0 .25em;transition:color .3s}
+.posts p{margin:0;color:var(--muted)}
+.posts a:hover h2{color:var(--gold)}
+</style>

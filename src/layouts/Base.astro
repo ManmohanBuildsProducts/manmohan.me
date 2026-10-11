@@ -1,0 +1,52 @@
+---
+interface Props { title: string; description: string; image?: string; type?: string }
+const { title, description, image = '/og.png', type = 'website' } = Astro.props;
+const url = new URL(Astro.url.pathname, Astro.site);
+const img = new URL(image, Astro.site);
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{title}</title>
+<meta name="description" content={description}>
+<link rel="canonical" href={url}>
+<meta property="og:type" content={type}>
+<meta property="og:url" content={url}>
+<meta property="og:title" content={title}>
+<meta property="og:description" content={description}>
+<meta property="og:image" content={img}>
+<meta name="twitter:card" content="summary_large_image">
+<link rel="alternate" type="application/rss+xml" title="Manmohan · Writing" href="/rss.xml">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..500;1,6..72,300..500&family=Inter:wght@400;500&display=swap">
+<style is:global>
+:root{--bg:#030304;--ink:#f1ece2;--muted:#aaa59b;--dim:#5e5b54;--gold:#f3c871;--line:#1d1c20;--panel:#0b0b0e}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.7 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+em{font-style:italic;color:var(--gold)}
+a{color:inherit}
+::selection{background:var(--gold);color:#120d02}
+.grain{position:fixed;inset:-50%;z-index:0;pointer-events:none;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.top{position:relative;z-index:1;display:flex;align-items:baseline;gap:22px;padding:clamp(16px,3.4vh,32px) clamp(16px,4vw,48px)}
+.top .brand{font:400 1.3rem Newsreader,Georgia,serif;text-decoration:none}
+.top .w{color:var(--muted);text-decoration:none;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase}
+.top .w:hover,.top .w[aria-current]{color:var(--gold)}
+main{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:clamp(32px,8vh,96px) 16px 96px}
+.kick{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+h1{font:300 clamp(2.2rem,5.4vw,3.6rem)/1.08 Newsreader,Georgia,serif;letter-spacing:-.01em;margin:.4em 0 .5em}
+footer{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:28px 16px 48px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;font-size:.78rem;color:var(--dim)}
+footer a{color:var(--muted);text-decoration:none}footer a:hover{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<nav class="top"><a class="brand" href="/">Manmohan</a><a class="w" href="/writing/" aria-current={Astro.url.pathname.startsWith('/writing') ? 'page' : undefined}>Writing</a></nav>
+<main><slot /></main>
+<footer><span>manmohan.me</span><span><a href="/rss.xml">RSS</a> · <a href="mailto:manmohanbuildsproducts@gmail.com">Email</a> · <a href="https://www.linkedin.com/in/maciitr" rel="noopener">LinkedIn</a> · <a href="https://github.com/ManmohanBuildsProducts" rel="noopener">GitHub</a></span></footer>
+</body>
+</html>
