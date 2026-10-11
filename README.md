@@ -31,7 +31,7 @@ npm run build    # outputs dist/
 
 ## Hosting
 
-Cloudflare Pages, connected to this repo. Build command `npm run build`, output directory `dist`, custom domain `manmohan.me`.
+Cloudflare Workers (static assets), connected to this repo. Build command `npm run build`, deploy command `npx wrangler deploy` (reads `wrangler.jsonc`, serves `dist`). Custom domain `manmohan.me`.
 
 ## Home page source
 
