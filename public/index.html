@@ -81,7 +81,7 @@ main{position:relative;z-index:2}
 .tag{position:absolute;transform:translate(-50%,-150%);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);white-space:nowrap;opacity:0;transition:opacity .6s;text-shadow:0 0 18px rgba(0,0,0,.9)}
 
 /* chapter title cards */
-.card{display:flex;align-items:center;padding:0 clamp(16px,7vw,120px);position:relative}
+.card{display:flex;align-items:center;padding:0 clamp(16px,7vw,120px)}
 .card .in{max-width:880px}
 .card .roman{font:500 .78rem Inter,sans-serif;color:var(--gold);letter-spacing:.16em}
 .card h2{font:350 clamp(3.2rem,9.5vw,8.2rem)/.95 "Newsreader",Georgia,serif;letter-spacing:-.03em;margin:.1em 0 .25em}
@@ -125,7 +125,7 @@ main{position:relative;z-index:2}
 @media (max-width:860px){.mach{flex-direction:column;align-items:flex-start;justify-content:center;gap:18px;padding-top:56px}.mach .in{flex:none}.mach h2{font-size:clamp(2.2rem,10vw,3.4rem);margin:.05em 0 .15em}.mach .in p{font-size:.98rem}.mach .foot{margin-top:12px}.mach .meta{display:none}.mach .rule{display:none}.lab{width:100%;flex:none}.tabs button{padding:6px 10px;font-size:.7rem}.ld{font-size:1rem;min-height:4.4em}}
 
 /* close */
-.close{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:0 clamp(16px,7vw,120px);position:relative}
+.close{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:0 clamp(16px,7vw,120px)}
 .close .dot{width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 30px 6px rgba(243,200,113,.5);margin-bottom:40px;animation:breathe 3.2s ease-in-out infinite}
 @keyframes breathe{50%{transform:scale(1.5);box-shadow:0 0 60px 14px rgba(243,200,113,.35)}}
 .close h2{font:400 clamp(2.4rem,7vw,6rem)/1 "Newsreader",Georgia,serif;letter-spacing:-.02em;margin:0;max-width:16ch}
@@ -204,6 +204,7 @@ main{position:relative;z-index:2}
 .role li{font-size:.95rem;line-height:1.6;color:#dcd6cb;margin:8px 0}
 .role li b{color:var(--ink);font-weight:500}
 .role.hl h3{color:var(--gold)}
+@media (max-width:520px){.close .links{gap:18px 24px}.close .mail{letter-spacing:.08em;font-size:.74rem}}
 @media (prefers-reduced-motion: reduce){.grain,.hint i,.close .dot{animation:none}.w{animation-duration:.01s}}
 </style>
 </head>
@@ -683,7 +684,7 @@ function go(i,frac){i=Math.max(0,Math.min(STEPS.length-1,i));if(i===cur&&frac==n
   slides.forEach(x=>x.classList.toggle('cur',x===sec));
   const ch=sec.dataset.ch;rail.forEach(a=>a.classList.toggle('on',a.dataset.ch===ch));
   nextb.classList.toggle('gone',i===STEPS.length-1);nextb.querySelector('span').textContent=i===0?'Scroll':'';
-  stepn.textContent=String(i+1).padStart(2,'0')+' / '+String(STEPS.length).padStart(2,'0');
+  stepn.textContent=String(i+1).padStart(2,'0')+' / '+String(STEPS.length).padStart(2,'0');stepn.style.opacity=st.id==='close'?0:'';
   cur=i;if(sec.id==='ch-machines')att.start();else att.stop();}
 window.__go=go;
 const firstStep=id=>STEPS.findIndex(x=>x.id===id);
