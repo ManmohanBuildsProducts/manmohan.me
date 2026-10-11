@@ -168,6 +168,7 @@ main{position:relative;z-index:2}
 .dv h4{font:500 .76rem Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 12px}
 .dv .blk{padding:0 0 34px;margin:0 0 34px;border-bottom:1px solid var(--line)}
 .dv .blk:last-child{border-bottom:0}
+.dv .src{list-style:none;margin:0;padding:0;display:grid;gap:10px}.dv .src a{color:#dcd6cb;text-decoration:underline;text-decoration-color:rgba(220,214,203,.35);text-underline-offset:3px}.dv .src a:hover,.dv .src a:focus-visible{text-decoration-color:currentColor}
 .dv .blk p{font-size:1.08rem;line-height:1.7;color:#dcd6cb;margin:0;max-width:60ch}
 .stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .stats3 div{background:#0b0b0e;padding:20px 18px}
@@ -235,10 +236,10 @@ main{position:relative;z-index:2}
     <div class="jobcopy">
       <div class="jk">I · Blinkit offline · 2019–2020</div>
       <h2 class="hl">I wired <em>450 neighbourhood stores</em> across Delhi NCR into one network.</h2>
-      <p class="role">Early PM, employee #11</p>
+      <p class="role">Early PM (APM title), offline team</p>
       <button class="dive" data-dive="blinkit">Dive deeper <span aria-hidden="true">→</span></button>
     </div>
-    <div class="cap">Scale one: a city. All 450 stores were in Delhi NCR. The count is exact; where each store sits is approximate.</div>
+    <div class="cap">Scale one: a city. 100 stores in mid-2019, 300 by September (press), about 450 by Oct 2020 when I left (my count). All in Delhi NCR; where each store sits is approximate.</div>
     <div class="loading" data-loading>Loading</div>
   </div>
 </section>
@@ -251,7 +252,7 @@ main{position:relative;z-index:2}
       <p class="role">Co-founder &amp; CPO</p>
       <button class="dive" data-dive="tago">Dive deeper <span aria-hidden="true">→</span></button>
     </div>
-    <div class="cap">Papers from many clinics, filed into one record a person owns, structured so software can read it. Built on India's new digital health stack.</div>
+    <div class="cap">Papers from many clinics, filed into one record a person owns, structured so software can read it. Live on Google Play in 2021, on India's national digital health stack (NDHM).</div>
     <div class="loading" data-loading>Loading</div>
   </div>
 </section>
@@ -260,11 +261,11 @@ main{position:relative;z-index:2}
     <div class="num"><b data-n>1</b><span data-nl>shopkeeper</span></div>
     <div class="jobcopy">
       <div class="jk">III · Badho · 2022–2026</div>
-      <h2 class="hl">I co-founded Badho: <em>two million</em> shops buying stock straight from distributors.</h2>
+      <h2 class="hl">I co-founded Badho: shops buying stock straight from distributors, with data on <em>two million</em> of them.</h2>
       <p class="role">Co-founder &amp; Head of Product · B2B commerce for India's neighbourhood shops</p>
       <button class="dive" data-dive="badho">Dive deeper <span aria-hidden="true">→</span></button>
     </div>
-    <div class="cap">Scale two: the country. 20 lakh retailers, from Delhi out to every state. The count is exact; the places are approximate.</div>
+    <div class="cap">Scale two: the country. Data on 20 lakh retailers across 11 states; 1M+ installs on Google Play. The places are approximate.</div>
     <div class="loading" data-loading>Loading</div>
   </div>
 </section>
@@ -728,7 +729,7 @@ const CV={
   '<b>Blocked a model upgrade that won on the headline metric.</b> Portfolio error fell, but at product level, where money moves, error rose and direction accuracy dropped from 91% to 78%. It stayed out of production.',
   '<b>Made capacity a number leadership could hire against</b>, by splitting every stage into touch time and lead time and finding that the real limit is the last week of each month.']},
  badho:{h:'Badho',t:'Co-founder & Head of Product',d:'2022 – Apr 2026 · B2B commerce for shopkeepers',ab:'Connected distributors with neighbourhood retailers across North India.',li:[
-  '<b>Scale:</b> about 2M shopkeepers onboarded, 350K active at peak, ₹50 Cr peak monthly GTV, 200+ brand partners.',
+  '<b>Scale:</b> data on about 20 lakh retailers across 11 states, 1.8M app installs, 60–70K retailers buying every month and 350K active at peak, ₹50 Cr peak monthly GTV, 200+ direct brand partners.',
   '<b>Four pivots</b>, including a rebuild after a 91% revenue contraction.',
   '<b>AI matching across 170K+ products</b>, search with a model making the final call. Seller onboarding went from 2–3 days to same day.',
   '<b>Rebuilt search for Hindi and Hinglish</b>: sub-100ms hybrid search on local embeddings. Search use tripled, from 9% to 28% of daily users.',
@@ -736,11 +737,11 @@ const CV={
   '<b>Found a 97% payment drop-off</b> in my own SQL analysis and redesigned checkout. Replaced self-serve onboarding with a concierge model: completion went from 72% to 99.4%.',
   '<b>Built escrow payments from zero</b>, with risk scoring and an NBFC credit partner.',
   '<b>Built the product org</b>: PMs and APMs, four designers and a three-person automation team.']},
- tago:{h:'Tago Care',t:'Co-founder & CPO',d:'Jun 2021 – Mar 2022',ab:'A digital health locker on India\'s national health stack (ABHA).',li:[
-  '<b>Took my own idea from zero</b> to a live product with about 500 users.',
+ tago:{h:'Tago Care',t:'Co-founder & CPO',d:'Jun 2021 – Mar 2022',ab:'A digital health locker on India\'s national health stack (NDHM, now ABDM), live on Google Play in 2021.',li:[
+  '<b>Took my own idea from zero</b> to a live product with about 500 users before we shut it down.',
   '<b>Owned the whole product</b>: the bet, the build, the users, and the call to close it after nine months.']},
- blinkit:{h:'Blinkit',t:'Early PM, offline vertical',d:'Jun 2019 – Oct 2020 · employee #11',ab:'An incubated bet to bring neighbourhood stores into the online grocery network, before quick commerce.',li:[
-  '<b>Scaled partner stores across Delhi NCR to about 450.</b>',
+ blinkit:{h:'Blinkit',t:'Early PM (APM title), offline vertical',d:'Jun 2019 – Oct 2020',ab:'An incubated bet to bring neighbourhood stores into the online grocery network, before quick commerce.',li:[
+  '<b>Scaled Grofers\' branded partner stores across Delhi NCR</b> from about 100 in mid-2019 to about 450 by Oct 2020.',
   '<b>Store onboarding went from 7 days to 2 hours.</b>',
   '<b>Built a pricing engine</b> and automated point-of-sale reordering for partner stores.']},
  builds:{h:'Independent builds',t:'How I build',d:'Agents every day',ab:'',li:[
@@ -765,17 +766,20 @@ const DIVE={
  blinkit:{n:'I',name:'Blinkit offline',yrs:'2019–2020',big:'I wired <em>450 neighbourhood stores</em> across Delhi NCR into one network.',
   mess:'In 2019, neighbourhood stores ran on paper, memory and a till that talked to nothing. Blinkit wanted Delhi NCR\'s stores inside its app, and signing up a single store took seven days.',
   moves:['Rebuilt store onboarding end to end, until it took two hours instead of seven days.','Built a pricing engine so partner stores could sell online at the right price.','Automated reordering from each store\'s point-of-sale data.'],
-  stats:[['7d → 2h','store onboarding'],['450','stores onboarded'],['#11','employee number']],
+  stats:[['7d → 2h','store onboarding'],['300','stores in the press, Sep 2019'],['~450','stores by Oct 2020, my count']],
+  src:[['Business Today, Jun 2019: ~100 stores converted in Delhi NCR','https://www.businesstoday.in/current/corporate/grofers-converting-kirana-stores-supermarkets-into-its-brand-stores/story/359115.html'],['KrASIA, Oct 2019: 300 stores, all in Delhi NCR','https://kr-asia.com/how-softbank-backed-grofers-is-preparing-to-take-on-indias-online-grocery-market'],['Entrackr, Nov 2019: inside Grofers\' branded-store push','https://entrackr.com/2019/11/unpacking-grofers-offline-push-to-establish-itself-an-fmcg-brand/']],
   tr:'When the field is messy, I make the process itself the product.',next:'tago'},
  tago:{n:'II',name:'Tago',yrs:'2021–2022',big:'My own bet: people should <em>own their health records</em>, in a form machines can read.',
-  mess:'India was launching a national digital health stack (ABHA), yet most families still kept prescriptions and reports on paper, scattered across clinics and drawers.',
+  mess:'India was launching a national digital health stack (NDHM, now ABDM), yet most families still kept prescriptions and reports on paper, scattered across clinics and drawers.',
   moves:['Took my own idea from zero to a live product on the new national stack.','Owned the whole product as co-founder and CPO: the bet, the build and the users.','Made the call to close it after nine months.'],
   stats:[['~500','people trusted it'],['9','months'],['0 → 1','my own idea']],
+  src:[['Tago on Google Play, Sep 2021 (archived): Personal Health Record, Health ID, NDHM','https://web.archive.org/web/20210927064205/https://play.google.com/store/apps/details?id=com.tagocare.tago'],['tago.care, Sep 2021 (archived)','https://web.archive.org/web/20210927075924/http://tago.care/']],
   tr:'Judge a bet by its team and its timing, not just the idea.',next:'badho'},
- badho:{n:'III',name:'Badho',yrs:'2022–2026',big:'I co-founded Badho: <em>two million</em> shops buying stock straight from distributors.',
+ badho:{n:'III',name:'Badho',yrs:'2022–2026',big:'I co-founded Badho: shops buying stock straight from distributors, with data on <em>two million</em> of them.',
   mess:'After one city at Blinkit, this was the whole country. India has twelve to twenty million neighbourhood shops. Most order stock by phone, from memory, from wholesalers who set the price.',
   moves:['Rebuilt search for Hindi and Hinglish: sub-100ms, and search use tripled from 9% to 28% of daily users.','Killed our own commission model when the data showed it ate 40–66% of distributor margin.','Found a 97% payment drop-off in my own SQL and redesigned checkout. Concierge onboarding took completion from 72% to 99.4%.'],
-  stats:[['2M','shopkeepers onboarded, pan-India'],['350K','active in the peak month'],['₹50 Cr','peak monthly GTV']],
+  stats:[['20 lakh','retailers in our data, 11 states'],['1.8M','app installs'],['60–70K','buying every month']],
+  src:[['Badho retailer app on Google Play: 1M+ installs','https://play.google.com/store/apps/details?id=com.badhobuyer'],['Badho release, Jul 2025: 16 lakh+ retailers, 11 states','https://www.business-standard.com/content/press-releases-ani/badho-technologies-pvt-ltd-unveils-revolutionary-platform-to-fix-india-s-broken-fmcg-distribution-125072401461_1.html'],['Inc42 profile: Cofounder & CPO at Badho','https://inc42.com/person/manmohan-singh-charan/']],
   tr:'Four pivots, each one called on data. I\'d rather kill my own work than defend it.',next:'gobble'},
  gobble:{n:'IV',name:'GobbleCube',yrs:'2026–now',big:'Every night, brands set <em>tomorrow\'s discounts</em> for the whole country from an engine I built.',
   mess:'Brands on quick commerce set tomorrow\'s discounts city by city, every night, mostly by gut. Money was moving faster than anyone could reason about it.',
@@ -790,6 +794,7 @@ function openDive(k,btn){const d=DIVE[k],r=CV[k];dvLast=btn;
    <div><div class="blk"><h4>The mess</h4><p>${d.mess}</p></div>
    <div class="blk"><h4>What I did</h4><ol class="moves">${d.moves.map(m=>`<li>${m}</li>`).join('')}</ol></div>
    <div class="blk"><div class="stats3">${d.stats.map(([b,l])=>`<div><b>${b}</b><span>${l}</span></div>`).join('')}</div></div>
+   ${d.src?`<div class="blk"><h4>Public record</h4><ul class="src">${d.src.map(([l,u])=>`<li><a href="${u}" target="_blank" rel="noopener">${l}</a></li>`).join('')}</ul></div>`:''}
    <div class="blk"><h4>What transfers</h4><blockquote>${d.tr}</blockquote></div>
    <div class="blk"><h4>From the resume</h4><ul class="cvl">${r.li.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>`;
   dv.scrollTop=0;dv.classList.add('on');dv.setAttribute('aria-hidden','false');dvx.focus({preventScroll:true});}
