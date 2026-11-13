@@ -4,8 +4,8 @@ import { posts } from '../lib';
 
 export async function GET(context: APIContext) {
   return rss({
-    title: 'Manmohan · Writing',
-    description: 'Notes on making messy systems legible, for people and for models.',
+    title: 'Manmohan Singh Charan · Notes',
+    description: 'Notes by Manmohan Singh Charan on agents, search, and shipping products.',
     site: context.site!,
     items: (await posts()).map((p) => ({
       title: p.data.title,
