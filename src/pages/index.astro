@@ -2,11 +2,9 @@
 import Home from "../layouts/Home.astro";
 import IslandScene from "../components/IslandScene.astro";
 import "../styles/home.css";
-import { contact, home, islands, personOrder, workshop } from "../data/island";
+import { contact, home, islands, workshop } from "../data/island";
 
 const ages = home.ages;
-const villagers = home.people.filter((person) => !person.crew);
-const crew = home.people.filter((person) => person.crew);
 const fog = islands.filter((island) => island.kind === "fog");
 const count = ages.length;
 
@@ -51,7 +49,6 @@ const rows = (age: (typeof ages)[number]) => [
     <a class="brand" href="/">Manmohan</a>
     <nav aria-label="Primary">
       <a href="#ages">Ages</a>
-      <a href="#people">Villagers</a>
       <a href="#workshop">Workshop</a>
       <a href="#contact">Contact</a>
       <a href="/writing/">Writing</a>
@@ -65,9 +62,11 @@ const rows = (age: (typeof ages)[number]) => [
       <p class="dek">{contact.line}</p>
     </header>
 
-    <div class="saga">
-      <IslandScene />
-      <div class="ledger" id="ages">
+    <div class="reel">
+      <div class="pin">
+        <IslandScene />
+      </div>
+      <div class="chapters" id="ages">
         <h2 class="sr">The ages</h2>
         {ages.map((age) => (
           <article
@@ -104,32 +103,6 @@ const rows = (age: (typeof ages)[number]) => [
       </div>
     </div>
 
-    <section class="block" id="people" aria-labelledby="people-title">
-      <h2 id="people-title">Villagers</h2>
-      <div class="people">
-        {villagers.map((person) => (
-          <article class="card" id={`person-${person.id}`} tabindex="-1" data-line={person.line} data-order={personOrder(person)}>
-            <p class="kicker">Villager</p>
-            <h3>{person.job}</h3>
-            <p class="says">{person.line}</p>
-          </article>
-        ))}
-      </div>
-    </section>
-
-    <section class="block" id="crew" aria-labelledby="crew-title">
-      <h2 id="crew-title">Builder crew</h2>
-      <div class="people">
-        {crew.map((person) => (
-          <article class="card" id={`person-${person.id}`} tabindex="-1" data-line={person.line}>
-            <p class="crew-mark">Crew</p>
-            <h3>{person.job}</h3>
-            <p class="says">{person.line}</p>
-          </article>
-        ))}
-      </div>
-    </section>
-
     <section class="block" id="workshop" aria-labelledby="workshop-title">
       <p class="kicker">Tinkering with AI</p>
       <h2 id="workshop-title">{workshop.title}</h2>
@@ -160,9 +133,6 @@ const rows = (age: (typeof ages)[number]) => [
             <h3>{island.name}</h3>
             <p>{island.teaser}</p>
             <p style="margin-top:8px">{island.scouted}</p>
-            <p style="margin-top:12px">
-              <button type="button" class="btn ghost" data-scout={island.id} aria-pressed="false">Scout the fog</button>
-            </p>
           </article>
         ))}
       </div>

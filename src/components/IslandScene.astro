@@ -2,6 +2,7 @@
 import { home, horizonNote, islands, personOrder, resources } from "../data/island";
 import Structure from "./Structure.astro";
 import Villager from "./Villager.astro";
+import { sprites } from "./sprites";
 import { anchor, at, diamond, HW, HH, iso, terrain } from "./iso";
 
 const ages = home.ages;
@@ -9,9 +10,6 @@ const people = home.people;
 const places = home.places;
 const fogIslands = islands.filter((island) => island.kind === "fog");
 const tiles = terrain();
-
-const grassFill = ["#2f8a34", "#38963c", "#277a30"];
-const sandFill = ["#e7c56e", "#f0d48a", "#d7ae58"];
 
 function roadTiles(fromId: string, toId: string, order: number) {
   const a = anchor[fromId];
@@ -70,8 +68,12 @@ const fogOrigin = { x: 930, y: 96 };
             <stop offset="0.55" stop-color="#1d6eae" />
             <stop offset="1" stop-color="#0c4d86" />
           </linearGradient>
+          <pattern id="watertex" patternUnits="userSpaceOnUse" width="280" height="140">
+            <image href={sprites.terrain.water} x="0" y="0" width="280" height="140" opacity="0.4" />
+          </pattern>
         </defs>
         <rect width="1180" height="700" fill="url(#skysea)" />
+        <rect width="1180" height="700" fill="url(#watertex)" opacity="0.55" />
         <g class="waves" aria-hidden="true">
           <path d="M-20 180 q 24 -8 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0" />
           <path d="M-10 240 q 28 -9 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0" />
@@ -83,9 +85,10 @@ const fogOrigin = { x: 930, y: 96 };
         <g aria-hidden="true">
           {tiles.map((tile) => (
             <g>
-              <polygon points={diamond(tile.x, tile.y)} fill={tile.kind === "sand" ? sandFill[tile.shade] : grassFill[tile.shade]} stroke="#2f5a28" stroke-width="0.6" />
-              {tile.kind === "grass" && (
-                <polygon points={diamond(tile.x, tile.y - 3, HW * 0.55, HH * 0.45)} fill="#ffffff" opacity="0.08" />
+              {tile.kind === "grass" ? (
+                <image href={sprites.terrain.grass} x={tile.x - HW} y={tile.y - HH} width={HW * 2} height={HH * 2} />
+              ) : (
+                <image href={sprites.terrain.sand} x={tile.x - HW} y={tile.y - HH} width={HW * 2} height={HH * 2} />
               )}
               {tile.kind === "sand" && (
                 <ellipse class="foam" cx={tile.x} cy={tile.y + HH - 2} rx="10" ry="4" fill="#f4fbff" opacity="0.55" />
@@ -95,20 +98,24 @@ const fogOrigin = { x: 930, y: 96 };
           {roads.map((road) => (
             <polygon class="isl-road" data-order={road.order} points={diamond(road.x, road.y, HW * 0.72, HH * 0.72)} fill="#b8894a" stroke="#7a5a2c" stroke-width="0.6" />
           ))}
-          {rocks.map((rock) => (
+          {sprites.rocks && rocks.map((rock) => (
+            <image href={sprites.rocks} x={rock.x - 16} y={rock.y - 14} width="32" height="28" />
+          ))}
+          {!sprites.rocks && rocks.map((rock) => (
             <g transform={`translate(${rock.x} ${rock.y})`}>
-              <polygon points="-8,2 0,-6 10,0 2,6" fill="#8d8478" stroke="#3a322c" />
-              <polygon points="-8,2 0,-6 0,-2 -6,3" fill="#b7aea2" />
+              <polygon points="-7,2 0,-5 8,1 1,5" fill="#9a9186" />
             </g>
           ))}
-          {trees.map((tree) => (
-            <g transform={`translate(${tree.x} ${tree.y}) scale(${tree.s})`} aria-hidden="true">
-              <ellipse cx="2" cy="6" rx="8" ry="3" fill="#000" opacity="0.18" />
-              <polygon points="-2,4 2,4 1,-6 -1,-6" fill="#6b4424" />
-              <polygon points="-12,0 0,-16 12,0" fill="#1f6b28" />
-              <polygon points="-9,-4 0,-18 4,-6" fill="#3d9a40" />
-            </g>
-          ))}
+          {trees.map((tree) => {
+            const art = sprites.trees[tree.i % 2];
+            return art ? (
+              <image href={art} x={tree.x - 18 * tree.s} y={tree.y - 36 * tree.s} width={36 * tree.s} height={40 * tree.s} />
+            ) : (
+              <g transform={`translate(${tree.x} ${tree.y})`}>
+                <polygon points="-8,2 0,-14 8,2" fill="#2f7a32" />
+              </g>
+            );
+          })}
         </g>
 
         {ages.map((age) => {
@@ -127,10 +134,11 @@ const fogOrigin = { x: 930, y: 96 };
           return (
             <g transform={`translate(${p.x} ${y})`}>
               <ellipse cx="4" cy="8" rx="18" ry="7" fill="#000" opacity="0.2" />
-              <a href={place.href} aria-label={place.kind === "workshop" ? "The Workshop: tinkering with AI" : "Watchtower. Job Scout keeps the lookout."}>
-                <Structure kind={place.kind === "workshop" ? "workshop" : "tower"} />
-                {place.kind === "workshop" && (
-                  <text x="0" y="22" text-anchor="middle" fill="#2a1c12" font-size="13">{place.label}</text>
+              <a href={place.href} aria-label={place.kind === "workshop" ? "The Workshop" : "Watchtower"}>
+                {sprites.buildings[place.id] ? (
+                  <image class="sprite" href={sprites.buildings[place.id]} x="-48" y="-88" width="96" height="96" />
+                ) : (
+                  <Structure kind={place.kind === "workshop" ? "workshop" : "tower"} />
                 )}
               </a>
             </g>
@@ -148,12 +156,21 @@ const fogOrigin = { x: 930, y: 96 };
                 <g class="rise">
                   <g class="bld" transform={`scale(${grow})`}>
                     {age.wonder && <ellipse class="glow" cx="0" cy="-70" rx="70" ry="28" fill="#e6b325" />}
-                    <Structure kind={age.kind} wonder={age.wonder} />
+                    {sprites.buildings[age.id] ? (
+                      <image
+                        class="sprite"
+                        href={age.order <= 1 ? sprites.buildings[age.id] : undefined}
+                        data-src={age.order <= 1 ? undefined : sprites.buildings[age.id]}
+                        x="-88"
+                        y="-150"
+                        width="176"
+                        height="160"
+                      />
+                    ) : (
+                      <Structure kind={age.kind} wonder={age.wonder} />
+                    )}
                   </g>
-                  <g class="plaque" aria-hidden="true">
-                    <polygon points={age.wonder ? "-58,16 58,16 50,34 -50,34" : "-46,14 46,14 40,30 -40,30"} fill="#f4e6c4" stroke="#6a4a16" />
-                    <text y={age.wonder ? 28 : 26} text-anchor="middle" fill="#2a1c12" font-size={age.wonder ? 14 : 12}>{age.name}</text>
-                  </g>
+                  <text class="plaque" y={age.wonder ? 28 : 22} text-anchor="middle" fill="#f7f1e4" font-size={age.wonder ? 15 : 12} stroke="#1a140e" stroke-width="3" paint-order="stroke">{age.name}</text>
                 </g>
               </a>
             </g>
@@ -205,31 +222,13 @@ const fogOrigin = { x: 930, y: 96 };
           })}
         </svg>
       </div>
-      <p class="bubble" data-bubble hidden></p>
+      <p class="ambient" data-ambient hidden>Now I order stock from my phone</p>
       <div class="isl-banner" data-banner hidden>
     <p class="banner-k" data-banner-k></p>
     <p class="banner-t" data-banner-t></p>
     <p class="banner-d" data-banner-d></p>
   </div>
     </div>
-  </div>
-  <div class="command">
-    <div class="controls">
-      <button type="button" class="btn primary" data-advance>Advance age</button>
-      <button type="button" class="btn ghost" data-replay>Replay</button>
-      <p class="status" data-status>Five plots marked.</p>
-    </div>
-    <ol class="queue" aria-label="Ages, in order">
-      {ages.map((age) => (
-        <li>
-          <a href={`#${age.id}`} data-queue={age.order} class:list={{ wonder: age.wonder, raising: age.raising }}>
-            <span class="roman">{age.age}</span>
-            <span class="qname">{age.name}</span>
-          </a>
-        </li>
-      ))}
-    </ol>
-    <p class="hint">Click a building, a villager, the Workshop or the fog.</p>
   </div>
 </div>
 
