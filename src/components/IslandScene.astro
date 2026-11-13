@@ -2,6 +2,7 @@
 import { home, horizonNote, islands, personOrder, resources } from "../data/island";
 import Structure from "./Structure.astro";
 import Villager from "./Villager.astro";
+import { sprites } from "./sprites";
 import { anchor, at, diamond, HW, HH, iso, terrain } from "./iso";
 
 const ages = home.ages;
@@ -9,9 +10,6 @@ const people = home.people;
 const places = home.places;
 const fogIslands = islands.filter((island) => island.kind === "fog");
 const tiles = terrain();
-
-const grassFill = ["#2f8a34", "#38963c", "#277a30"];
-const sandFill = ["#e7c56e", "#f0d48a", "#d7ae58"];
 
 function roadTiles(fromId: string, toId: string, order: number) {
   const a = anchor[fromId];
@@ -46,6 +44,29 @@ const plotOf = Object.fromEntries(ages.map((age) => [age.id, at(age.id)]));
 const placeOf = Object.fromEntries(places.map((place) => [place.id, at(place.id)]));
 
 const fogOrigin = { x: 930, y: 96 };
+const grassArt = sprites.terrain.grass;
+const sandArt = sprites.terrain.sand;
+const waterArt = sprites.terrain.water;
+const grassFill = ["#2f8a34", "#38963c", "#277a30"];
+const sandFill = ["#e7c56e", "#f0d48a", "#d7ae58"];
+
+/** One scale for every painted building, taken from its real pixel size. Badho is a little larger. */
+const BUILD = 104 / 512;
+const nativeBuild: Record<string, [number, number]> = {
+  blinkit: [512, 483],
+  bijak: [494, 512],
+  tago: [493, 512],
+  badho: [470, 512],
+  gobble: [512, 503],
+  workshop: [390, 512],
+  watchtower: [275, 640],
+};
+function buildingBox(id: string) {
+  const [w, h] = nativeBuild[id] ?? [512, 512];
+  const boost = id === "badho" ? 1.18 : 1;
+  return { w: Math.round(w * BUILD * boost), h: Math.round(h * BUILD * boost) };
+}
+const GROUND = 6;
 ---
 
 <div class="stage">
@@ -70,8 +91,17 @@ const fogOrigin = { x: 930, y: 96 };
             <stop offset="0.55" stop-color="#1d6eae" />
             <stop offset="1" stop-color="#0c4d86" />
           </linearGradient>
+          <clipPath id="tile-clip">
+            <polygon points={diamond(0, 0)} />
+          </clipPath>
         </defs>
         <rect width="1180" height="700" fill="url(#skysea)" />
+        {waterArt && (
+          <g opacity="0.5">
+            <image href={waterArt} alt="" role="presentation" x="40" y="120" width="560" height="280" />
+            <image href={waterArt} alt="" role="presentation" x="620" y="300" width="480" height="240" />
+          </g>
+        )}
         <g class="waves" aria-hidden="true">
           <path d="M-20 180 q 24 -8 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0" />
           <path d="M-10 240 q 28 -9 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0" />
@@ -81,34 +111,56 @@ const fogOrigin = { x: 930, y: 96 };
         </g>
 
         <g aria-hidden="true">
-          {tiles.map((tile) => (
-            <g>
-              <polygon points={diamond(tile.x, tile.y)} fill={tile.kind === "sand" ? sandFill[tile.shade] : grassFill[tile.shade]} stroke="#2f5a28" stroke-width="0.6" />
-              {tile.kind === "grass" && (
-                <polygon points={diamond(tile.x, tile.y - 3, HW * 0.55, HH * 0.45)} fill="#ffffff" opacity="0.08" />
-              )}
-              {tile.kind === "sand" && (
-                <ellipse class="foam" cx={tile.x} cy={tile.y + HH - 2} rx="10" ry="4" fill="#f4fbff" opacity="0.55" />
-              )}
-            </g>
-          ))}
+          {tiles.map((tile) => {
+            const art = tile.kind === "grass" ? grassArt : sandArt;
+            // Grass art sits inset in its canvas; scale it so the diamond covers the cell.
+            const cover = tile.kind === "grass" ? (HH * 2) / 155 : 1;
+            const tw = tile.kind === "grass" ? 384 * cover : HW * 2;
+            const th = tile.kind === "grass" ? 192 * cover : HH * 2;
+            const tx = tile.kind === "grass" ? tile.x - HW - 21 * cover : tile.x - HW;
+            const ty = tile.kind === "grass" ? tile.y - HH - 1 * cover : tile.y - HH;
+            return (
+              <g transform={`translate(${tile.x} ${tile.y})`} clip-path="url(#tile-clip)">
+                {art ? (
+                  <image href={art} alt="" role="presentation" x={tx - tile.x} y={ty - tile.y} width={tw} height={th} />
+                ) : (
+                  <polygon points={diamond(0, 0)} fill={tile.kind === "sand" ? sandFill[tile.shade] : grassFill[tile.shade]} />
+                )}
+                {tile.kind === "sand" && (
+                  <ellipse class="foam" cx="0" cy={HH - 2} rx="10" ry="4" fill="#f4fbff" opacity="0.55" />
+                )}
+              </g>
+            );
+          })}
           {roads.map((road) => (
             <polygon class="isl-road" data-order={road.order} points={diamond(road.x, road.y, HW * 0.72, HH * 0.72)} fill="#b8894a" stroke="#7a5a2c" stroke-width="0.6" />
           ))}
-          {rocks.map((rock) => (
+          {sprites.rocks && rocks.map((rock) => (
+            <g>
+              <ellipse cx={rock.x} cy={rock.y + 2} rx="14" ry="5" fill="#000" opacity="0.2" />
+              <image href={sprites.rocks} alt="" role="presentation" x={rock.x - 22} y={rock.y - 40} width="44" height="43" />
+            </g>
+          ))}
+          {!sprites.rocks && rocks.map((rock) => (
             <g transform={`translate(${rock.x} ${rock.y})`}>
-              <polygon points="-8,2 0,-6 10,0 2,6" fill="#8d8478" stroke="#3a322c" />
-              <polygon points="-8,2 0,-6 0,-2 -6,3" fill="#b7aea2" />
+              <polygon points="-7,2 0,-5 8,1 1,5" fill="#9a9186" />
             </g>
           ))}
-          {trees.map((tree) => (
-            <g transform={`translate(${tree.x} ${tree.y}) scale(${tree.s})`} aria-hidden="true">
-              <ellipse cx="2" cy="6" rx="8" ry="3" fill="#000" opacity="0.18" />
-              <polygon points="-2,4 2,4 1,-6 -1,-6" fill="#6b4424" />
-              <polygon points="-12,0 0,-16 12,0" fill="#1f6b28" />
-              <polygon points="-9,-4 0,-18 4,-6" fill="#3d9a40" />
-            </g>
-          ))}
+          {trees.map((tree) => {
+            const art = sprites.trees[tree.i % 2];
+            const th = 96 * tree.s;
+            const tw = th * (tree.i % 2 === 0 ? 217 / 360 : 329 / 360);
+            return art ? (
+              <g>
+                <ellipse cx={tree.x} cy={tree.y + 2} rx={tw * 0.28} ry={tw * 0.1} fill="#000" opacity="0.22" />
+                <image href={art} alt="" role="presentation" x={tree.x - tw / 2} y={tree.y - th} width={tw} height={th} />
+              </g>
+            ) : (
+              <g transform={`translate(${tree.x} ${tree.y})`}>
+                <polygon points="-8,2 0,-14 8,2" fill="#2f7a32" />
+              </g>
+            );
+          })}
         </g>
 
         {ages.map((age) => {
@@ -123,14 +175,18 @@ const fogOrigin = { x: 930, y: 96 };
 
         {places.map((place) => {
           const p = placeOf[place.id];
-          const y = place.kind === "watchtower" ? p.y - 8 : p.y;
+          const art = sprites.buildings[place.id];
+          const box = buildingBox(place.id);
+          const y = art ? p.y : place.kind === "watchtower" ? p.y - 8 : p.y;
+          const ground = GROUND;
           return (
             <g transform={`translate(${p.x} ${y})`}>
-              <ellipse cx="4" cy="8" rx="18" ry="7" fill="#000" opacity="0.2" />
-              <a href={place.href} aria-label={place.kind === "workshop" ? "The Workshop: tinkering with AI" : "Watchtower. Job Scout keeps the lookout."}>
-                <Structure kind={place.kind === "workshop" ? "workshop" : "tower"} />
-                {place.kind === "workshop" && (
-                  <text x="0" y="22" text-anchor="middle" fill="#2a1c12" font-size="13">{place.label}</text>
+              <ellipse cx="2" cy={ground} rx={box.w * 0.26} ry={box.w * 0.08} fill="#000" opacity="0.28" />
+              <a href={place.href} aria-label={place.kind === "workshop" ? "The Workshop" : "Watchtower"}>
+                {art ? (
+                  <image class="sprite" href={art} alt="" role="presentation" x={-box.w / 2} y={ground - box.h} width={box.w} height={box.h} />
+                ) : (
+                  <Structure kind={place.kind === "workshop" ? "workshop" : "tower"} />
                 )}
               </a>
             </g>
@@ -140,20 +196,33 @@ const fogOrigin = { x: 930, y: 96 };
         {ages.map((age) => {
           const p = plotOf[age.id];
           const grow = age.wonder ? 1.38 : 0.72 + age.order * 0.08;
+          const art = sprites.buildings[age.id];
+          const box = buildingBox(age.id);
+          const ground = GROUND;
           return (
             <g class="isl-era" data-order={age.order} data-id={age.id} transform={`translate(${p.x} ${p.y})`}>
               <a href={`#${age.id}`} aria-label={`Age ${age.age}, ${age.name}. ${age.wonder ? "The wonder. " : age.raising ? "Still being built. " : ""}Open the chronicle.`}>
                 <ellipse class="ring" cx="2" cy="10" rx={age.wonder ? 54 : 36} ry={age.wonder ? 18 : 12} fill="none" />
-                <ellipse cx="6" cy="12" rx={age.wonder ? 40 : 26} ry="10" fill="#000" opacity="0.22" />
+                <ellipse cx="4" cy={ground + 2} rx={art ? box.w * 0.28 : age.wonder ? 40 : 26} ry="10" fill="#000" opacity="0.28" />
                 <g class="rise">
-                  <g class="bld" transform={`scale(${grow})`}>
-                    {age.wonder && <ellipse class="glow" cx="0" cy="-70" rx="70" ry="28" fill="#e6b325" />}
-                    <Structure kind={age.kind} wonder={age.wonder} />
-                  </g>
-                  <g class="plaque" aria-hidden="true">
-                    <polygon points={age.wonder ? "-58,16 58,16 50,34 -50,34" : "-46,14 46,14 40,30 -40,30"} fill="#f4e6c4" stroke="#6a4a16" />
-                    <text y={age.wonder ? 28 : 26} text-anchor="middle" fill="#2a1c12" font-size={age.wonder ? 14 : 12}>{age.name}</text>
-                  </g>
+                  {art ? (
+                    <image
+                      class="sprite"
+                      alt=""
+                      role="presentation"
+                      data-src={art}
+                      x={-box.w / 2}
+                      y={ground - box.h}
+                      width={box.w}
+                      height={box.h}
+                    />
+                  ) : (
+                    <g class="bld" transform={`scale(${grow})`}>
+                      {age.wonder && <ellipse class="glow" cx="0" cy="-70" rx="70" ry="28" fill="#e6b325" />}
+                      <Structure kind={age.kind} wonder={age.wonder} />
+                    </g>
+                  )}
+                  <text class="plaque" y={age.wonder ? 28 : 22} text-anchor="middle" fill="#f7f1e4" font-size={age.wonder ? 15 : 12} stroke="#1a140e" stroke-width="3" paint-order="stroke">{age.name}</text>
                 </g>
               </a>
             </g>
@@ -162,7 +231,7 @@ const fogOrigin = { x: 930, y: 96 };
 
         {people.map((person) => {
           const p = at(person.id);
-          const y = person.id === "scout" ? p.y - 78 : p.y;
+          const y = person.id === "scout" ? p.y - 104 : p.y;
           return <Villager person={person} order={personOrder(person)} x={p.x} y={y} />;
         })}
 
@@ -205,31 +274,13 @@ const fogOrigin = { x: 930, y: 96 };
           })}
         </svg>
       </div>
-      <p class="bubble" data-bubble hidden></p>
+      <p class="ambient" data-ambient hidden>Now I order stock from my phone</p>
       <div class="isl-banner" data-banner hidden>
     <p class="banner-k" data-banner-k></p>
     <p class="banner-t" data-banner-t></p>
     <p class="banner-d" data-banner-d></p>
   </div>
     </div>
-  </div>
-  <div class="command">
-    <div class="controls">
-      <button type="button" class="btn primary" data-advance>Advance age</button>
-      <button type="button" class="btn ghost" data-replay>Replay</button>
-      <p class="status" data-status>Five plots marked.</p>
-    </div>
-    <ol class="queue" aria-label="Ages, in order">
-      {ages.map((age) => (
-        <li>
-          <a href={`#${age.id}`} data-queue={age.order} class:list={{ wonder: age.wonder, raising: age.raising }}>
-            <span class="roman">{age.age}</span>
-            <span class="qname">{age.name}</span>
-          </a>
-        </li>
-      ))}
-    </ol>
-    <p class="hint">Click a building, a villager, the Workshop or the fog.</p>
   </div>
 </div>
 

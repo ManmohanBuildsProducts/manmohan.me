@@ -1,4 +1,6 @@
 ---
+import { preloadedSprites } from "../components/sprites";
+
 interface Props {
   title: string;
   description: string;
@@ -31,6 +33,9 @@ const image = new URL("/og.png", Astro.site);
 <link rel="alternate" type="application/rss+xml" title="Manmohan · Writing" href="/rss.xml">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/fonts/cinzel-600.woff2" as="font" type="font/woff2" crossorigin>
+{preloadedSprites.map((href) => (
+  <link rel="preload" href={href} as="image" type="image/webp" />
+))}
 <script is:inline>
 (function () {
   try {

@@ -1,5 +1,6 @@
 ---
 import type { Person } from "../data/island";
+import { sprites } from "./sprites";
 
 interface Props {
   person: Person;
@@ -8,49 +9,61 @@ interface Props {
   y: number;
 }
 const { person, order, x, y } = Astro.props;
-const dur = (3.2 + Math.abs(person.drift) / 8).toFixed(2);
-const short = person.job.split("·")[0].trim();
+const art = sprites.villagers[person.id];
+const eager = order < 1;
+const height = 58;
+const native: Record<string, { sw: number; ww?: number }> = {
+  picker: { sw: 98 },
+  trader: { sw: 125 },
+  carer: { sw: 108 },
+  kirana1: { sw: 95, ww: 92 },
+  kirana2: { sw: 95 },
+  seller1: { sw: 120, ww: 116 },
+  seller2: { sw: 120 },
+  jarvis: { sw: 116 },
+  coach: { sw: 125 },
+  scout: { sw: 117 },
+  builder: { sw: 151, ww: 140 },
+};
+const frame = native[person.id] ?? { sw: 110 };
+const standW = Math.round((frame.sw * height) / 192);
+const walkW = Math.round(((frame.ww ?? frame.sw) * height) / 192);
 ---
 
-<g class="villager" transform={`translate(${x} ${y}) scale(1.55)`}>
-<a
-  class="isl-npc"
-  data-order={order}
-  data-id={person.id}
-  href={`#person-${person.id}`}
-  aria-label={`${person.job}. ${person.crew ? "Quirk" : "Says"}: ${person.line}`}
->
-  <g>
-    <ellipse class="ring" cx="2" cy="6" rx="18" ry="8" fill="none" />
-    <ellipse cx="3" cy="7" rx="12" ry="5" fill="#000" opacity="0.22" />
-    <g class="walker" data-drift={person.drift} style={`--dx:${person.drift}px;--dur:${dur}s`}>
-      <g class="leg leg-a">
-        <polygon points="-4,2 -1,2 -2,10 -6,9" fill="#5c4030" />
-      </g>
-      <g class="leg leg-b">
-        <polygon points="2,2 5,2 7,10 3,9" fill="#3e2a1c" />
-      </g>
-      <polygon points="-8,0 0,4 0,-12 -8,-16" fill={person.color} stroke="#2a1c12" stroke-width="0.8" />
-      <polygon points="8,0 0,4 0,-12 8,-16" fill="#2a1c12" opacity="0.35" />
-      <polygon points="8,0 0,4 0,-12 8,-16" fill={person.color} stroke="#2a1c12" stroke-width="0.8" opacity="0.82" />
-      <circle cx="0" cy="-18" r="5.2" fill="#e2be96" stroke="#2a1c12" stroke-width="0.7" />
-      {person.crew && (
-        <g>
-          <polygon points="-6,-20 0,-28 6,-20" fill="#e6b325" stroke="#2a1c12" stroke-width="0.7" />
-          <line x1="0" y1="-28" x2="0" y2="-33" stroke="#2a1c12" stroke-width="1" />
-          <circle cx="0" cy="-34" r="1.8" fill="#e6b325" stroke="#2a1c12" stroke-width="0.5" />
-        </g>
+<g class="isl-npc" data-order={order} transform={`translate(${x} ${y})`} aria-hidden="true">
+  {art?.stand ? (
+    <g class:list={["fig", { "has-walk": Boolean(art.walk) }]}>
+      <ellipse cx="0" cy="3" rx={standW * 0.34} ry="4.5" fill="#000" opacity="0.22" />
+      <image
+        class="stand"
+        alt=""
+        role="presentation"
+        href={eager ? art.stand : undefined}
+        data-src={eager ? undefined : art.stand}
+        x={-standW / 2}
+        y={4 - height}
+        width={standW}
+        height={height}
+      />
+      {art.walk && (
+        <image
+          class="step"
+          alt=""
+          role="presentation"
+          href={eager && art.walk ? art.walk : undefined}
+          data-src={eager ? undefined : art.walk}
+          x={-walkW / 2}
+          y={4 - height}
+          width={walkW}
+          height={height}
+        />
       )}
     </g>
-    <ellipse cx="0" cy="-6" rx="22" ry="14" fill="transparent" />
-  </g>
-</a>
-    <g class="unit-tag" aria-hidden="true">
-      <foreignObject x="-78" y="-62" width="156" height="36">
-        <div xmlns="http://www.w3.org/1999/xhtml" class="unitplate">
-          <span class="unitjob">{short}</span>
-          <span class="hp"><i></i></span>
-        </div>
-      </foreignObject>
+  ) : (
+    <g>
+      <ellipse cx="1" cy="2" rx="7" ry="3" fill="#000" opacity="0.2" />
+      <ellipse cx="0" cy="-8" rx="6" ry="8" fill={person.color} />
+      <circle cx="0" cy="-18" r="4" fill="#efd0a8" />
     </g>
+  )}
 </g>
