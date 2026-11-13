@@ -2,7 +2,7 @@
 import Home from "../layouts/Home.astro";
 import IslandScene from "../components/IslandScene.astro";
 import "../styles/home.css";
-import { contact, home, islands, personOrder, resources, workshop } from "../data/island";
+import { contact, home, islands, personOrder, workshop } from "../data/island";
 
 const ages = home.ages;
 const villagers = home.people.filter((person) => !person.crew);
@@ -14,7 +14,7 @@ const ageCss = Array.from({ length: count }, (_, age) => {
   const later = ages.filter((item) => item.order > age).map((item) => String(item.order));
   if (!later.length) return "";
   const hide = later
-    .map((order) => `html.js[data-age="${age}"] :is(.isl-era,.isl-road,.isl-npc)[data-order="${order}"]`)
+        .map((order) => `html.js[data-age="${age}"] :is(.isl-era,.isl-road,.isl-npc,.mm-dot)[data-order="${order}"]`)
     .join(",");
   const plots = later.map((order) => `html.js[data-age="${age}"] .isl-plot[data-order="${order}"]`).join(",");
   return `${hide}{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .45s ease,visibility 0s linear .45s}${plots}{opacity:1;visibility:visible;transition:opacity .45s ease,visibility 0s}`;
@@ -63,11 +63,6 @@ const rows = (age: (typeof ages)[number]) => [
       <p class="kicker">manmohan.work</p>
       <h1>Seven years. Five ages. One island, still growing.</h1>
       <p class="dek">{contact.line}</p>
-      <ul class="resources" aria-label="Resources">
-        {resources.map((item) => (
-          <li><span aria-hidden="true">◆ </span>{item}</li>
-        ))}
-      </ul>
     </header>
 
     <div class="saga">

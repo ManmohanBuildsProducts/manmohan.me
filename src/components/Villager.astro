@@ -4,31 +4,53 @@ import type { Person } from "../data/island";
 interface Props {
   person: Person;
   order: number;
+  x: number;
+  y: number;
 }
-const { person, order } = Astro.props;
-const dur = (4 + Math.abs(person.drift) / 6).toFixed(2);
+const { person, order, x, y } = Astro.props;
+const dur = (3.2 + Math.abs(person.drift) / 8).toFixed(2);
+const short = person.job.split("·")[0].trim();
 ---
 
-<g
+<g class="villager" transform={`translate(${x} ${y}) scale(1.55)`}>
+<a
   class="isl-npc"
   data-order={order}
   data-id={person.id}
-  aria-hidden="true"
+  href={`#person-${person.id}`}
+  aria-label={`${person.job}. ${person.crew ? "Quirk" : "Says"}: ${person.line}`}
 >
-  <g transform={`translate(${person.x} ${person.y})`}>
-    <ellipse class="ring" cx="0" cy="4" rx="16" ry="6" fill="none" />
+  <g>
+    <ellipse class="ring" cx="2" cy="6" rx="18" ry="8" fill="none" />
+    <ellipse cx="3" cy="7" rx="12" ry="5" fill="#000" opacity="0.22" />
     <g class="walker" data-drift={person.drift} style={`--dx:${person.drift}px;--dur:${dur}s`}>
-      <ellipse cx="0" cy="2" rx="8" ry="2.5" fill="#000" opacity="0.22" />
-      <rect x="-5" y="-15" width="10" height="16" rx="3.5" fill={person.color} />
-      <circle cx="0" cy="-19" r="5" fill="#E2BE96" stroke="#2A2216" stroke-width="0.8" />
+      <g class="leg leg-a">
+        <polygon points="-4,2 -1,2 -2,10 -6,9" fill="#5c4030" />
+      </g>
+      <g class="leg leg-b">
+        <polygon points="2,2 5,2 7,10 3,9" fill="#3e2a1c" />
+      </g>
+      <polygon points="-8,0 0,4 0,-12 -8,-16" fill={person.color} stroke="#2a1c12" stroke-width="0.8" />
+      <polygon points="8,0 0,4 0,-12 8,-16" fill="#2a1c12" opacity="0.35" />
+      <polygon points="8,0 0,4 0,-12 8,-16" fill={person.color} stroke="#2a1c12" stroke-width="0.8" opacity="0.82" />
+      <circle cx="0" cy="-18" r="5.2" fill="#e2be96" stroke="#2a1c12" stroke-width="0.7" />
       {person.crew && (
         <g>
-          <path d="M -6.5 -21 Q 0 -31 6.5 -21 Z" fill="#E9B949" stroke="#2A2216" stroke-width="0.8" />
-          <line x1="0" y1="-30" x2="0" y2="-36" stroke="#2A2216" stroke-width="1.15" />
-          <circle cx="0" cy="-37.5" r="2.3" fill="#E9B949" stroke="#2A2216" stroke-width="0.6" />
+          <polygon points="-6,-20 0,-28 6,-20" fill="#e6b325" stroke="#2a1c12" stroke-width="0.7" />
+          <line x1="0" y1="-28" x2="0" y2="-33" stroke="#2a1c12" stroke-width="1" />
+          <circle cx="0" cy="-34" r="1.8" fill="#e6b325" stroke="#2a1c12" stroke-width="0.5" />
         </g>
       )}
     </g>
-    <circle cx="0" cy="-12" r="22" fill="transparent" />
+    <ellipse cx="0" cy="-6" rx="22" ry="14" fill="transparent" />
   </g>
+</a>
+    <g class="unit-tag" aria-hidden="true">
+      <foreignObject x="-78" y="-62" width="156" height="36">
+        <div xmlns="http://www.w3.org/1999/xhtml" class="unitplate">
+          <span class="unitjob">{short}</span>
+          <span class="hp"><i></i></span>
+        </div>
+      </foreignObject>
+    </g>
 </g>

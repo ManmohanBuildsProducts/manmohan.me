@@ -119,8 +119,11 @@ function showBanner(card: HTMLElement) {
   banner.classList.toggle("wonder", card.dataset.wonder === "true");
   banner.hidden = false;
   banner.classList.remove("on");
+  const frame = document.querySelector(".isl-frame");
+  frame?.classList.remove("age-flash");
   void banner.offsetWidth;
   banner.classList.add("on");
+  frame?.classList.add("age-flash");
   window.clearTimeout(bannerTimer);
   bannerTimer = window.setTimeout(() => {
     banner.hidden = true;
