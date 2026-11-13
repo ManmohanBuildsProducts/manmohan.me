@@ -50,16 +50,23 @@ const waterArt = sprites.terrain.water;
 const grassFill = ["#2f8a34", "#38963c", "#277a30"];
 const sandFill = ["#e7c56e", "#f0d48a", "#d7ae58"];
 
-/** Painted sprites are bottom-center anchored so the base sits on the tile. */
-const buildingBox: Record<string, { w: number; h: number }> = {
-  blinkit: { w: 108, h: 108 },
-  bijak: { w: 116, h: 116 },
-  tago: { w: 124, h: 124 },
-  badho: { w: 168, h: 168 },
-  gobble: { w: 150, h: 150 },
-  workshop: { w: 108, h: 108 },
-  watchtower: { w: 96, h: 128 },
+/** One scale for every painted building, taken from its real pixel size. Badho is a little larger. */
+const BUILD = 104 / 512;
+const nativeBuild: Record<string, [number, number]> = {
+  blinkit: [512, 483],
+  bijak: [494, 512],
+  tago: [493, 512],
+  badho: [470, 512],
+  gobble: [512, 503],
+  workshop: [390, 512],
+  watchtower: [275, 640],
 };
+function buildingBox(id: string) {
+  const [w, h] = nativeBuild[id] ?? [512, 512];
+  const boost = id === "badho" ? 1.18 : 1;
+  return { w: Math.round(w * BUILD * boost), h: Math.round(h * BUILD * boost) };
+}
+const GROUND = 6;
 ---
 
 <div class="stage">
@@ -84,14 +91,17 @@ const buildingBox: Record<string, { w: number; h: number }> = {
             <stop offset="0.55" stop-color="#1d6eae" />
             <stop offset="1" stop-color="#0c4d86" />
           </linearGradient>
-          {waterArt && (
-            <pattern id="watertex" patternUnits="userSpaceOnUse" width="280" height="140">
-              <image href={waterArt} x="0" y="0" width="280" height="140" opacity="0.55" />
-            </pattern>
-          )}
+          <clipPath id="tile-clip">
+            <polygon points={diamond(0, 0)} />
+          </clipPath>
         </defs>
         <rect width="1180" height="700" fill="url(#skysea)" />
-        {waterArt && <rect width="1180" height="700" fill="url(#watertex)" opacity="0.42" />}
+        {waterArt && (
+          <g opacity="0.5">
+            <image href={waterArt} alt="" role="presentation" x="40" y="120" width="560" height="280" />
+            <image href={waterArt} alt="" role="presentation" x="620" y="300" width="480" height="240" />
+          </g>
+        )}
         <g class="waves" aria-hidden="true">
           <path d="M-20 180 q 24 -8 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0" />
           <path d="M-10 240 q 28 -9 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0" />
@@ -103,15 +113,21 @@ const buildingBox: Record<string, { w: number; h: number }> = {
         <g aria-hidden="true">
           {tiles.map((tile) => {
             const art = tile.kind === "grass" ? grassArt : sandArt;
+            // Grass art sits inset in its canvas; scale it so the diamond covers the cell.
+            const cover = tile.kind === "grass" ? (HH * 2) / 155 : 1;
+            const tw = tile.kind === "grass" ? 384 * cover : HW * 2;
+            const th = tile.kind === "grass" ? 192 * cover : HH * 2;
+            const tx = tile.kind === "grass" ? tile.x - HW - 21 * cover : tile.x - HW;
+            const ty = tile.kind === "grass" ? tile.y - HH - 1 * cover : tile.y - HH;
             return (
-              <g>
+              <g transform={`translate(${tile.x} ${tile.y})`} clip-path="url(#tile-clip)">
                 {art ? (
-                  <image href={art} x={tile.x - HW} y={tile.y - HH} width={HW * 2} height={HH * 2} />
+                  <image href={art} alt="" role="presentation" x={tx - tile.x} y={ty - tile.y} width={tw} height={th} />
                 ) : (
-                  <polygon points={diamond(tile.x, tile.y)} fill={tile.kind === "sand" ? sandFill[tile.shade] : grassFill[tile.shade]} stroke="#2a4a24" stroke-width="0.4" />
+                  <polygon points={diamond(0, 0)} fill={tile.kind === "sand" ? sandFill[tile.shade] : grassFill[tile.shade]} />
                 )}
                 {tile.kind === "sand" && (
-                  <ellipse class="foam" cx={tile.x} cy={tile.y + HH - 2} rx="10" ry="4" fill="#f4fbff" opacity="0.55" />
+                  <ellipse class="foam" cx="0" cy={HH - 2} rx="10" ry="4" fill="#f4fbff" opacity="0.55" />
                 )}
               </g>
             );
@@ -120,7 +136,10 @@ const buildingBox: Record<string, { w: number; h: number }> = {
             <polygon class="isl-road" data-order={road.order} points={diamond(road.x, road.y, HW * 0.72, HH * 0.72)} fill="#b8894a" stroke="#7a5a2c" stroke-width="0.6" />
           ))}
           {sprites.rocks && rocks.map((rock) => (
-            <image href={sprites.rocks} x={rock.x - 16} y={rock.y - 14} width="32" height="28" />
+            <g>
+              <ellipse cx={rock.x} cy={rock.y + 2} rx="14" ry="5" fill="#000" opacity="0.2" />
+              <image href={sprites.rocks} alt="" role="presentation" x={rock.x - 22} y={rock.y - 40} width="44" height="43" />
+            </g>
           ))}
           {!sprites.rocks && rocks.map((rock) => (
             <g transform={`translate(${rock.x} ${rock.y})`}>
@@ -129,12 +148,12 @@ const buildingBox: Record<string, { w: number; h: number }> = {
           ))}
           {trees.map((tree) => {
             const art = sprites.trees[tree.i % 2];
-            const tw = 46 * tree.s;
-            const th = 58 * tree.s;
+            const th = 96 * tree.s;
+            const tw = th * (tree.i % 2 === 0 ? 217 / 360 : 329 / 360);
             return art ? (
               <g>
                 <ellipse cx={tree.x} cy={tree.y + 2} rx={tw * 0.28} ry={tw * 0.1} fill="#000" opacity="0.22" />
-                <image href={art} x={tree.x - tw / 2} y={tree.y - th} width={tw} height={th} />
+                <image href={art} alt="" role="presentation" x={tree.x - tw / 2} y={tree.y - th} width={tw} height={th} />
               </g>
             ) : (
               <g transform={`translate(${tree.x} ${tree.y})`}>
@@ -157,15 +176,15 @@ const buildingBox: Record<string, { w: number; h: number }> = {
         {places.map((place) => {
           const p = placeOf[place.id];
           const art = sprites.buildings[place.id];
-          const box = buildingBox[place.id] ?? { w: 96, h: 96 };
+          const box = buildingBox(place.id);
           const y = art ? p.y : place.kind === "watchtower" ? p.y - 8 : p.y;
-          const ground = 8;
+          const ground = GROUND;
           return (
             <g transform={`translate(${p.x} ${y})`}>
               <ellipse cx="2" cy={ground} rx={box.w * 0.26} ry={box.w * 0.08} fill="#000" opacity="0.28" />
               <a href={place.href} aria-label={place.kind === "workshop" ? "The Workshop" : "Watchtower"}>
                 {art ? (
-                  <image class="sprite" href={art} x={-box.w / 2} y={ground - box.h} width={box.w} height={box.h} />
+                  <image class="sprite" href={art} alt="" role="presentation" x={-box.w / 2} y={ground - box.h} width={box.w} height={box.h} />
                 ) : (
                   <Structure kind={place.kind === "workshop" ? "workshop" : "tower"} />
                 )}
@@ -178,8 +197,8 @@ const buildingBox: Record<string, { w: number; h: number }> = {
           const p = plotOf[age.id];
           const grow = age.wonder ? 1.38 : 0.72 + age.order * 0.08;
           const art = sprites.buildings[age.id];
-          const box = buildingBox[age.id] ?? { w: 120, h: 120 };
-          const ground = 8;
+          const box = buildingBox(age.id);
+          const ground = GROUND;
           return (
             <g class="isl-era" data-order={age.order} data-id={age.id} transform={`translate(${p.x} ${p.y})`}>
               <a href={`#${age.id}`} aria-label={`Age ${age.age}, ${age.name}. ${age.wonder ? "The wonder. " : age.raising ? "Still being built. " : ""}Open the chronicle.`}>
@@ -189,6 +208,8 @@ const buildingBox: Record<string, { w: number; h: number }> = {
                   {art ? (
                     <image
                       class="sprite"
+                      alt=""
+                      role="presentation"
                       data-src={art}
                       x={-box.w / 2}
                       y={ground - box.h}
@@ -210,7 +231,7 @@ const buildingBox: Record<string, { w: number; h: number }> = {
 
         {people.map((person) => {
           const p = at(person.id);
-          const y = person.id === "scout" ? p.y - 78 : p.y;
+          const y = person.id === "scout" ? p.y - 104 : p.y;
           return <Villager person={person} order={personOrder(person)} x={p.x} y={y} />;
         })}
 
