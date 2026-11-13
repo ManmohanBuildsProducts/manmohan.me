@@ -10,9 +10,9 @@ const { p } = Astro.props;
 const { Content } = await render(p);
 const url = new URL(`/writing/${p.id}/`, Astro.site).toString();
 ---
-<Base title={`${p.data.title} · Manmohan`} description={p.data.description} type="article">
+<Base title={`${p.data.title} · Manmohan Singh Charan`} description={p.data.description} type="article">
   <article>
-    <a class="back" href="/writing/">← Writing</a>
+    <a class="back" href="/writing/">← Notes</a>
     <h1>{p.data.title}</h1>
     <time datetime={p.data.date.toISOString()}>{fmt(p.data.date)}</time>
     <div class="prose"><Content /></div>

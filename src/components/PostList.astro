@@ -1,0 +1,35 @@
+---
+import { fmt } from '../lib';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  posts: CollectionEntry<'writing'>[];
+}
+
+const { posts } = Astro.props;
+---
+{posts.length === 0 ? (
+  <p class="empty">Nothing published yet.</p>
+) : (
+  <ol class="posts">
+    {posts.map((p) => (
+      <li>
+        <a href={`/writing/${p.id}/`}>
+          <time datetime={p.data.date.toISOString()}>{fmt(p.data.date)}</time>
+          <h3>{p.data.title}</h3>
+          <p>{p.data.description}</p>
+        </a>
+      </li>
+    ))}
+  </ol>
+)}
+<style>
+.empty{color:var(--muted);margin:1.25rem 0 0}
+.posts{list-style:none;padding:0;margin:8px 0 0}
+.posts li{border-top:1px solid var(--line)}
+.posts a{display:block;padding:22px 0;text-decoration:none}
+.posts time{font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.posts h3{font:400 1.45rem/1.25 Newsreader,Georgia,serif;margin:.35em 0 .2em;transition:color .3s}
+.posts p{margin:0;color:var(--muted)}
+.posts a:hover h3{color:var(--gold)}
+</style>

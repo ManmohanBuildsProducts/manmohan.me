@@ -1,0 +1,103 @@
+---
+import Base from '../layouts/Base.astro';
+import PostList from '../components/PostList.astro';
+import { posts } from '../lib';
+import { projects } from '../data/projects';
+
+const notes = await posts();
+const title = 'Manmohan Singh Charan — AI-native product leader';
+const description = 'AI-native product leader who ships agents. Builds in public, notes when they are ready, and a short record of the work.';
+const sameAs = [
+  'https://x.com/ManmohanBuilds',
+  'https://github.com/ManmohanBuildsProducts',
+  'https://www.linkedin.com/in/maciitr',
+];
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Manmohan Singh Charan',
+  url: 'https://manmohan.work/',
+  jobTitle: 'Lead PM',
+  worksFor: { '@type': 'Organization', name: 'GobbleCube' },
+  alumniOf: { '@type': 'CollegeOrUniversity', name: 'IIT Roorkee' },
+  sameAs,
+};
+---
+<Base title={title} description={description} wide>
+  <script type="application/ld+json" set:html={JSON.stringify(person)} />
+  <header class="hero">
+    <p class="who">Manmohan Singh Charan</p>
+    <h1>AI-native product leader who ships <em>agents.</em></h1>
+    <ul class="social">
+      <li><a href="https://x.com/ManmohanBuilds" target="_blank" rel="me noopener noreferrer">X <span>@ManmohanBuilds</span><span class="sr"> (opens in a new tab)</span></a></li>
+      <li><a href="https://github.com/ManmohanBuildsProducts" target="_blank" rel="me noopener noreferrer">GitHub <span>ManmohanBuildsProducts</span><span class="sr"> (opens in a new tab)</span></a></li>
+      <li><a href="https://www.linkedin.com/in/maciitr" target="_blank" rel="me noopener noreferrer">LinkedIn <span>Manmohan Singh Charan</span><span class="sr"> (opens in a new tab)</span></a></li>
+    </ul>
+  </header>
+
+  <section id="builds" aria-labelledby="builds-title">
+    <p class="kick">Builds</p>
+    <h2 id="builds-title">Four builds</h2>
+    <div class="grid">
+      {projects.map((project) => (
+        <article class="card">
+          <p class="kick">{project.kicker}</p>
+          <h3>{project.title}</h3>
+          <p>{project.body}</p>
+          {project.links.length > 0 && (
+            <ul class="out">
+              {project.links.map((link) => (
+                <li>
+                  <a href={link.href} target="_blank" rel="noopener noreferrer">
+                    {link.label} <span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section id="notes" aria-labelledby="notes-title">
+    <p class="kick">Notes</p>
+    <h2 id="notes-title">Writing</h2>
+    <PostList posts={notes.slice(0, 5)} />
+    <p class="more"><a href="/writing/">All notes</a> · <a href="/rss.xml">RSS</a></p>
+  </section>
+
+  <section id="about" aria-labelledby="about-title">
+    <p class="kick">About</p>
+    <h2 id="about-title">Background</h2>
+    <p>Seven years in product. Two-time co-founder of Badho and Tago Care. Roles at Blinkit, Bijak, Tago Care, and Badho. IIT Roorkee. I build with Cursor and Claude.</p>
+    <p>At Badho: 10+ production agent workflows, and hybrid search that grew from 9% to 28% of DAU, at under 100ms, with zero LLM calls.</p>
+    <p>Currently Lead PM at GobbleCube.</p>
+  </section>
+</Base>
+<style>
+.hero{padding:clamp(28px,7vh,84px) 0 clamp(48px,8vh,88px)}
+.who{margin:0;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.hero h1{max-width:min(18ch,100%);margin:.45em 0 0;font-size:clamp(2.15rem,8vw,4.5rem);font-weight:300;letter-spacing:-.025em}
+.social{display:flex;flex-wrap:wrap;gap:8px 22px;list-style:none;padding:0;margin:28px 0 0}
+.social a{display:inline-block;padding:8px 0;text-decoration:none;font-size:.95rem}
+.social a span{color:var(--muted)}
+.social a:hover{color:var(--gold)}
+section{padding:clamp(36px,6vh,64px) 0;border-top:1px solid var(--line)}
+section h2{font:300 clamp(1.8rem,3vw,2.4rem)/1.15 Newsreader,Georgia,serif;letter-spacing:-.02em;margin:.35em 0 .8em}
+.grid{display:grid;gap:14px}
+.card{display:flex;flex-direction:column;gap:10px;min-width:0;padding:22px 20px 18px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.02)}
+.card h3{font:400 clamp(1.45rem,2vw,1.75rem)/1.15 Newsreader,Georgia,serif;margin:0}
+.card p{margin:0;color:var(--muted);font-size:.98rem;line-height:1.65}
+.out{list-style:none;display:flex;flex-wrap:wrap;gap:8px 16px;padding:14px 0 0;margin:auto 0 0}
+.out a{color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(243,200,113,.45);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;padding-bottom:2px}
+.out a:hover{border-bottom-color:var(--gold)}
+#about p{max-width:62ch;color:#ddd7cc;margin:.7em 0}
+.more{margin:18px 0 0;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase}
+.more a{color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(243,200,113,.45)}
+.more a:hover{border-bottom-color:var(--gold)}
+@media (min-width:760px){
+  .grid{grid-template-columns:1fr 1fr}
+  .card{padding:26px 24px 20px}
+}
+</style>
