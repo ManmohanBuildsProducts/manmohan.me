@@ -1,0 +1,151 @@
+---
+interface Props {
+  kind: "depot" | "mandi" | "care" | "market" | "scaffold" | "workshop" | "tower";
+  wonder?: boolean;
+}
+const { kind, wonder = false } = Astro.props;
+const ink = "#3a2918";
+
+function pts(list: [number, number][]) {
+  return list.map(([x, y]) => `${x},${y}`).join(" ");
+}
+function up(p: [number, number], h: number): [number, number] {
+  return [p[0], p[1] - h];
+}
+function prism(a: number, h: number) {
+  const b = a / 2;
+  const W: [number, number] = [-a, 0];
+  const E: [number, number] = [a, 0];
+  const S: [number, number] = [0, b];
+  const N: [number, number] = [0, -b];
+  return {
+    b,
+    west: pts([W, S, up(S, h), up(W, h)]),
+    east: pts([E, S, up(S, h), up(E, h)]),
+    roof: pts([up(W, h), up(N, h), up(E, h), up(S, h)]),
+    N, E, S, W,
+  };
+}
+---
+
+{kind === "depot" && (() => {
+  const p = prism(28, 24);
+  return (
+    <g>
+      <polygon points={p.west} fill="#e0a85a" stroke={ink} stroke-width="1.1" />
+      <polygon points={p.east} fill="#8d5528" stroke={ink} stroke-width="1.1" />
+      <polygon points={p.roof} fill="#e8c56b" stroke={ink} stroke-width="1.1" />
+      <polygon points={pts([[-16, -6], [-6, 0], [-6, -16], [-16, -22]])} fill="#5c3a1e" />
+      <path d="M-22,-28 L6,-14 M-10,-34 L18,-20" stroke="#c4923e" stroke-width="2" fill="none" />
+      <polygon points="-34,6 -18,14 -8,8 -24,0" fill="#a56b32" stroke={ink} />
+    </g>
+  );
+})()}
+
+{kind === "mandi" && (() => {
+  const p = prism(36, 18);
+  return (
+    <g>
+      <polygon points={p.west} fill="#f0d7a4" stroke={ink} stroke-width="1.1" />
+      <polygon points={p.east} fill="#b08958" stroke={ink} stroke-width="1.1" />
+      <polygon points="-46,-22 0,-46 46,-22 0,2" fill="#c4472f" stroke={ink} />
+      <polygon points="-46,-22 0,-46 0,-40 -40,-20" fill="#f2d36a" />
+      <polygon points="0,-46 46,-22 40,-18 0,-40" fill="#e07a32" />
+      <circle cx="-16" cy="-4" r="5" fill="#6eae3d" stroke={ink} />
+      <circle cx="-4" cy="2" r="5" fill="#e07a32" stroke={ink} />
+      <circle cx="10" cy="-2" r="5" fill="#c4472f" stroke={ink} />
+    </g>
+  );
+})()}
+
+{kind === "care" && (() => {
+  const p = prism(32, 40);
+  return (
+    <g>
+      <polygon points={p.west} fill="#efe4d0" stroke={ink} stroke-width="1.1" />
+      <polygon points={p.east} fill="#b3a490" stroke={ink} stroke-width="1.1" />
+      <polygon points="-40,-46 0,-66 40,-46 0,-26" fill="#a33b32" stroke={ink} />
+      <polygon points="-40,-46 0,-66 0,-60 -34,-44" fill="#c45a48" />
+      <polygon points={pts([[-18, -8], [-8, -2], [-8, -22], [-18, -28]])} fill="#6a4630" />
+      <path d="M-4,-30 C-12,-40 -6,-48 0,-40 C6,-48 12,-40 4,-30 C2,-28 -2,-28 -4,-30 Z" fill="#c4472f" />
+    </g>
+  );
+})()}
+
+{kind === "market" && (() => {
+  const base = prism(62, 10);
+  const hall = prism(48, 46);
+  return (
+    <g>
+      <polygon points={base.west} fill="#d9cdb8" stroke={ink} />
+      <polygon points={base.east} fill="#a89880" stroke={ink} />
+      <polygon points={base.roof} fill="#efe6d2" stroke={ink} />
+      <g transform="translate(0 -10)">
+        <polygon points={hall.west} fill="#f4efe4" stroke={ink} stroke-width="1.15" />
+        <polygon points={hall.east} fill="#c3b6a2" stroke={ink} stroke-width="1.15" />
+        <polygon points={hall.roof} fill="#f0d78c" stroke={ink} stroke-width="1.15" />
+        <path d="M-36,-8 L-28,-4 M-20,-12 L-12,-8 M-4,-16 L4,-12" stroke="#b7aa96" stroke-width="3" />
+        <ellipse cx="0" cy="-70" rx="26" ry="14" fill="#e6b325" stroke={ink} />
+        <ellipse cx="0" cy="-76" rx="16" ry="9" fill="#f6e2a0" />
+        <ellipse cx="0" cy="-80" rx="8" ry="5" fill="#fff4c8" />
+        {wonder && (
+          <g>
+            <line x1="0" y1="-86" x2="0" y2="-112" stroke={ink} stroke-width="2" />
+            <polygon points="0,-112 18,-106 0,-102" fill="#c4472f" stroke={ink} />
+          </g>
+        )}
+      </g>
+    </g>
+  );
+})()}
+
+{kind === "scaffold" && (() => {
+  const p = prism(34, 28);
+  return (
+    <g>
+      <polygon points={p.west} fill="#e7d7b8" stroke={ink} opacity="0.85" />
+      <polygon points={p.east} fill="#b7a48a" stroke={ink} opacity="0.9" />
+      <polygon points={p.roof} fill="#d9c7a4" stroke={ink} stroke-dasharray="4 3" />
+      <g stroke="#6b4424" stroke-width="2.4" fill="none">
+        <line x1="-40" y1="4" x2="-40" y2="-62" />
+        <line x1="-14" y1="8" x2="-14" y2="-70" />
+        <line x1="14" y1="8" x2="14" y2="-70" />
+        <line x1="40" y1="4" x2="40" y2="-62" />
+        <line x1="-42" y1="-24" x2="42" y2="-24" />
+        <line x1="-42" y1="-46" x2="42" y2="-46" />
+      </g>
+      <line x1="52" y1="6" x2="52" y2="-86" stroke={ink} stroke-width="3" />
+      <line x1="58" y1="-86" x2="6" y2="-86" stroke={ink} stroke-width="3" />
+      <g class="hook" transform="translate(6 -86)">
+        <line x1="0" y1="0" x2="0" y2="18" stroke={ink} stroke-width="1.6" />
+        <rect x="-7" y="16" width="14" height="8" fill="#e6b325" stroke={ink} />
+      </g>
+    </g>
+  );
+})()}
+
+{kind === "workshop" && (() => {
+  const p = prism(24, 20);
+  return (
+    <g>
+      <polygon points={p.west} fill="#d89a52" stroke={ink} />
+      <polygon points={p.east} fill="#8a5328" stroke={ink} />
+      <polygon points={p.roof} fill="#6b4424" stroke={ink} />
+      <circle cx="0" cy="-28" r="7" fill="none" stroke={ink} stroke-width="2.2" stroke-dasharray="3 2" />
+    </g>
+  );
+})()}
+
+{kind === "tower" && (() => {
+  const p = prism(16, 70);
+  return (
+    <g>
+      <polygon points={p.west} fill="#c4a574" stroke={ink} />
+      <polygon points={p.east} fill="#8c7352" stroke={ink} />
+      <polygon points={p.roof} fill="#6b4424" stroke={ink} />
+      <polygon points="-22,-78 0,-90 22,-78 0,-66" fill="#a33b32" stroke={ink} />
+      <line x1="0" y1="-88" x2="0" y2="-104" stroke={ink} stroke-width="1.6" />
+      <polygon points="0,-104 12,-100 0,-96" fill="#e6b325" />
+    </g>
+  );
+})()}

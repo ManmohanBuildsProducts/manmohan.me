@@ -1,6 +1,6 @@
 # manmohan.work
 
-Personal site. Home page is a hand-built WebGL deck (`public/index.html`); `/writing` is an Astro blog.
+Personal site. The home page is the Living Island (`src/pages/index.astro`), drawn in SVG. Ages, villagers, and islands live in `src/data/island.ts`. `/writing` is an Astro blog.
 
 ## Publish a post
 
@@ -33,6 +33,6 @@ npm run build    # outputs dist/
 
 Cloudflare Workers (static assets), connected to this repo. Build command `npm run build`, deploy command `npx wrangler deploy` (reads `wrangler.jsonc`, serves `dist`). Custom domain `manmohan.work`.
 
-## Home page source
+## Home page
 
-`public/index.html` is a build output. Its source (`src.html` + `build.py`, which injects the Survey of India outline) lives in the project files; rebuild there and copy the result here.
+Edit `src/data/island.ts` to add an age or a fog island. The scene, the chronicle, and the age rules all read that file. `npm run dev` serves the page at http://localhost:4321.

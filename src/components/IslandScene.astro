@@ -1,0 +1,238 @@
+---
+import { home, horizonNote, islands, personOrder, resources } from "../data/island";
+import Structure from "./Structure.astro";
+import Villager from "./Villager.astro";
+import { anchor, at, diamond, HW, HH, iso, terrain } from "./iso";
+
+const ages = home.ages;
+const people = home.people;
+const places = home.places;
+const fogIslands = islands.filter((island) => island.kind === "fog");
+const tiles = terrain();
+
+const grassFill = ["#2f8a34", "#38963c", "#277a30"];
+const sandFill = ["#e7c56e", "#f0d48a", "#d7ae58"];
+
+function roadTiles(fromId: string, toId: string, order: number) {
+  const a = anchor[fromId];
+  const b = anchor[toId];
+  if (!a || !b) return [];
+  return [0.35, 0.65].map((t, i) => {
+    const gx = a[0] + (b[0] - a[0]) * t;
+    const gy = a[1] + (b[1] - a[1]) * t;
+    return { order, i, ...iso(gx, gy) };
+  });
+}
+
+const roads = [
+  ...roadTiles("workshop", "blinkit", 1),
+  ...roadTiles("blinkit", "bijak", 2),
+  ...roadTiles("bijak", "tago", 3),
+  ...roadTiles("tago", "badho", 4),
+  ...roadTiles("badho", "gobble", 5),
+];
+
+const trees = [
+  [1.6, 5.2], [2.8, 4.4], [4.2, 3.6], [5.6, 3.2], [6.8, 2.6],
+  [8.4, 2.0], [10.2, 2.2], [11.4, 3.4], [3.4, 6.8], [5.8, 6.6],
+  [8.8, 5.8], [1.2, 6.6], [9.4, 6.2], [6.2, 7.2],
+].map(([gx, gy], i) => ({ ...iso(gx, gy), i, s: 0.85 + (i % 3) * 0.12 }));
+
+const rocks = [
+  [1.4, 7.4], [12.6, 5.2], [8.0, 6.4],
+].map(([gx, gy], i) => ({ ...iso(gx, gy), i }));
+
+const plotOf = Object.fromEntries(ages.map((age) => [age.id, at(age.id)]));
+const placeOf = Object.fromEntries(places.map((place) => [place.id, at(place.id)]));
+
+const fogOrigin = { x: 930, y: 96 };
+---
+
+<div class="stage">
+  <ul class="resources" aria-label="Resources">
+    {resources.map((item) => (
+      <li>
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+          <polygon points="8,1 15,8 8,15 1,8" fill="#e6b325" stroke="#6a4a16" />
+        </svg>
+        <span>{item}</span>
+      </li>
+    ))}
+  </ul>
+  <div class="isl-frame" tabindex="0">
+    <div class="isl-world">
+      <svg class="isl-svg" viewBox="200 40 840 600" role="group" aria-labelledby="island-title">
+        <title id="island-title">Living island: five ages, villagers, the Workshop, and an island in the fog</title>
+        <defs>
+          <linearGradient id="skysea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#8fd4ef" />
+            <stop offset="0.28" stop-color="#3d92c8" />
+            <stop offset="0.55" stop-color="#1d6eae" />
+            <stop offset="1" stop-color="#0c4d86" />
+          </linearGradient>
+        </defs>
+        <rect width="1180" height="700" fill="url(#skysea)" />
+        <g class="waves" aria-hidden="true">
+          <path d="M-20 180 q 24 -8 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0" />
+          <path d="M-10 240 q 28 -9 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0" />
+          <path d="M-30 430 q 30 -8 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0" />
+          <path d="M40 560 q 26 -7 52 0 t 52 0 t 52 0 t 52 0 t 52 0 t 52 0 t 52 0 t 52 0 t 52 0" />
+          <path d="M0 640 q 32 -8 64 0 t 64 0 t 64 0 t 64 0 t 64 0 t 64 0 t 64 0" />
+        </g>
+
+        <g aria-hidden="true">
+          {tiles.map((tile) => (
+            <g>
+              <polygon points={diamond(tile.x, tile.y)} fill={tile.kind === "sand" ? sandFill[tile.shade] : grassFill[tile.shade]} stroke="#2f5a28" stroke-width="0.6" />
+              {tile.kind === "grass" && (
+                <polygon points={diamond(tile.x, tile.y - 3, HW * 0.55, HH * 0.45)} fill="#ffffff" opacity="0.08" />
+              )}
+              {tile.kind === "sand" && (
+                <ellipse class="foam" cx={tile.x} cy={tile.y + HH - 2} rx="10" ry="4" fill="#f4fbff" opacity="0.55" />
+              )}
+            </g>
+          ))}
+          {roads.map((road) => (
+            <polygon class="isl-road" data-order={road.order} points={diamond(road.x, road.y, HW * 0.72, HH * 0.72)} fill="#b8894a" stroke="#7a5a2c" stroke-width="0.6" />
+          ))}
+          {rocks.map((rock) => (
+            <g transform={`translate(${rock.x} ${rock.y})`}>
+              <polygon points="-8,2 0,-6 10,0 2,6" fill="#8d8478" stroke="#3a322c" />
+              <polygon points="-8,2 0,-6 0,-2 -6,3" fill="#b7aea2" />
+            </g>
+          ))}
+          {trees.map((tree) => (
+            <g transform={`translate(${tree.x} ${tree.y}) scale(${tree.s})`} aria-hidden="true">
+              <ellipse cx="2" cy="6" rx="8" ry="3" fill="#000" opacity="0.18" />
+              <polygon points="-2,4 2,4 1,-6 -1,-6" fill="#6b4424" />
+              <polygon points="-12,0 0,-16 12,0" fill="#1f6b28" />
+              <polygon points="-9,-4 0,-18 4,-6" fill="#3d9a40" />
+            </g>
+          ))}
+        </g>
+
+        {ages.map((age) => {
+          const p = plotOf[age.id];
+          return (
+            <g class="isl-plot" data-order={age.order} transform={`translate(${p.x} ${p.y})`} aria-hidden="true">
+              <polygon points={diamond(0, 0, 22, 11)} fill="#c4a574" stroke="#6b4424" stroke-dasharray="3 2" />
+              <text y="-4" text-anchor="middle" fill="#3a2918" font-size="12">{age.age}</text>
+            </g>
+          );
+        })}
+
+        {places.map((place) => {
+          const p = placeOf[place.id];
+          const y = place.kind === "watchtower" ? p.y - 8 : p.y;
+          return (
+            <g transform={`translate(${p.x} ${y})`}>
+              <ellipse cx="4" cy="8" rx="18" ry="7" fill="#000" opacity="0.2" />
+              <a href={place.href} aria-label={place.kind === "workshop" ? "The Workshop: tinkering with AI" : "Watchtower. Job Scout keeps the lookout."}>
+                <Structure kind={place.kind === "workshop" ? "workshop" : "tower"} />
+                {place.kind === "workshop" && (
+                  <text x="0" y="22" text-anchor="middle" fill="#2a1c12" font-size="13">{place.label}</text>
+                )}
+              </a>
+            </g>
+          );
+        })}
+
+        {ages.map((age) => {
+          const p = plotOf[age.id];
+          const grow = age.wonder ? 1.38 : 0.72 + age.order * 0.08;
+          return (
+            <g class="isl-era" data-order={age.order} data-id={age.id} transform={`translate(${p.x} ${p.y})`}>
+              <a href={`#${age.id}`} aria-label={`Age ${age.age}, ${age.name}. ${age.wonder ? "The wonder. " : age.raising ? "Still being built. " : ""}Open the chronicle.`}>
+                <ellipse class="ring" cx="2" cy="10" rx={age.wonder ? 54 : 36} ry={age.wonder ? 18 : 12} fill="none" />
+                <ellipse cx="6" cy="12" rx={age.wonder ? 40 : 26} ry="10" fill="#000" opacity="0.22" />
+                <g class="rise">
+                  <g class="bld" transform={`scale(${grow})`}>
+                    {age.wonder && <ellipse class="glow" cx="0" cy="-70" rx="70" ry="28" fill="#e6b325" />}
+                    <Structure kind={age.kind} wonder={age.wonder} />
+                  </g>
+                  <g class="plaque" aria-hidden="true">
+                    <polygon points={age.wonder ? "-58,16 58,16 50,34 -50,34" : "-46,14 46,14 40,30 -40,30"} fill="#f4e6c4" stroke="#6a4a16" />
+                    <text y={age.wonder ? 28 : 26} text-anchor="middle" fill="#2a1c12" font-size={age.wonder ? 14 : 12}>{age.name}</text>
+                  </g>
+                </g>
+              </a>
+            </g>
+          );
+        })}
+
+        {people.map((person) => {
+          const p = at(person.id);
+          const y = person.id === "scout" ? p.y - 78 : p.y;
+          return <Villager person={person} order={personOrder(person)} x={p.x} y={y} />;
+        })}
+
+        {fogIslands.map((island) => (
+          <g class="fogbank" data-island={island.id} transform={`translate(${fogOrigin.x} ${fogOrigin.y})`}>
+            <a href={`#island-${island.id}`} data-scout={island.id}>
+              <g class="fog-reveal" data-island={island.id}>
+                <polygon points={diamond(0, 18, 34, 16)} fill="#e7c56e" stroke="#6b4424" />
+                <polygon points={diamond(0, 14, 22, 10)} fill="#3e9a40" />
+                <polygon points="-10,8 0,-8 10,8" fill="#1f6b28" />
+                <text y="40" text-anchor="middle" fill="#f7f4ec" font-size="13">{island.name}</text>
+              </g>
+              <g class="fog-cover" data-island={island.id}>
+                <ellipse cx="-8" cy="8" rx="36" ry="16" fill="#e7eef2" opacity="0.92" />
+                <ellipse cx="18" cy="2" rx="32" ry="14" fill="#f4f7f8" opacity="0.9" />
+                <ellipse cx="4" cy="16" rx="28" ry="12" fill="#d5dee4" opacity="0.88" />
+                <text y="6" text-anchor="middle" fill="#3e4a54" font-size="16" aria-hidden="true">?</text>
+                <text y="40" text-anchor="middle" fill="#f7f4ec" font-size="12" font-family="ui-monospace, monospace">scout the fog</text>
+              </g>
+            </a>
+          </g>
+        ))}
+
+        <g aria-hidden="true" opacity="0.95">
+          <ellipse cx="150" cy="78" rx="40" ry="16" fill="#f7fbfe" />
+          <ellipse cx="188" cy="72" rx="34" ry="14" fill="#fff" />
+          <text x="168" y="108" text-anchor="middle" fill="#f7f4ec" font-size="13" font-family="ui-monospace, monospace">{horizonNote}</text>
+        </g>
+      </svg>
+      <div class="minimap" aria-hidden="true">
+        <svg viewBox="0 0 120 86">
+          <polygon points="60,6 112,43 60,80 8,43" fill="#1d6eae" stroke="#e6c27a" stroke-width="2" />
+          <polygon points="60,22 96,43 60,64 24,43" fill="#3e9a40" />
+          <polygon points="60,28 88,43 60,58 32,43" fill="#e7c56e" opacity="0.9" />
+          {ages.map((age) => {
+            const p = plotOf[age.id];
+            const x = 18 + ((p.x - 300) / 640) * 84;
+            const y = 16 + ((p.y - 240) / 320) * 54;
+            return <circle class="mm-dot" data-order={age.order} cx={x} cy={y} r={age.wonder ? 3.4 : 2.4} fill={age.wonder ? "#e6b325" : "#f4e6c4"} stroke="#2a1c12" />;
+          })}
+        </svg>
+      </div>
+      <p class="bubble" data-bubble hidden></p>
+      <div class="isl-banner" data-banner hidden>
+    <p class="banner-k" data-banner-k></p>
+    <p class="banner-t" data-banner-t></p>
+    <p class="banner-d" data-banner-d></p>
+  </div>
+    </div>
+  </div>
+  <div class="command">
+    <div class="controls">
+      <button type="button" class="btn primary" data-advance>Advance age</button>
+      <button type="button" class="btn ghost" data-replay>Replay</button>
+      <p class="status" data-status>Five plots marked.</p>
+    </div>
+    <ol class="queue" aria-label="Ages, in order">
+      {ages.map((age) => (
+        <li>
+          <a href={`#${age.id}`} data-queue={age.order} class:list={{ wonder: age.wonder, raising: age.raising }}>
+            <span class="roman">{age.age}</span>
+            <span class="qname">{age.name}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+    <p class="hint">Click a building, a villager, the Workshop or the fog.</p>
+  </div>
+</div>
+
+<script>
+  import "../scripts/island.ts";
+</script>
