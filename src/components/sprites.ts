@@ -42,15 +42,18 @@ export const sprites = {
   } as Record<string, { stand: string; walk?: string }>,
 };
 
+/** First view only: open island, workshop, watchtower, and the people already on it. */
 export const preloadedSprites = [
   sprites.terrain.grass,
   sprites.terrain.sand,
+  sprites.terrain.water,
   sprites.trees[0],
+  sprites.trees[1],
   sprites.rocks,
   sprites.buildings.workshop,
   sprites.buildings.watchtower,
-  sprites.buildings.blinkit,
   sprites.villagers.coach.stand,
   sprites.villagers.builder.stand,
+  sprites.villagers.builder.walk,
   sprites.villagers.scout.stand,
 ].filter(Boolean);

@@ -14,26 +14,27 @@ const eager = order <= 1;
 ---
 
 <g class="isl-npc" data-order={order} transform={`translate(${x} ${y})`} aria-hidden="true">
-  {art ? (
+  {art?.stand ? (
     <g class:list={["fig", { "has-walk": Boolean(art.walk) }]}>
+      <ellipse cx="1" cy="2" rx="11" ry="4" fill="#000" opacity="0.28" />
       <image
         class="stand"
         href={eager ? art.stand : undefined}
         data-src={eager ? undefined : art.stand}
-        x="-22"
-        y="-44"
-        width="44"
-        height="44"
+        x="-26"
+        y="-50"
+        width="52"
+        height="52"
       />
       {art.walk && (
         <image
           class="step"
-          href={eager ? art.walk : undefined}
+          href={eager && art.walk ? art.walk : undefined}
           data-src={eager ? undefined : art.walk}
-          x="-22"
-          y="-44"
-          width="44"
-          height="44"
+          x="-26"
+          y="-50"
+          width="52"
+          height="52"
         />
       )}
     </g>

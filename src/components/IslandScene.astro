@@ -44,6 +44,22 @@ const plotOf = Object.fromEntries(ages.map((age) => [age.id, at(age.id)]));
 const placeOf = Object.fromEntries(places.map((place) => [place.id, at(place.id)]));
 
 const fogOrigin = { x: 930, y: 96 };
+const grassArt = sprites.terrain.grass;
+const sandArt = sprites.terrain.sand;
+const waterArt = sprites.terrain.water;
+const grassFill = ["#2f8a34", "#38963c", "#277a30"];
+const sandFill = ["#e7c56e", "#f0d48a", "#d7ae58"];
+
+/** Painted sprites are bottom-center anchored so the base sits on the tile. */
+const buildingBox: Record<string, { w: number; h: number }> = {
+  blinkit: { w: 108, h: 108 },
+  bijak: { w: 116, h: 116 },
+  tago: { w: 124, h: 124 },
+  badho: { w: 168, h: 168 },
+  gobble: { w: 150, h: 150 },
+  workshop: { w: 108, h: 108 },
+  watchtower: { w: 96, h: 128 },
+};
 ---
 
 <div class="stage">
@@ -68,12 +84,14 @@ const fogOrigin = { x: 930, y: 96 };
             <stop offset="0.55" stop-color="#1d6eae" />
             <stop offset="1" stop-color="#0c4d86" />
           </linearGradient>
-          <pattern id="watertex" patternUnits="userSpaceOnUse" width="280" height="140">
-            <image href={sprites.terrain.water} x="0" y="0" width="280" height="140" opacity="0.4" />
-          </pattern>
+          {waterArt && (
+            <pattern id="watertex" patternUnits="userSpaceOnUse" width="280" height="140">
+              <image href={waterArt} x="0" y="0" width="280" height="140" opacity="0.55" />
+            </pattern>
+          )}
         </defs>
         <rect width="1180" height="700" fill="url(#skysea)" />
-        <rect width="1180" height="700" fill="url(#watertex)" opacity="0.55" />
+        {waterArt && <rect width="1180" height="700" fill="url(#watertex)" opacity="0.42" />}
         <g class="waves" aria-hidden="true">
           <path d="M-20 180 q 24 -8 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0" />
           <path d="M-10 240 q 28 -9 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0" />
@@ -83,18 +101,21 @@ const fogOrigin = { x: 930, y: 96 };
         </g>
 
         <g aria-hidden="true">
-          {tiles.map((tile) => (
-            <g>
-              {tile.kind === "grass" ? (
-                <image href={sprites.terrain.grass} x={tile.x - HW} y={tile.y - HH} width={HW * 2} height={HH * 2} />
-              ) : (
-                <image href={sprites.terrain.sand} x={tile.x - HW} y={tile.y - HH} width={HW * 2} height={HH * 2} />
-              )}
-              {tile.kind === "sand" && (
-                <ellipse class="foam" cx={tile.x} cy={tile.y + HH - 2} rx="10" ry="4" fill="#f4fbff" opacity="0.55" />
-              )}
-            </g>
-          ))}
+          {tiles.map((tile) => {
+            const art = tile.kind === "grass" ? grassArt : sandArt;
+            return (
+              <g>
+                {art ? (
+                  <image href={art} x={tile.x - HW} y={tile.y - HH} width={HW * 2} height={HH * 2} />
+                ) : (
+                  <polygon points={diamond(tile.x, tile.y)} fill={tile.kind === "sand" ? sandFill[tile.shade] : grassFill[tile.shade]} stroke="#2a4a24" stroke-width="0.4" />
+                )}
+                {tile.kind === "sand" && (
+                  <ellipse class="foam" cx={tile.x} cy={tile.y + HH - 2} rx="10" ry="4" fill="#f4fbff" opacity="0.55" />
+                )}
+              </g>
+            );
+          })}
           {roads.map((road) => (
             <polygon class="isl-road" data-order={road.order} points={diamond(road.x, road.y, HW * 0.72, HH * 0.72)} fill="#b8894a" stroke="#7a5a2c" stroke-width="0.6" />
           ))}
@@ -108,8 +129,13 @@ const fogOrigin = { x: 930, y: 96 };
           ))}
           {trees.map((tree) => {
             const art = sprites.trees[tree.i % 2];
+            const tw = 46 * tree.s;
+            const th = 58 * tree.s;
             return art ? (
-              <image href={art} x={tree.x - 18 * tree.s} y={tree.y - 36 * tree.s} width={36 * tree.s} height={40 * tree.s} />
+              <g>
+                <ellipse cx={tree.x} cy={tree.y + 2} rx={tw * 0.28} ry={tw * 0.1} fill="#000" opacity="0.22" />
+                <image href={art} x={tree.x - tw / 2} y={tree.y - th} width={tw} height={th} />
+              </g>
             ) : (
               <g transform={`translate(${tree.x} ${tree.y})`}>
                 <polygon points="-8,2 0,-14 8,2" fill="#2f7a32" />
@@ -130,13 +156,16 @@ const fogOrigin = { x: 930, y: 96 };
 
         {places.map((place) => {
           const p = placeOf[place.id];
-          const y = place.kind === "watchtower" ? p.y - 8 : p.y;
+          const art = sprites.buildings[place.id];
+          const box = buildingBox[place.id] ?? { w: 96, h: 96 };
+          const y = art ? p.y : place.kind === "watchtower" ? p.y - 8 : p.y;
+          const ground = 8;
           return (
             <g transform={`translate(${p.x} ${y})`}>
-              <ellipse cx="4" cy="8" rx="18" ry="7" fill="#000" opacity="0.2" />
+              <ellipse cx="2" cy={ground} rx={box.w * 0.26} ry={box.w * 0.08} fill="#000" opacity="0.28" />
               <a href={place.href} aria-label={place.kind === "workshop" ? "The Workshop" : "Watchtower"}>
-                {sprites.buildings[place.id] ? (
-                  <image class="sprite" href={sprites.buildings[place.id]} x="-48" y="-88" width="96" height="96" />
+                {art ? (
+                  <image class="sprite" href={art} x={-box.w / 2} y={ground - box.h} width={box.w} height={box.h} />
                 ) : (
                   <Structure kind={place.kind === "workshop" ? "workshop" : "tower"} />
                 )}
@@ -148,28 +177,30 @@ const fogOrigin = { x: 930, y: 96 };
         {ages.map((age) => {
           const p = plotOf[age.id];
           const grow = age.wonder ? 1.38 : 0.72 + age.order * 0.08;
+          const art = sprites.buildings[age.id];
+          const box = buildingBox[age.id] ?? { w: 120, h: 120 };
+          const ground = 8;
           return (
             <g class="isl-era" data-order={age.order} data-id={age.id} transform={`translate(${p.x} ${p.y})`}>
               <a href={`#${age.id}`} aria-label={`Age ${age.age}, ${age.name}. ${age.wonder ? "The wonder. " : age.raising ? "Still being built. " : ""}Open the chronicle.`}>
                 <ellipse class="ring" cx="2" cy="10" rx={age.wonder ? 54 : 36} ry={age.wonder ? 18 : 12} fill="none" />
-                <ellipse cx="6" cy="12" rx={age.wonder ? 40 : 26} ry="10" fill="#000" opacity="0.22" />
+                <ellipse cx="4" cy={ground + 2} rx={art ? box.w * 0.28 : age.wonder ? 40 : 26} ry="10" fill="#000" opacity="0.28" />
                 <g class="rise">
-                  <g class="bld" transform={`scale(${grow})`}>
-                    {age.wonder && <ellipse class="glow" cx="0" cy="-70" rx="70" ry="28" fill="#e6b325" />}
-                    {sprites.buildings[age.id] ? (
-                      <image
-                        class="sprite"
-                        href={age.order <= 1 ? sprites.buildings[age.id] : undefined}
-                        data-src={age.order <= 1 ? undefined : sprites.buildings[age.id]}
-                        x="-88"
-                        y="-150"
-                        width="176"
-                        height="160"
-                      />
-                    ) : (
+                  {art ? (
+                    <image
+                      class="sprite"
+                      data-src={art}
+                      x={-box.w / 2}
+                      y={ground - box.h}
+                      width={box.w}
+                      height={box.h}
+                    />
+                  ) : (
+                    <g class="bld" transform={`scale(${grow})`}>
+                      {age.wonder && <ellipse class="glow" cx="0" cy="-70" rx="70" ry="28" fill="#e6b325" />}
                       <Structure kind={age.kind} wonder={age.wonder} />
-                    )}
-                  </g>
+                    </g>
+                  )}
                   <text class="plaque" y={age.wonder ? 28 : 22} text-anchor="middle" fill="#f7f1e4" font-size={age.wonder ? 15 : 12} stroke="#1a140e" stroke-width="3" paint-order="stroke">{age.name}</text>
                 </g>
               </a>

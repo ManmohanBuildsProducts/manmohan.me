@@ -3,7 +3,7 @@
   "compatibility_date": "2026-10-01",
   "previews": {},
   "build": {
-    "command": "npm ci && npm run build"
+    "command": "if [ ! -d dist ]; then npm ci && npm run build; fi"
   },
   "assets": {
     "directory": "./dist",
