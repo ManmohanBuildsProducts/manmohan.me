@@ -89,6 +89,20 @@ function announce(card: HTMLElement) {
   live.textContent = `${kicker}. ${title}. ${line}`;
 }
 
+function fillKicker(el: HTMLElement, text: string) {
+  const match = text.match(/^(.*?\b)(IV|III|II|V|I)(\b.*)$/);
+  el.replaceChildren();
+  if (!match) {
+    el.textContent = text;
+    return;
+  }
+  el.append(match[1]);
+  const numeral = document.createElement("span");
+  numeral.className = "banner-num";
+  numeral.textContent = match[2];
+  el.append(numeral, match[3]);
+}
+
 function showBanner(card: HTMLElement) {
   announce(card);
   if (!motionOk || !banner) {
@@ -99,7 +113,7 @@ function showBanner(card: HTMLElement) {
   const k = banner.querySelector<HTMLElement>("[data-banner-k]");
   const t = banner.querySelector<HTMLElement>("[data-banner-t]");
   const d = banner.querySelector<HTMLElement>("[data-banner-d]");
-  if (k) k.textContent = card.dataset.bannerKicker ?? "";
+  if (k) fillKicker(k, card.dataset.bannerKicker ?? "");
   if (t) t.textContent = card.dataset.bannerTitle ?? "";
   if (d) d.textContent = card.dataset.bannerLine ?? "";
   banner.classList.toggle("wonder", card.dataset.wonder === "true");

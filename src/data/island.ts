@@ -133,6 +133,12 @@ export const workshop = {
   ] satisfies Bench[],
 };
 
+function bannerKicker(age: Pick<Age, "age" | "wonder" | "raising">) {
+  if (age.wonder) return `AGE ${age.age} · WONDER RAISED`;
+  if (age.raising) return `AGE ${age.age} · THE CURRENT AGE`;
+  return `ADVANCED TO AGE ${age.age}`;
+}
+
 const ages: Age[] = [
   {
     id: "blinkit",
@@ -150,7 +156,7 @@ const ages: Age[] = [
     lives: "450 neighbourhood stores across Delhi NCR",
     could: "Neighbourhood stores, run with the discipline of a network.",
     extra: [],
-    bannerKicker: "ADVANCED TO AGE I",
+    bannerKicker: bannerKicker({ age: "I", wonder: false, raising: false }),
     bannerTitle: "The Blinkit Age",
     bannerLine: "Learning ops at real scale",
     speaker: "picker",
@@ -171,7 +177,7 @@ const ages: Age[] = [
     lives: "Mandi traders.",
     could: "A mandi where the rate lives on a screen, not a shout.",
     extra: [],
-    bannerKicker: "ADVANCED TO AGE II",
+    bannerKicker: bannerKicker({ age: "II", wonder: false, raising: false }),
     bannerTitle: "The Bijak Age",
     bannerLine: "Digitising mandi trade",
     speaker: "trader",
@@ -192,7 +198,7 @@ const ages: Age[] = [
     lives: "Families and caregivers.",
     could: "A record the whole family can hold in one place.",
     extra: [],
-    bannerKicker: "ADVANCED TO AGE III",
+    bannerKicker: bannerKicker({ age: "III", wonder: false, raising: false }),
     bannerTitle: "The Tago Care Age",
     bannerLine: "Building care for families",
     speaker: "carer",
@@ -219,7 +225,7 @@ const ages: Age[] = [
         value: "10+ production agent workflows. Hybrid search from 9% to 28% of DAU, at under 100ms, with zero LLM calls.",
       },
     ],
-    bannerKicker: "AGE IV · WONDER RAISED",
+    bannerKicker: bannerKicker({ age: "IV", wonder: true, raising: false }),
     bannerTitle: "The Badho Age",
     bannerLine: "Digital channel for general trade — 20 lakh retailers · 11 states · 1M+ installs",
     speaker: "kirana1",
@@ -240,7 +246,7 @@ const ages: Age[] = [
     lives: "Not claimed yet.",
     could: "Still on the scaffolding.",
     extra: [],
-    bannerKicker: "AGE V · THE CURRENT AGE",
+    bannerKicker: bannerKicker({ age: "V", wonder: false, raising: true }),
     bannerTitle: "The GobbleCube Age",
     bannerLine: "The current age, still being built.",
     speaker: "jarvis",
