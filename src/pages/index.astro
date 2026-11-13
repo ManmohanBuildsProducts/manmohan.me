@@ -1,12 +1,13 @@
 ---
 import Base from '../layouts/Base.astro';
 import PostList from '../components/PostList.astro';
+import WatchSearch from '../components/WatchSearch.astro';
 import { posts } from '../lib';
-import { projects } from '../data/projects';
+import { visibleProjects } from '../data/projects';
 
 const notes = await posts();
-const title = 'Manmohan Singh Charan — AI-native product leader';
-const description = 'AI-native product leader who ships agents. Builds in public, notes when they are ready, and a short record of the work.';
+const title = 'Manmohan Singh Charan';
+const description = 'AI-native product leader who ships agents.';
 const sameAs = [
   'https://x.com/ManmohanBuilds',
   'https://github.com/ManmohanBuildsProducts',
@@ -27,19 +28,22 @@ const person = {
   <script type="application/ld+json" set:html={JSON.stringify(person)} />
   <header class="hero">
     <p class="who">Manmohan Singh Charan</p>
-    <h1>AI-native product leader who ships <em>agents.</em></h1>
-    <ul class="social">
-      <li><a href="https://x.com/ManmohanBuilds" target="_blank" rel="me noopener noreferrer">X <span>@ManmohanBuilds</span><span class="sr"> (opens in a new tab)</span></a></li>
-      <li><a href="https://github.com/ManmohanBuildsProducts" target="_blank" rel="me noopener noreferrer">GitHub <span>ManmohanBuildsProducts</span><span class="sr"> (opens in a new tab)</span></a></li>
-      <li><a href="https://www.linkedin.com/in/maciitr" target="_blank" rel="me noopener noreferrer">LinkedIn <span>Manmohan Singh Charan</span><span class="sr"> (opens in a new tab)</span></a></li>
-    </ul>
+    <h1>I make the messy real world <em>legible</em> to models.</h1>
+    <p class="open">Open to product roles at frontier AI labs and AI-native teams, remote or relocation.</p>
+    <div class="cta">
+      <a class="btn primary" href="#builds">Builds</a>
+      {notes.length > 0 && <a class="btn" href="/writing/">Notes</a>}
+      <a class="btn" href="mailto:manmohanbuildsproducts@gmail.com">Email</a>
+    </div>
   </header>
+
+  <WatchSearch />
 
   <section id="builds" aria-labelledby="builds-title">
     <p class="kick">Builds</p>
-    <h2 id="builds-title">Four builds</h2>
+    <h2 id="builds-title">{visibleProjects.length} builds</h2>
     <div class="grid">
-      {projects.map((project) => (
+      {visibleProjects.map((project) => (
         <article class="card">
           <p class="kick">{project.kicker}</p>
           <h3>{project.title}</h3>
@@ -48,8 +52,10 @@ const person = {
             <ul class="out">
               {project.links.map((link) => (
                 <li>
-                  <a href={link.href} target="_blank" rel="noopener noreferrer">
-                    {link.label} <span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span>
+                  <a href={link.href} target={link.href.startsWith('http') ? '_blank' : undefined} rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}>
+                    {link.label}
+                    {link.href.startsWith('http') && <span aria-hidden="true"> ↗</span>}
+                    {link.href.startsWith('http') && <span class="sr"> (opens in a new tab)</span>}
                   </a>
                 </li>
               ))}
@@ -60,12 +66,14 @@ const person = {
     </div>
   </section>
 
-  <section id="notes" aria-labelledby="notes-title">
-    <p class="kick">Notes</p>
-    <h2 id="notes-title">Writing</h2>
-    <PostList posts={notes.slice(0, 5)} />
-    <p class="more"><a href="/writing/">All notes</a> · <a href="/rss.xml">RSS</a></p>
-  </section>
+  {notes.length > 0 && (
+    <section id="notes" aria-labelledby="notes-title">
+      <p class="kick">Notes</p>
+      <h2 id="notes-title">Writing</h2>
+      <PostList posts={notes.slice(0, 5)} />
+      <p class="more"><a href="/writing/">All notes</a> · <a href="/rss.xml">RSS</a></p>
+    </section>
+  )}
 
   <section id="about" aria-labelledby="about-title">
     <p class="kick">About</p>
@@ -78,11 +86,12 @@ const person = {
 <style>
 .hero{padding:clamp(28px,7vh,84px) 0 clamp(48px,8vh,88px)}
 .who{margin:0;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
-.hero h1{max-width:min(18ch,100%);margin:.45em 0 0;font-size:clamp(2.15rem,8vw,4.5rem);font-weight:300;letter-spacing:-.025em}
-.social{display:flex;flex-wrap:wrap;gap:8px 22px;list-style:none;padding:0;margin:28px 0 0}
-.social a{display:inline-block;padding:8px 0;text-decoration:none;font-size:.95rem}
-.social a span{color:var(--muted)}
-.social a:hover{color:var(--gold)}
+.hero h1{max-width:min(16ch,100%);margin:.45em 0 0;font-size:clamp(2.15rem,7.4vw,4.35rem);font-weight:300;letter-spacing:-.025em}
+.open{max-width:42ch;margin:22px 0 0;color:var(--muted)}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:999px;border:1px solid rgba(243,200,113,.55);text-decoration:none;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase}
+.btn.primary{background:var(--gold);color:#140e02;border-color:var(--gold)}
+.btn:hover{border-color:var(--gold)}
 section{padding:clamp(36px,6vh,64px) 0;border-top:1px solid var(--line)}
 section h2{font:300 clamp(1.8rem,3vw,2.4rem)/1.15 Newsreader,Georgia,serif;letter-spacing:-.02em;margin:.35em 0 .8em}
 .grid{display:grid;gap:14px}

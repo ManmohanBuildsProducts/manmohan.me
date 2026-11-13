@@ -7,6 +7,8 @@ export type Project = {
   title: string;
   kicker: string;
   body: string;
+  /** Flip to true once the card has a public description worth showing. */
+  visible?: boolean;
   links: ProjectLink[];
 };
 
@@ -30,6 +32,7 @@ export const projects: Project[] = [
     kicker: 'whileyousleep.xyz · Search',
     body: 'Domain-specific search for Indian auto parts: Hindi and Hinglish, misspellings, symptom queries, and part numbers, over 26,835 SKUs. Hybrid retrieval combines BM25 with a fine-tuned embedding model. On the published dev set, part-number recall is 46.4% higher than that embedding model alone.',
     links: [
+      { label: 'Watch it', href: '/#watch' },
       { label: 'Source', href: 'https://github.com/ManmohanBuildsProducts/auto-parts-search' },
       { label: 'Model', href: 'https://huggingface.co/ManmohanBuildsProducts/auto-parts-search-v3' },
       { label: 'Studio', href: 'https://whileyousleep.xyz' },
@@ -47,6 +50,9 @@ export const projects: Project[] = [
     title: 'Indian contract review',
     kicker: 'Not public yet',
     body: 'A project for reviewing Indian contracts. It is not public yet.',
+    visible: false,
     links: [],
   },
 ];
+
+export const visibleProjects = projects.filter((project) => project.visible !== false);
