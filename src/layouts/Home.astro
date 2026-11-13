@@ -1,0 +1,50 @@
+---
+interface Props {
+  title: string;
+  description: string;
+}
+const { title, description } = Astro.props;
+const url = new URL(Astro.url.pathname, Astro.site);
+const image = new URL("/og.png", Astro.site);
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{title}</title>
+<meta name="description" content={description}>
+<meta name="author" content="Manmohan Singh Charan">
+<meta name="theme-color" content="#13110C">
+<meta name="color-scheme" content="dark">
+<link rel="canonical" href={url}>
+<meta property="og:type" content="website">
+<meta property="og:url" content={url}>
+<meta property="og:title" content={title}>
+<meta property="og:description" content={description}>
+<meta property="og:image" content={image}>
+<meta property="og:image:alt" content="Manmohan Singh Charan. Seven years. Five ages. One island, still growing.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content={title}>
+<meta name="twitter:description" content={description}>
+<meta name="twitter:image" content={image}>
+<link rel="alternate" type="application/rss+xml" title="Manmohan · Writing" href="/rss.xml">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script is:inline>
+(function () {
+  try {
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var root = document.documentElement;
+    root.classList.add("js");
+    root.dataset.motion = reduce ? "reduce" : "ok";
+    root.dataset.age = reduce ? "5" : "0";
+    root.dataset.fog = "";
+  } catch (e) {}
+})();
+</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<slot />
+</body>
+</html>

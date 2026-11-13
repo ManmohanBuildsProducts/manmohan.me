@@ -1,0 +1,200 @@
+---
+import Home from "../layouts/Home.astro";
+import IslandScene from "../components/IslandScene.astro";
+import "../styles/home.css";
+import { contact, home, islands, personOrder, resources, workshop } from "../data/island";
+
+const ages = home.ages;
+const villagers = home.people.filter((person) => !person.crew);
+const crew = home.people.filter((person) => person.crew);
+const fog = islands.filter((island) => island.kind === "fog");
+const count = ages.length;
+
+const ageCss = Array.from({ length: count }, (_, age) => {
+  const later = ages.filter((item) => item.order > age).map((item) => String(item.order));
+  if (!later.length) return "";
+  const hide = later
+    .map((order) => `html.js[data-age="${age}"] :is(.isl-era,.isl-road,.isl-npc)[data-order="${order}"]`)
+    .join(",");
+  const plots = later.map((order) => `html.js[data-age="${age}"] .isl-plot[data-order="${order}"]`).join(",");
+  return `${hide}{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .45s ease,visibility 0s linear .45s}${plots}{opacity:1;visibility:visible;transition:opacity .45s ease,visibility 0s}`;
+}).join("");
+
+const title = "Manmohan Singh Charan";
+const description =
+  "Seven years. Five ages. One island, still growing. Two-time co-founder (Badho, Tago Care). IIT Roorkee. Open to AI frontier roles, remote or relocation.";
+
+const person = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Manmohan Singh Charan",
+  url: "https://manmohan.work/",
+  email: `mailto:${contact.email}`,
+  jobTitle: "Lead PM",
+  worksFor: { "@type": "Organization", name: "GobbleCube" },
+  alumniOf: { "@type": "CollegeOrUniversity", name: "IIT Roorkee" },
+  sameAs: [contact.x, contact.github, contact.linkedin],
+};
+
+const rows = (age: (typeof ages)[number]) => [
+  { label: "What was grand", value: age.grand },
+  { label: "Whose lives it touched", value: age.lives },
+  { label: "What it could have been", value: age.could, accent: true },
+  ...age.extra,
+];
+---
+<Home title={title} description={description}>
+  <Fragment set:html={`<style>${ageCss}</style>`} />
+  <script type="application/ld+json" set:html={JSON.stringify(person)} />
+  <p class="sr" aria-live="polite" data-live></p>
+  <header class="wrap top">
+    <a class="brand" href="/">Manmohan</a>
+    <nav aria-label="Primary">
+      <a href="#ages">Ages</a>
+      <a href="#people">Villagers</a>
+      <a href="#workshop">Workshop</a>
+      <a href="#contact">Contact</a>
+      <a href="/writing/">Writing</a>
+    </nav>
+    <a class="btn primary" href={`mailto:${contact.email}`}>Email me</a>
+  </header>
+  <main id="content" class="wrap">
+    <header class="hero">
+      <p class="kicker">manmohan.work</p>
+      <h1>Seven years. Five ages. One island, still growing.</h1>
+      <p class="dek">{contact.line}</p>
+      <ul class="resources" aria-label="Resources">
+        {resources.map((item) => (
+          <li><span aria-hidden="true">◆ </span>{item}</li>
+        ))}
+      </ul>
+    </header>
+
+    <div class="saga">
+      <IslandScene />
+      <div class="ledger" id="ages">
+        <h2 class="sr">The ages</h2>
+        {ages.map((age) => (
+          <article
+            class:list={["age", { wonder: age.wonder }]}
+            id={age.id}
+            tabindex="-1"
+            data-age-card
+            data-order={age.order}
+            data-numeral={age.age}
+            data-name={age.name}
+            data-wonder={age.wonder ? "true" : "false"}
+            data-speaker={age.speaker}
+            data-banner-kicker={age.bannerKicker}
+            data-banner-title={age.bannerTitle}
+            data-banner-line={age.bannerLine}
+          >
+            <p class="kicker">
+              {age.wonder ? `Age ${age.age} · the wonder` : `Age ${age.age}`}
+              {age.role ? ` · ${age.role}` : ""}
+              {age.raising ? " · still being built" : ""}
+            </p>
+            <h3>{age.name}</h3>
+            {age.role && <p class="role">{age.role}</p>}
+            <dl class="rows">
+              {rows(age).map((row) => (
+                <div>
+                  <dt>{row.label}</dt>
+                  <dd class:list={{ accent: row.accent }}>{row.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </article>
+        ))}
+      </div>
+    </div>
+
+    <section class="block" id="people" aria-labelledby="people-title">
+      <h2 id="people-title">Villagers</h2>
+      <div class="people">
+        {villagers.map((person) => (
+          <article class="card" id={`person-${person.id}`} tabindex="-1" data-line={person.line} data-order={personOrder(person)}>
+            <p class="kicker">Villager</p>
+            <h3>{person.job}</h3>
+            <p class="says">{person.line}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="block" id="crew" aria-labelledby="crew-title">
+      <h2 id="crew-title">Builder crew</h2>
+      <div class="people">
+        {crew.map((person) => (
+          <article class="card" id={`person-${person.id}`} tabindex="-1" data-line={person.line}>
+            <p class="crew-mark">Crew</p>
+            <h3>{person.job}</h3>
+            <p class="says">{person.line}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="block" id="workshop" aria-labelledby="workshop-title">
+      <p class="kicker">Tinkering with AI</p>
+      <h2 id="workshop-title">{workshop.title}</h2>
+      <div class="benches">
+        {workshop.benches.map((bench) => (
+          <article class="card">
+            <h3>{bench.title}</h3>
+            <p>{bench.body}</p>
+            {bench.href && bench.linkLabel && (
+              <p style="margin-top:10px">
+                <a class="outlink" href={bench.href} target="_blank" rel="noopener noreferrer">
+                  {bench.linkLabel}<span aria-hidden="true"> ↗</span>
+                  <span class="sr"> (opens in a new tab)</span>
+                </a>
+              </p>
+            )}
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="block" id="islands" aria-labelledby="islands-title">
+      <h2 id="islands-title">The next island</h2>
+      <div class="islands">
+        {fog.map((island) => (
+          <article class="card" id={`island-${island.id}`}>
+            <p class="kicker">In the fog</p>
+            <h3>{island.name}</h3>
+            <p>{island.teaser}</p>
+            <p style="margin-top:8px">{island.scouted}</p>
+            <p style="margin-top:12px">
+              <button type="button" class="btn ghost" data-scout={island.id} aria-pressed="false">Scout the fog</button>
+            </p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="block contact" id="contact" aria-labelledby="contact-title">
+      <div>
+        <h2 id="contact-title">Send a messenger</h2>
+        <p>{contact.line}</p>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href={`mailto:${contact.email}`}>Email me</a>
+        <a class="btn ghost" href={contact.github} target="_blank" rel="me noopener noreferrer">GitHub<span class="sr"> (opens in a new tab)</span></a>
+        <a class="btn ghost" href={contact.x} target="_blank" rel="me noopener noreferrer">{contact.xLabel}<span class="sr"> (opens in a new tab)</span></a>
+        <a class="btn ghost" href={contact.linkedin} target="_blank" rel="me noopener noreferrer">LinkedIn<span class="sr"> (opens in a new tab)</span></a>
+      </div>
+    </section>
+  </main>
+  <footer class="wrap foot">
+    <span>manmohan.work</span>
+    <nav aria-label="Footer">
+      <a href="/rss.xml">RSS</a>
+      <a href={`mailto:${contact.email}`}>Email</a>
+      <a href={contact.x} target="_blank" rel="me noopener noreferrer">X @ManmohanBuilds<span class="sr"> (opens in a new tab)</span></a>
+      <a href={contact.github} target="_blank" rel="me noopener noreferrer">GitHub<span class="sr"> (opens in a new tab)</span></a>
+      <a href={contact.linkedin} target="_blank" rel="me noopener noreferrer">LinkedIn<span class="sr"> (opens in a new tab)</span></a>
+      <a href="/writing/">Writing</a>
+    </nav>
+  </footer>
+</Home>

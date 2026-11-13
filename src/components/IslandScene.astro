@@ -1,0 +1,216 @@
+---
+import { home, horizonNote, islands, personOrder } from "../data/island";
+import Structure from "./Structure.astro";
+import Villager from "./Villager.astro";
+
+const ages = home.ages;
+const people = home.people;
+const places = home.places;
+const fogIslands = islands.filter((island) => island.kind === "fog");
+
+const anchors = [{ x: 118, y: 368 }, ...ages.map((age) => ({ x: age.x, y: age.y }))];
+
+function road(a: { x: number; y: number }, b: { x: number; y: number }) {
+  const dx = (b.x - a.x) / 2;
+  const y1 = a.y + 8;
+  const y2 = b.y + 8;
+  return `M ${a.x} ${y1} C ${a.x + dx} ${y1}, ${b.x - dx} ${y2}, ${b.x} ${y2}`;
+}
+
+const roads = ages.map((age, index) => ({
+  order: age.order,
+  d: road(anchors[index], anchors[index + 1]),
+}));
+
+const trees: [number, number, number][] = [
+  [128, 360, 11],
+  [154, 292, 13],
+  [250, 248, 12],
+  [408, 236, 14],
+  [534, 224, 12],
+  [742, 232, 13],
+  [860, 400, 11],
+  [834, 430, 10],
+  [378, 452, 12],
+  [524, 456, 11],
+  [688, 448, 12],
+  [214, 418, 9],
+];
+
+const stroke = "#2A2216";
+const wall = "#F4E7CC";
+const roof = "#E9B949";
+const wood = "#8A5A32";
+---
+
+<div class="stage">
+  <div class="isl-frame" tabindex="0">
+    <div class="isl-world">
+      <svg class="isl-svg" viewBox="0 0 1000 520" role="group" aria-labelledby="island-title">
+        <title id="island-title">Living island: five ages, villagers, the Workshop, and an island in the fog</title>
+        <defs>
+          <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#0C2C36" />
+            <stop offset="0.55" stop-color="#164552" />
+            <stop offset="1" stop-color="#1B5C68" />
+          </linearGradient>
+          <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#87B35C" />
+            <stop offset="1" stop-color="#4E7C38" />
+          </linearGradient>
+        </defs>
+        <rect width="1000" height="520" fill="url(#sea)" />
+        <g class="waves" aria-hidden="true">
+          <path d="M20 168 q 16 -7 32 0 t 32 0 t 32 0" />
+          <path d="M240 196 q 18 -7 36 0 t 36 0" />
+          <path d="M520 150 q 16 -6 32 0 t 32 0 t 32 0" />
+          <path d="M40 470 q 20 -7 40 0 t 40 0" />
+          <path d="M760 486 q 18 -6 36 0 t 36 0 t 36 0" />
+        </g>
+        <g aria-hidden="true">
+          <circle cx="430" cy="58" r="34" fill="#E9B949" opacity="0.16" />
+          <circle cx="430" cy="58" r="18" fill="#E9B949" />
+        </g>
+        <g aria-hidden="true" opacity="0.92">
+          <ellipse cx="78" cy="74" rx="34" ry="18" fill="#E9EEF2" />
+          <ellipse cx="116" cy="66" rx="40" ry="22" fill="#E9EEF2" />
+          <ellipse cx="154" cy="80" rx="30" ry="16" fill="#E9EEF2" />
+          <text x="116" y="124" text-anchor="middle" fill="#F7F4EC" font-size="13" font-family="ui-monospace, monospace">{horizonNote}</text>
+        </g>
+
+        {fogIslands.map((island) => (
+          <g class="fogbank" data-island={island.id}>
+            <a href={`#island-${island.id}`} data-scout={island.id}>
+              <path d="M -48 16 C -36 -28, 62 -32, 86 4 C 102 32, 40 50, 2 44 C -32 40, -54 30, -48 16 Z" fill="#E3C98F" transform={`translate(${island.x} ${island.y})`} />
+              <path d="M -32 12 C -24 -16, 52 -18, 70 6 C 78 24, 36 36, 6 32 C -22 30, -36 22, -32 12 Z" fill="#6E9B4F" transform={`translate(${island.x} ${island.y})`} />
+              <g class="fog-reveal" data-island={island.id} transform={`translate(${island.x} ${island.y})`}>
+                <line x1="18" y1="14" x2="18" y2="-22" stroke={stroke} stroke-width="2" />
+                <circle cx="18" cy="-24" r="4" fill={roof} />
+                <rect x="6" y="2" width="24" height="16" rx="2" fill={wall} stroke={stroke} />
+                <text x="16" y="68" text-anchor="middle" fill="#F7F4EC" font-size="15">{island.name}</text>
+              </g>
+              <g class="fog-cover" data-island={island.id} transform={`translate(${island.x} ${island.y})`}>
+                <ellipse cx="-16" cy="6" rx="40" ry="22" fill="#E9EEF2" opacity="0.94" />
+                <ellipse cx="28" cy="-4" rx="46" ry="24" fill="#E9EEF2" opacity="0.94" />
+                <ellipse cx="62" cy="14" rx="34" ry="18" fill="#E9EEF2" opacity="0.94" />
+                <ellipse cx="8" cy="22" rx="44" ry="20" fill="#E9EEF2" opacity="0.94" />
+                <text x="20" y="10" text-anchor="middle" fill="#3E4A54" font-size="22" font-family="Georgia, serif" aria-hidden="true">?</text>
+                <text x="18" y="70" text-anchor="middle" fill="#F7F4EC" font-size="13" font-family="ui-monospace, monospace">scout the fog</text>
+              </g>
+            </a>
+          </g>
+        ))}
+
+        <g aria-hidden="true">
+          <path d="M 62 392 C 78 258, 292 198, 512 204 C 770 194, 968 258, 952 384 C 942 470, 708 500, 500 496 C 270 502, 52 478, 62 392 Z" fill="#E4C98C" />
+          <path d="M 92 388 C 108 274, 304 222, 512 226 C 754 218, 930 274, 916 378 C 906 452, 698 476, 500 472 C 286 478, 84 458, 92 388 Z" fill="url(#grass)" />
+          <path d="M 150 402 C 210 360, 300 348, 390 370" fill="none" stroke="#F4E7CC" stroke-width="6" stroke-linecap="round" opacity="0.28" />
+        </g>
+
+        <g aria-hidden="true">
+          {roads.map((path) => (
+            <path class="isl-road" data-order={path.order} d={path.d} fill="none" stroke="#C9A86A" stroke-width="7" stroke-linecap="round" />
+          ))}
+        </g>
+
+        <g aria-hidden="true">
+          {trees.map(([x, y, r]) => (
+            <g transform={`translate(${x} ${y})`}>
+              <rect x="-2.2" y="-6" width="4.4" height="12" fill={wood} />
+              <circle cx="0" cy="-14" r={r} fill="#3F6E30" />
+              <circle cx={-r * 0.35} cy={-16} r={r * 0.72} fill="#56873C" />
+            </g>
+          ))}
+        </g>
+
+        {ages.map((age) => (
+          <g class="isl-plot" data-order={age.order} transform={`translate(${age.x} ${age.y})`} aria-hidden="true">
+            <ellipse cx="0" cy="6" rx="30" ry="10" fill="#E7D09A" />
+            <ellipse cx="0" cy="6" rx="30" ry="10" fill="none" stroke={wood} stroke-width="1.4" stroke-dasharray="3 3" />
+            <text x="0" y="-8" text-anchor="middle" fill={stroke} font-size="14" font-family="ui-monospace, monospace">{age.age}</text>
+          </g>
+        ))}
+
+        {places.map((place) => (
+          <g transform={`translate(${place.x} ${place.y})`}>
+            <a href={place.href} aria-label={place.kind === "workshop" ? "The Workshop: tinkering with AI" : "Watchtower. Job Scout keeps the lookout."}>
+              {place.kind === "workshop" ? (
+                <g>
+                  <rect x="-24" y="-26" width="48" height="26" fill={wall} stroke={stroke} />
+                  <polygon points="-28,-26 0,-44 28,-26" fill={wood} stroke={stroke} />
+                  <circle cx="0" cy="-12" r="7" fill="none" stroke={stroke} stroke-width="2.4" stroke-dasharray="3 2" />
+                  <rect x="-8" y="-16" width="16" height="16" fill={wall} stroke={stroke} />
+                </g>
+              ) : (
+                <g>
+                  <line x1="-16" y1="0" x2="-10" y2="-70" stroke={wood} stroke-width="3" />
+                  <line x1="16" y1="0" x2="10" y2="-70" stroke={wood} stroke-width="3" />
+                  <line x1="-14" y1="-26" x2="12" y2="-48" stroke={wood} stroke-width="2" />
+                  <line x1="-12" y1="-48" x2="12" y2="-26" stroke={wood} stroke-width="2" />
+                  <rect x="-18" y="-76" width="36" height="7" fill={wood} />
+                  <polygon points="-20,-100 0,-114 20,-100" fill={roof} stroke={stroke} />
+                  <line x1="-16" y1="-100" x2="-16" y2="-76" stroke={wood} stroke-width="2" />
+                  <line x1="16" y1="-100" x2="16" y2="-76" stroke={wood} stroke-width="2" />
+                </g>
+              )}
+              {place.kind === "workshop" && (
+                <text x="0" y="20" text-anchor="middle" fill={stroke} font-size="14">{place.label}</text>
+              )}
+            </a>
+          </g>
+        ))}
+
+        {ages.map((age) => (
+          <g class="isl-era" data-order={age.order} data-id={age.id} transform={`translate(${age.x} ${age.y})`}>
+            <a href={`#${age.id}`} aria-label={`Age ${age.age}, ${age.name}. ${age.wonder ? "The wonder. " : age.raising ? "Still being built. " : ""}Open the chronicle.`}>
+              <ellipse class="ring" cx="0" cy="8" rx={age.wonder ? 78 : 52} ry={age.wonder ? 16 : 12} fill="none" />
+              <g class="rise">
+                <g class="bld" transform={`scale(${age.wonder ? 1.5 : age.raising ? 1.05 : 1})`}>
+                  {age.wonder && <ellipse class="glow" cx="0" cy="-48" rx="86" ry="52" fill={roof} />}
+                  <Structure kind={age.kind} wonder={age.wonder} />
+                </g>
+                <g class="tag" aria-hidden="true">
+                  <rect x={-age.labelWidth / 2} y={age.wonder ? 22 : 16} width={age.labelWidth} height={age.wonder ? 44 : 38} rx="8" fill="#F6EBD2" />
+                  <text x="0" y={age.wonder ? 40 : 32} text-anchor="middle" fill="#1A140C" font-size={age.wonder ? 18 : 15}>{age.name}</text>
+                  <text x="0" y={age.wonder ? 58 : 48} text-anchor="middle" fill="#3A3326" font-size="11" font-family="ui-monospace, monospace">
+                    {age.raising ? `AGE ${age.age} · BUILDING` : age.wonder ? `AGE ${age.age} · WONDER` : `AGE ${age.age}`}
+                  </text>
+                </g>
+              </g>
+            </a>
+          </g>
+        ))}
+
+        {people.map((person) => (
+          <Villager person={person} order={personOrder(person)} />
+        ))}
+      </svg>
+      <p class="bubble" data-bubble hidden></p>
+    </div>
+  </div>
+  <div class="isl-banner" data-banner hidden>
+    <p class="banner-k" data-banner-k></p>
+    <p class="banner-t" data-banner-t></p>
+    <p class="banner-d" data-banner-d></p>
+  </div>
+  <div class="controls">
+    <button type="button" class="btn primary" data-advance>Advance age</button>
+    <button type="button" class="btn ghost" data-replay>Replay</button>
+    <p class="status" data-status>Five plots marked.</p>
+  </div>
+  <ol class="queue" aria-label="Ages, in order">
+    {ages.map((age) => (
+      <li>
+        <a href={`#${age.id}`} data-queue={age.order} class:list={{ wonder: age.wonder, raising: age.raising }}>
+          <span class="roman">{age.age}</span>
+          <span class="qname">{age.name}</span>
+        </a>
+      </li>
+    ))}
+  </ol>
+  <p class="hint">Click a building, a villager, the Workshop or the fog.</p>
+</div>
+
+<script>
+  import "../scripts/island.ts";
+</script>
