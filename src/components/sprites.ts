@@ -35,7 +35,6 @@ export const sprites = {
     kirana2: { stand: sprite("kirana.webp") },
     seller1: { stand: sprite("seller.webp"), walk: sprite("seller-walk.webp") },
     seller2: { stand: sprite("seller.webp") },
-    jarvis: { stand: sprite("foreman.webp") },
     coach: { stand: sprite("herald.webp") },
     scout: { stand: sprite("scout.webp") },
     builder: { stand: sprite("builder.webp"), walk: sprite("builder-walk.webp") },

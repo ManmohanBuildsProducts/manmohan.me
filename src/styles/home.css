@@ -113,8 +113,7 @@ a { color: inherit; }
   color: var(--gold);
 }
 .age .kicker,
-.card .kicker,
-.crew-mark { color: #6b3e0a; }
+.card .kicker { color: #6b3e0a; }
 .block > .kicker {
   display: inline-block;
   color: #f6e2a0;

@@ -201,7 +201,7 @@ const GROUND = 6;
           const ground = GROUND;
           return (
             <g class="isl-era" data-order={age.order} data-id={age.id} transform={`translate(${p.x} ${p.y})`}>
-              <a href={`#${age.id}`} aria-label={`Age ${age.age}, ${age.name}. ${age.wonder ? "The wonder. " : age.raising ? "Still being built. " : ""}Open the chronicle.`}>
+              <a href={`#${age.id}`} aria-label={`Age ${age.age}, ${age.name}. ${age.wonder ? "The wonder. " : age.raising ? "The current age. " : ""}Open the chronicle.`}>
                 <ellipse class="ring" cx="2" cy="10" rx={age.wonder ? 54 : 36} ry={age.wonder ? 18 : 12} fill="none" />
                 <ellipse cx="4" cy={ground + 2} rx={art ? box.w * 0.28 : age.wonder ? 40 : 26} ry="10" fill="#000" opacity="0.28" />
                 <g class="rise">

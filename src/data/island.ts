@@ -48,7 +48,7 @@ export type Age = {
 export type Person = {
   id: string;
   job: string;
-  /** Speech line, or the crew member's quirk. */
+  /** Speech line. */
   line: string;
   crew: boolean;
   /** Age id this person arrives with. Empty string: already on the island. */
@@ -283,7 +283,7 @@ const people: Person[] = [
 ];
 
 const places: Place[] = [
-  { id: "workshop", name: "The Workshop", kind: "workshop", href: "#workshop", x: 248, y: 424, label: "Workshop" },
+  { id: "workshop", name: "The Workshop", kind: "workshop", href: "#build", x: 248, y: 424, label: "Workshop" },
   { id: "watchtower", name: "Watchtower", kind: "watchtower", href: "#islands", x: 872, y: 368, label: "Watchtower" },
 ];
 
