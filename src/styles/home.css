@@ -442,17 +442,20 @@ html.js[data-motion="ok"] .queue a:not(.is-on) { border-style: dashed; opacity: 
   .people, .benches { grid-template-columns: 1fr 1fr; }
   .rows div { grid-template-columns: 168px 1fr; gap: 12px; align-items: baseline; }
 }
-@media (min-width: 1100px) {
+@media (min-width: 1024px) {
   .chapters {
-    width: min(520px, 40vw);
+    --chapter-w: min(560px, 42vw);
+    width: var(--chapter-w);
     margin-left: auto;
+    margin-right: 0;
     margin-top: -100svh;
-    padding: 100svh 48px 8vh 36px;
+    padding: 100svh 0 8vh;
     position: relative;
     z-index: 2;
+    box-sizing: border-box;
   }
 }
-@media (max-width: 1099px) {
+@media (max-width: 1023px) {
   .stage {
     position: relative;
     top: auto;
@@ -710,7 +713,7 @@ html[data-motion="ok"] .foam { animation: foam 2.4s ease-in-out infinite; }
   pointer-events: none;
 }
 .ambient[hidden] { display: none; }
-@media (max-width: 1099px) {
+@media (max-width: 1023px) {
   .pin { position: relative; height: 100svh; min-height: 100svh; }
   .chapters { margin: 0; width: 100%; padding: 2.5rem 1.25rem 1rem; background: #13110c; }
   .saga .age { min-height: 0; padding: 2.75rem 0; max-width: none; }
@@ -785,11 +788,11 @@ html[data-motion="ok"] .waves { animation: isl-drift 14s ease-in-out infinite al
 }
 .veil { transition: opacity 0.45s ease; }
 .veil a { pointer-events: auto; }
-@media (min-width: 1100px) {
+@media (min-width: 1024px) {
   .pin.is-reading .veil { opacity: 0; }
   .pin.is-reading .veil a { pointer-events: none; }
   .pin.is-reading .stage {
-    width: calc(100% - min(520px, 40vw));
+    width: calc(100% - min(560px, 42vw));
     transition: width 0.45s ease;
   }
 }
@@ -857,7 +860,7 @@ html[data-motion="ok"] .waves { animation: isl-drift 14s ease-in-out infinite al
   margin: 0;
   padding: 8vh 40px 10vh 32px;
   color: #f6efe2;
-  background: linear-gradient(90deg, rgba(20, 18, 14, 0.15), #14120e 14%, #14120e);
+  background: #14120e;
   border: 0;
   border-radius: 0;
   box-shadow: none;
