@@ -160,9 +160,18 @@ function syncParallax() {
   clouds?.setAttribute("transform", `translate(${-shift * 0.7} 0)`);
 }
 
+function syncReading() {
+  const pin = document.querySelector(".pin");
+  const first = articles[0];
+  if (!pin || !first) return;
+  const reading = first.getBoundingClientRect().top < window.innerHeight * 0.82;
+  pin.classList.toggle("is-reading", reading);
+}
+
 function onScroll() {
   syncParallax();
   syncFog();
+  syncReading();
   if (reduce) {
     highlight(ageFromScroll());
     return;

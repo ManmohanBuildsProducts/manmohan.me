@@ -783,7 +783,16 @@ html[data-motion="ok"] .waves { animation: isl-drift 14s ease-in-out infinite al
   background: linear-gradient(to top, rgba(8, 6, 4, 0.82) 0%, rgba(8, 6, 4, 0.28) 48%, transparent 100%);
   pointer-events: none;
 }
+.veil { transition: opacity 0.45s ease; }
 .veil a { pointer-events: auto; }
+@media (min-width: 1100px) {
+  .pin.is-reading .veil { opacity: 0; }
+  .pin.is-reading .veil a { pointer-events: none; }
+  .pin.is-reading .stage {
+    width: calc(100% - min(520px, 40vw));
+    transition: width 0.45s ease;
+  }
+}
 .veil h1 {
   max-width: 16ch;
   margin: 0.15em 0 0;
