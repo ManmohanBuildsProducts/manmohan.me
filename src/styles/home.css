@@ -937,12 +937,14 @@ html[data-motion="ok"] .waves { animation: isl-drift 14s ease-in-out infinite al
 .contact { border-top: 0; padding-top: 0; }
 .block > .kicker { background: transparent; padding: 0; letter-spacing: 0.12em; font-family: var(--sans); font-size: 0.875rem; }
 
-html.js[data-intro="play"] .veil {
+html.js[data-intro="play"] .veil,
+html.js[data-intro="run"] .veil {
   opacity: 0;
   visibility: hidden;
 }
 .intro-card { display: none; }
-html.js[data-intro="play"] .intro-card {
+html.js[data-intro="play"] .intro-card,
+html.js[data-intro="run"] .intro-card {
   position: absolute;
   z-index: 5;
   inset: 0;
@@ -975,3 +977,11 @@ html.js[data-intro="play"] .intro-card {
   text-transform: uppercase;
 }
 .intro-card .intro-skip { pointer-events: auto; min-height: 44px; }
+html.js[data-intro="run"] .intro-kicker,
+html.js[data-intro="run"] .intro-title { display: none; }
+html.js[data-intro="run"] .intro-card {
+  background: none;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 0 7vw 2.4rem;
+}

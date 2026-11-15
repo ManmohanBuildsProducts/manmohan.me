@@ -170,12 +170,16 @@ function syncReading() {
   pin.classList.toggle("is-reading", reading);
 }
 
-let introLock = root.dataset.intro === "play";
+function introActive() {
+  return root.dataset.intro === "play" || root.dataset.intro === "run";
+}
+
+let introLock = introActive();
 const introTimers: number[] = [];
 const INTRO_KEY = "mm-island-intro";
 
 function endIntro() {
-  if (root.dataset.intro !== "play") return;
+  if (!introActive()) return;
   introTimers.forEach((timer) => window.clearTimeout(timer));
   introTimers.length = 0;
   introLock = false;
@@ -201,6 +205,7 @@ function playIntro() {
     introTimers.push(
       window.setTimeout(() => {
         if (!introLock) return;
+        if (order === 1) root.dataset.intro = "run";
         applyAge(order, true, 760);
       }, titleHold + (order - 1) * step),
     );
