@@ -450,9 +450,12 @@ html.js[data-motion="ok"] .queue a:not(.is-on) { border-style: dashed; opacity: 
     gap: 28px;
     align-items: start;
   }
-  .pin { height: calc(100svh - 72px); }
+  .pin { min-height: calc(100svh - 72px); }
   .chapters { padding-top: 12px; }
   .reel .age { max-width: none; padding: 6vh 0 8vh; }
+  .reel .age h3 { font-size: clamp(2rem, 3.2vw, 3.1rem); }
+  .reel .age .rows div { grid-template-columns: 1fr; gap: 2px; }
+  .reel .age .kicker { letter-spacing: 0.06em; }
   .saga {
     display: grid;
     grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.72fr);
@@ -616,14 +619,15 @@ html[data-motion="ok"] .foam { animation: foam 2.4s ease-in-out infinite; }
   position: sticky;
   top: 0;
   z-index: 3;
-  height: calc(100svh - 64px);
+  height: auto;
+  min-height: calc(100svh - 64px);
   display: flex;
   flex-direction: column;
   background: #0b3f72;
 }
 .pin .stage {
   flex: 1;
-  min-height: 0;
+  min-height: 62svh;
   display: flex;
   flex-direction: column;
   margin: 0;
@@ -720,7 +724,8 @@ html[data-motion="ok"] .foam { animation: foam 2.4s ease-in-out infinite; }
 }
 .ambient[hidden] { display: none; }
 @media (max-width: 1099px) {
-  .pin { height: 54svh; }
+  .pin { height: auto; min-height: 0; }
+  .pin .stage { min-height: 48svh; }
   .reel .age { min-height: 70vh; padding: 5vh 6vw 7vh; max-width: none; }
   .stage { position: static; background: transparent; }
 }

@@ -108,7 +108,6 @@ const rows = (age: (typeof ages)[number]) => [
           >
             <p class="kicker">
               {age.wonder ? `Age ${age.age} · the wonder` : `Age ${age.age}`}
-              {age.role ? ` · ${age.role}` : ""}
             </p>
             <h3>{age.name}</h3>
             {age.role && <p class="role">{age.role}</p>}
