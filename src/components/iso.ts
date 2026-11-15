@@ -58,10 +58,6 @@ export const anchor: Record<string, [number, number]> = {
   seller2: [8.3, 4.35],
   seller1: [9.7, 4.05],
   kirana2: [10.3, 5.55],
-  jarvis: [11.7, 5.7],
-  coach: [3.7, 7.85],
-  builder: [1.7, 8.15],
-  scout: [12.15, 2.55],
 };
 
 export function at(id: string) {

@@ -82,7 +82,7 @@ const GROUND = 6;
   </ul>
   <div class="isl-frame" tabindex="0">
     <div class="isl-world">
-      <svg class="isl-svg" viewBox="200 40 840 600" role="group" aria-labelledby="island-title">
+      <svg class="isl-svg" viewBox="330 175 660 430" role="group" aria-labelledby="island-title">
         <title id="island-title">Living island: five ages, villagers, the Workshop, and an island in the fog</title>
         <defs>
           <linearGradient id="skysea" x1="0" y1="0" x2="0" y2="1">
@@ -222,7 +222,7 @@ const GROUND = 6;
                       <Structure kind={age.kind} wonder={age.wonder} />
                     </g>
                   )}
-                  <text class="plaque" y={age.wonder ? 28 : 22} text-anchor="middle" fill="#f7f1e4" font-size={age.wonder ? 15 : 12} stroke="#1a140e" stroke-width="3" paint-order="stroke">{age.name}</text>
+                  <text class="plaque" y={age.wonder ? 28 : 22} text-anchor="middle" fill="#f7f1e4" font-size="16" stroke="#1a140e" stroke-width="3" paint-order="stroke">{age.name}</text>
                 </g>
               </a>
             </g>
@@ -249,7 +249,7 @@ const GROUND = 6;
                 <ellipse cx="18" cy="2" rx="32" ry="14" fill="#f4f7f8" opacity="0.9" />
                 <ellipse cx="4" cy="16" rx="28" ry="12" fill="#d5dee4" opacity="0.88" />
                 <text y="6" text-anchor="middle" fill="#3e4a54" font-size="16" aria-hidden="true">?</text>
-                <text y="40" text-anchor="middle" fill="#f7f4ec" font-size="12" font-family="ui-monospace, monospace">scout the fog</text>
+                <text y="40" text-anchor="middle" fill="#f7f4ec" font-size="14">The next island</text>
               </g>
             </a>
           </g>
@@ -258,7 +258,7 @@ const GROUND = 6;
         <g aria-hidden="true" opacity="0.95">
           <ellipse cx="150" cy="78" rx="40" ry="16" fill="#f7fbfe" />
           <ellipse cx="188" cy="72" rx="34" ry="14" fill="#fff" />
-          <text x="168" y="108" text-anchor="middle" fill="#f7f4ec" font-size="13" font-family="ui-monospace, monospace">{horizonNote}</text>
+          <text x="168" y="108" text-anchor="middle" fill="#f7f4ec" font-size="14">{horizonNote}</text>
         </g>
       </svg>
       <div class="minimap" aria-hidden="true">
@@ -274,7 +274,6 @@ const GROUND = 6;
           })}
         </svg>
       </div>
-      <p class="ambient" data-ambient hidden>Now I order stock from my phone</p>
       <div class="isl-banner" data-banner hidden>
     <p class="banner-k" data-banner-k></p>
     <p class="banner-t" data-banner-t></p>

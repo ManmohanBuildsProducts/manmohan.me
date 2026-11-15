@@ -89,9 +89,9 @@ function rise(order: number) {
   window.setTimeout(() => era.classList.remove("rising", "wonder-rise"), 1200);
 }
 
-function syncAmbient(order: number) {
+function syncAmbient(_order: number) {
   if (!ambient) return;
-  ambient.hidden = order < 4;
+  ambient.hidden = true;
 }
 
 function mountSprites(order: number) {
@@ -126,17 +126,21 @@ function ageFromScroll() {
   const focus = window.innerHeight * 0.74;
   let best = 0;
   let bestDist = Infinity;
+  let passed = 0;
   for (const card of articles) {
     const heading = card.querySelector("h3");
     const y = (heading ?? card).getBoundingClientRect().top;
+    const order = Number(card.dataset.order);
+    if (y <= focus) passed = Math.max(passed, order);
     const dist = Math.abs(y - focus);
     if (dist < bestDist) {
       bestDist = dist;
-      best = Number(card.dataset.order);
+      best = order;
     }
   }
-  if (bestDist > window.innerHeight * 0.42) return 0;
-  return best;
+  if (bestDist <= window.innerHeight * 0.42) return best;
+  if (passed > 0 && passed === articles.length) return passed;
+  return 0;
 }
 
 function syncFog() {

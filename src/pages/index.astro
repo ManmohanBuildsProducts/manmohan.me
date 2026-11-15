@@ -2,7 +2,8 @@
 import Home from "../layouts/Home.astro";
 import IslandScene from "../components/IslandScene.astro";
 import "../styles/home.css";
-import { contact, home, islands, workshop } from "../data/island";
+import { contact, cv, home, islands, workshop } from "../data/island";
+import { posts } from "../lib";
 
 const ages = home.ages;
 const fog = islands.filter((island) => island.kind === "fog");
@@ -18,9 +19,11 @@ const ageCss = Array.from({ length: count }, (_, age) => {
   return `${hide}{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .45s ease,visibility 0s linear .45s}${plots}{opacity:1;visibility:visible;transition:opacity .45s ease,visibility 0s}`;
 }).join("");
 
+const essays = await posts();
+const showWriting = essays.length > 0;
+
 const title = "Manmohan Singh Charan";
-const description =
-  "Seven years. Five ages. One island, still growing. Two-time co-founder (Badho, Tago Care). IIT Roorkee. Open to AI frontier roles, remote or relocation.";
+const description = contact.line;
 
 const person = {
   "@context": "https://schema.org",
@@ -37,7 +40,7 @@ const person = {
 const rows = (age: (typeof ages)[number]) => [
   { label: "What was grand", value: age.grand },
   { label: "Whose lives it touched", value: age.lives },
-  { label: "What it could have been", value: age.could, accent: true },
+  { label: "What it built toward", value: age.could, accent: true },
   ...age.extra,
 ];
 ---
@@ -49,24 +52,44 @@ const rows = (age: (typeof ages)[number]) => [
     <a class="brand" href="/">Manmohan</a>
     <nav aria-label="Primary">
       <a href="#ages">Ages</a>
-      <a href="#workshop">Workshop</a>
+      <a href="#build">How I build</a>
       <a href="#contact">Contact</a>
-      <a href="/writing/">Writing</a>
+      {showWriting && <a href="/writing/">Writing</a>}
     </nav>
-    <a class="btn primary" href={`mailto:${contact.email}`}>Email me</a>
+    <a class="btn primary" href={`mailto:${contact.email}`}>Email</a>
   </header>
   <main id="content" class="wrap">
-    <header class="hero">
-      <p class="kicker">manmohan.work</p>
-      <h1>Seven years. Five ages. One island, still growing.</h1>
-      <p class="dek">{contact.line}</p>
-    </header>
-
     <div class="reel">
       <div class="pin">
+        <header class="identity">
+          <p class="kicker">manmohan.work</p>
+          <h1>Manmohan Singh Charan</h1>
+          <p class="lede">{contact.line}</p>
+          <p class="tagline">Seven years. Five ages. One island, still growing.</p>
+          <div class="actions">
+            <a class="btn primary" href={contact.linkedin} target="_blank" rel="me noopener noreferrer">LinkedIn<span class="sr"> (opens in a new tab)</span></a>
+            <a class="btn ghost" href={`mailto:${contact.email}`}>Email</a>
+            <a class="btn ghost" href={contact.x} target="_blank" rel="me noopener noreferrer">X<span class="sr"> (opens in a new tab)</span></a>
+            <a class="btn ghost" href={contact.github} target="_blank" rel="me noopener noreferrer">GitHub<span class="sr"> (opens in a new tab)</span></a>
+            {cv.available && <a class="btn ghost" href={cv.href}>CV</a>}
+            <a class="btn ghost" href="#summary">Skip the island</a>
+          </div>
+        </header>
         <IslandScene />
       </div>
       <div class="chapters" id="ages">
+        <section class="summary" id="summary">
+          <h2>The five ages, plainly</h2>
+          <ol>
+            {ages.map((age) => (
+              <li>
+                <a href={`#${age.id}`}>{age.name}</a>
+                {age.role ? <span> · {age.role}</span> : null}
+                <span> — {age.grand}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
         <h2 class="sr">The ages</h2>
         {ages.map((age) => (
           <article
@@ -86,10 +109,10 @@ const rows = (age: (typeof ages)[number]) => [
             <p class="kicker">
               {age.wonder ? `Age ${age.age} · the wonder` : `Age ${age.age}`}
               {age.role ? ` · ${age.role}` : ""}
-              {age.raising ? " · still being built" : ""}
             </p>
             <h3>{age.name}</h3>
             {age.role && <p class="role">{age.role}</p>}
+            {age.dates && <p class="role">{age.dates}</p>}
             <dl class="rows">
               {rows(age).map((row) => (
                 <div>
@@ -103,9 +126,11 @@ const rows = (age: (typeof ages)[number]) => [
       </div>
     </div>
 
-    <section class="block" id="workshop" aria-labelledby="workshop-title">
-      <p class="kicker">Tinkering with AI</p>
-      <h2 id="workshop-title">{workshop.title}</h2>
+    <section class="block" id="build" aria-labelledby="build-title">
+      <p class="kicker">Badho</p>
+      <h2 id="build-title">How I build with AI</h2>
+      <p class="proof">10+ production agent workflows. Hybrid search went from 9% to 28% of DAU in under 100ms, with zero LLM calls.</p>
+      <h3 class="subhead">{workshop.title}</h3>
       <div class="benches">
         {workshop.benches.map((bench) => (
           <article class="card">
@@ -159,7 +184,7 @@ const rows = (age: (typeof ages)[number]) => [
       <a href={contact.x} target="_blank" rel="me noopener noreferrer">X @ManmohanBuilds<span class="sr"> (opens in a new tab)</span></a>
       <a href={contact.github} target="_blank" rel="me noopener noreferrer">GitHub<span class="sr"> (opens in a new tab)</span></a>
       <a href={contact.linkedin} target="_blank" rel="me noopener noreferrer">LinkedIn<span class="sr"> (opens in a new tab)</span></a>
-      <a href="/writing/">Writing</a>
+      {showWriting && <a href="/writing/">Writing</a>}
     </nav>
   </footer>
 </Home>

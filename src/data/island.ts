@@ -21,6 +21,11 @@ export type Age = {
   age: string;
   order: number;
   role: string;
+  /**
+   * TODO: date range for this age, once the tenures are confirmed.
+   * Empty string renders nothing.
+   */
+  dates: string;
   kind: "depot" | "mandi" | "care" | "market" | "scaffold";
   wonder: boolean;
   /** Still under construction. No results belong on a raising age. */
@@ -97,8 +102,14 @@ export const resources = [
   "1M+ installs",
 ] as const;
 
+/** Flip `available` only after a real PDF is published at `href`. */
+export const cv = {
+  available: false,
+  href: "/cv",
+};
+
 export const contact = {
-  line: "Two-time co-founder (Badho, Tago Care). IIT Roorkee. Open to AI frontier roles, remote or relocation.",
+  line: "AI-native product leader. Lead PM at GobbleCube, on AI-first pricing and promo. Seven years. Two-time co-founder (Badho, Tago Care). Ex-Blinkit, Bijak. IIT Roorkee. Open to AI frontier roles, remote or relocation.",
   email: "manmohanbuildsproducts@gmail.com",
   github: "https://github.com/ManmohanBuildsProducts",
   githubLabel: "GitHub",
@@ -124,6 +135,8 @@ export const workshop = {
       id: "part-index",
       title: "Part Index",
       body: "Search for Indian auto parts that understands Hinglish and typos.",
+      href: "https://github.com/ManmohanBuildsProducts/auto-parts-search",
+      linkLabel: "Source",
     },
     {
       id: "home-lab",
@@ -146,6 +159,7 @@ const ages: Age[] = [
     age: "I",
     order: 1,
     role: "Early PM, offline team",
+    dates: "",
     kind: "depot",
     wonder: false,
     raising: false,
@@ -166,7 +180,9 @@ const ages: Age[] = [
     name: "Bijak",
     age: "II",
     order: 2,
+    /** TODO: Bijak title. Empty string renders nothing. */
     role: "",
+    dates: "",
     kind: "mandi",
     wonder: false,
     raising: false,
@@ -188,6 +204,7 @@ const ages: Age[] = [
     age: "III",
     order: 3,
     role: "Co-founder and CPO",
+    dates: "",
     kind: "care",
     wonder: false,
     raising: false,
@@ -209,6 +226,7 @@ const ages: Age[] = [
     age: "IV",
     order: 4,
     role: "Co-founder and Head of Product",
+    dates: "",
     kind: "market",
     wonder: true,
     raising: false,
@@ -217,7 +235,7 @@ const ages: Age[] = [
     labelWidth: 148,
     grand: "Putting India's kirana stores on the same digital rails as modern retail.",
     lives: "Small retailers and kirana owners; brands and sellers.",
-    could: "Digital channel for general trade",
+    could: "A digital channel for India's general trade.",
     extra: [
       { label: "Scale", value: "20 lakh retailers · 11 states · 1M+ installs" },
       {
@@ -236,40 +254,37 @@ const ages: Age[] = [
     age: "V",
     order: 5,
     role: "Lead PM",
+    dates: "",
     kind: "scaffold",
     wonder: false,
     raising: true,
     x: 778,
     y: 348,
     labelWidth: 150,
-    grand: "The current age, still being built.",
-    lives: "Not claimed yet.",
-    could: "Still on the scaffolding.",
+    grand: "Lead PM for AI-first pricing and promo.",
+    lives: "The current age.",
+    could: "Pricing and promo, built as the product ships.",
     extra: [],
     bannerKicker: bannerKicker({ age: "V", wonder: false, raising: true }),
     bannerTitle: "The GobbleCube Age",
-    bannerLine: "The current age, still being built.",
-    speaker: "jarvis",
+    bannerLine: "Lead PM, AI-first pricing and promo.",
+    speaker: "",
   },
 ];
 
 const people: Person[] = [
-  { id: "picker", job: "Store picker · Blinkit", line: "Order packed. Next one!", crew: false, era: "blinkit", x: 248, y: 400, color: "#C0504D", drift: 16 },
-  { id: "trader", job: "Mandi trader · Bijak", line: "Rates on a screen now, not a shout.", crew: false, era: "bijak", x: 404, y: 360, color: "#D9822B", drift: -14 },
-  { id: "carer", job: "Caregiver · Tago Care", line: "The whole family's records, in one place.", crew: false, era: "tago", x: 430, y: 420, color: "#4F8FBF", drift: 12 },
-  { id: "kirana1", job: "Kirana owner · Badho", line: "Now I order stock from my phone", crew: false, era: "badho", x: 540, y: 440, color: "#7B5EA7", drift: -16 },
-  { id: "seller2", job: "Seller · Badho", line: "Every lane's shops, one channel.", crew: false, era: "badho", x: 620, y: 458, color: "#A0522D", drift: -12 },
-  { id: "seller1", job: "Brand seller · Badho", line: "Reaching small shops directly.", crew: false, era: "badho", x: 700, y: 448, color: "#B8892B", drift: 16 },
-  { id: "kirana2", job: "Kirana owner · Badho", line: "Shutter's up, phone's already buzzing.", crew: false, era: "badho", x: 730, y: 430, color: "#2F8F83", drift: 12 },
-  { id: "jarvis", job: "Jarvis · chief of staff and foreman", line: "Keeps a checklist for his checklists.", crew: true, era: "gobble", x: 820, y: 430, color: "#3D5A80", drift: 10 },
-  { id: "coach", job: "Career Coach · herald and scribe", line: "Trims every proclamation to 280 characters.", crew: true, era: "", x: 360, y: 462, color: "#9C4F96", drift: 18 },
-  { id: "scout", job: "Job Scout · scout on the watchtower", line: "Spyglass up at 8:30 every weekday. Chai second.", crew: true, era: "", x: 872, y: 286, color: "#2E7D5B", drift: 0 },
-  { id: "builder", job: "AI Builder · engineer in the Workshop", line: "Benchmarks the hammer before every swing.", crew: true, era: "", x: 188, y: 458, color: "#B5651D", drift: 10 },
+  { id: "picker", job: "", line: "", crew: false, era: "blinkit", x: 248, y: 400, color: "#C0504D", drift: 16 },
+  { id: "trader", job: "", line: "", crew: false, era: "bijak", x: 404, y: 360, color: "#D9822B", drift: -14 },
+  { id: "carer", job: "", line: "", crew: false, era: "tago", x: 430, y: 420, color: "#4F8FBF", drift: 12 },
+  { id: "kirana1", job: "", line: "", crew: false, era: "badho", x: 540, y: 440, color: "#7B5EA7", drift: -16 },
+  { id: "seller2", job: "", line: "", crew: false, era: "badho", x: 620, y: 458, color: "#A0522D", drift: -12 },
+  { id: "seller1", job: "", line: "", crew: false, era: "badho", x: 700, y: 448, color: "#B8892B", drift: 16 },
+  { id: "kirana2", job: "", line: "", crew: false, era: "badho", x: 730, y: 430, color: "#2F8F83", drift: 12 },
 ];
 
 const places: Place[] = [
   { id: "workshop", name: "The Workshop", kind: "workshop", href: "#workshop", x: 248, y: 424, label: "Workshop" },
-  { id: "watchtower", name: "Watchtower", kind: "watchtower", href: "#person-scout", x: 872, y: 368, label: "Watchtower" },
+  { id: "watchtower", name: "Watchtower", kind: "watchtower", href: "#islands", x: 872, y: 368, label: "Watchtower" },
 ];
 
 export const islands: Island[] = [
@@ -316,8 +331,8 @@ export const originalCopy = [
   "A mandi where the rate lives on a screen, not a shout.",
   "Families and caregivers.",
   "A record the whole family can hold in one place.",
-  "Not claimed yet.",
-  "Still on the scaffolding.",
+  "Lead PM for AI-first pricing and promo.",
+  "Pricing and promo, built as the product ships.",
   "A home AI lab for local models.",
   "Five plots marked.",
 ] as const;
