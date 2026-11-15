@@ -1,5 +1,5 @@
 ---
-import { home, horizonNote, islands, personOrder, resources } from "../data/island";
+import { home, horizonNote, islands, personOrder } from "../data/island";
 import Structure from "./Structure.astro";
 import Villager from "./Villager.astro";
 import { sprites } from "./sprites";
@@ -70,19 +70,9 @@ const GROUND = 6;
 ---
 
 <div class="stage">
-  <ul class="resources" aria-label="Resources">
-    {resources.map((item) => (
-      <li>
-        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
-          <polygon points="8,1 15,8 8,15 1,8" fill="#e6b325" stroke="#6a4a16" />
-        </svg>
-        <span>{item}</span>
-      </li>
-    ))}
-  </ul>
   <div class="isl-frame" tabindex="0">
     <div class="isl-world">
-      <svg class="isl-svg" viewBox="300 150 740 500" role="group" aria-labelledby="island-title">
+      <svg class="isl-svg" viewBox="240 120 820 540" preserveAspectRatio="xMidYMid slice" role="group" aria-labelledby="island-title">
         <title id="island-title">Living island: five ages, villagers, the Workshop, and an island in the fog</title>
         <defs>
           <linearGradient id="skysea" x1="0" y1="0" x2="0" y2="1">
@@ -102,6 +92,12 @@ const GROUND = 6;
             <image href={waterArt} alt="" role="presentation" x="620" y="300" width="480" height="240" />
           </g>
         )}
+        <g class="clouds" aria-hidden="true">
+          <ellipse cx="220" cy="90" rx="78" ry="18" fill="#f4fbff" opacity="0.55" />
+          <ellipse cx="280" cy="84" rx="52" ry="14" fill="#fff" opacity="0.7" />
+          <ellipse cx="760" cy="120" rx="90" ry="20" fill="#e7f4fb" opacity="0.45" />
+          <ellipse cx="830" cy="112" rx="48" ry="14" fill="#fff" opacity="0.55" />
+        </g>
         <g class="waves" aria-hidden="true">
           <path d="M-20 180 q 24 -8 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0" />
           <path d="M-10 240 q 28 -9 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0" />

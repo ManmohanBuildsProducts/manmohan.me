@@ -16,6 +16,7 @@ const live = document.querySelector<HTMLElement>("[data-live]");
 const banner = document.querySelector<HTMLElement>("[data-banner]");
 const ambient = document.querySelector<HTMLElement>("[data-ambient]");
 const waves = document.querySelector<SVGGElement>(".waves");
+const clouds = document.querySelector<SVGGElement>(".clouds");
 const motionOk = !reduce;
 
 let age = reduce ? max : Number(root.dataset.age || 0);
@@ -152,9 +153,10 @@ function syncFog() {
 }
 
 function syncParallax() {
-  if (!motionOk || !waves) return;
-  const shift = Math.round(window.scrollY * 0.06);
-  waves.setAttribute("transform", `translate(0 ${shift})`);
+  if (!motionOk) return;
+  const shift = Math.round(window.scrollY * 0.05);
+  waves?.setAttribute("transform", `translate(${shift * 0.35} ${shift})`);
+  clouds?.setAttribute("transform", `translate(${-shift * 0.7} 0)`);
 }
 
 function onScroll() {
