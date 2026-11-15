@@ -6,7 +6,7 @@ const reduce =
 if (!root.classList.contains("js")) {
   root.classList.add("js");
   root.dataset.motion = reduce ? "reduce" : "ok";
-  root.dataset.age = reduce ? "5" : "0";
+  root.dataset.age = reduce ? "5" : "1";
   root.dataset.fog = "";
 }
 
@@ -141,7 +141,8 @@ function ageFromScroll() {
   }
   if (bestDist <= window.innerHeight * 0.42) return best;
   if (passed > 0 && passed === articles.length) return passed;
-  return 0;
+  if (passed > 0) return passed;
+  return 1;
 }
 
 function syncFog() {

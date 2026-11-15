@@ -749,7 +749,7 @@ html[data-motion="ok"] .foam { animation: foam 2.4s ease-in-out infinite; }
 h1 { letter-spacing: -0.03em; }
 .pin .stage { min-height: 0; height: 100%; }
 .pin .isl-frame { position: relative; }
-.minimap { display: none; }
+.minimap, .isl-plot { display: none; }
 .isl-banner {
   position: absolute;
   top: 76px;
