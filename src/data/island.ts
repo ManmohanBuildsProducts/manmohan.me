@@ -43,7 +43,7 @@ export type Age = {
 export type Person = {
   id: string;
   job: string;
-  /** Speech line, or the crew member's quirk. */
+  /** Speech line. */
   line: string;
   crew: boolean;
   /** Age id this person arrives with. Empty string: already on the island. */
@@ -249,7 +249,7 @@ const ages: Age[] = [
     bannerKicker: bannerKicker({ age: "V", wonder: false, raising: true }),
     bannerTitle: "The GobbleCube Age",
     bannerLine: "The current age, still being built.",
-    speaker: "jarvis",
+    speaker: "",
   },
 ];
 
@@ -261,15 +261,11 @@ const people: Person[] = [
   { id: "seller2", job: "Seller · Badho", line: "Every lane's shops, one channel.", crew: false, era: "badho", x: 620, y: 458, color: "#A0522D", drift: -12 },
   { id: "seller1", job: "Brand seller · Badho", line: "Reaching small shops directly.", crew: false, era: "badho", x: 700, y: 448, color: "#B8892B", drift: 16 },
   { id: "kirana2", job: "Kirana owner · Badho", line: "Shutter's up, phone's already buzzing.", crew: false, era: "badho", x: 730, y: 430, color: "#2F8F83", drift: 12 },
-  { id: "jarvis", job: "Jarvis · chief of staff and foreman", line: "Keeps a checklist for his checklists.", crew: true, era: "gobble", x: 820, y: 430, color: "#3D5A80", drift: 10 },
-  { id: "coach", job: "Career Coach · herald and scribe", line: "Trims every proclamation to 280 characters.", crew: true, era: "", x: 360, y: 462, color: "#9C4F96", drift: 18 },
-  { id: "scout", job: "Job Scout · scout on the watchtower", line: "Spyglass up at 8:30 every weekday. Chai second.", crew: true, era: "", x: 872, y: 286, color: "#2E7D5B", drift: 0 },
-  { id: "builder", job: "AI Builder · engineer in the Workshop", line: "Benchmarks the hammer before every swing.", crew: true, era: "", x: 188, y: 458, color: "#B5651D", drift: 10 },
 ];
 
 const places: Place[] = [
   { id: "workshop", name: "The Workshop", kind: "workshop", href: "#workshop", x: 248, y: 424, label: "Workshop" },
-  { id: "watchtower", name: "Watchtower", kind: "watchtower", href: "#person-scout", x: 872, y: 368, label: "Watchtower" },
+  { id: "watchtower", name: "Watchtower", kind: "watchtower", href: "#ages", x: 872, y: 368, label: "Watchtower" },
 ];
 
 export const islands: Island[] = [

@@ -6,7 +6,6 @@ import { contact, home, islands, personOrder, workshop } from "../data/island";
 
 const ages = home.ages;
 const villagers = home.people.filter((person) => !person.crew);
-const crew = home.people.filter((person) => person.crew);
 const fog = islands.filter((island) => island.kind === "fog");
 const count = ages.length;
 
@@ -110,19 +109,6 @@ const rows = (age: (typeof ages)[number]) => [
         {villagers.map((person) => (
           <article class="card" id={`person-${person.id}`} tabindex="-1" data-line={person.line} data-order={personOrder(person)}>
             <p class="kicker">Villager</p>
-            <h3>{person.job}</h3>
-            <p class="says">{person.line}</p>
-          </article>
-        ))}
-      </div>
-    </section>
-
-    <section class="block" id="crew" aria-labelledby="crew-title">
-      <h2 id="crew-title">Builder crew</h2>
-      <div class="people">
-        {crew.map((person) => (
-          <article class="card" id={`person-${person.id}`} tabindex="-1" data-line={person.line}>
-            <p class="crew-mark">Crew</p>
             <h3>{person.job}</h3>
             <p class="says">{person.line}</p>
           </article>
