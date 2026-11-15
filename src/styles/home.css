@@ -113,8 +113,7 @@ a { color: inherit; }
   color: var(--gold);
 }
 .age .kicker,
-.card .kicker,
-.crew-mark { color: #6b3e0a; }
+.card .kicker { color: #6b3e0a; }
 .block > .kicker {
   display: inline-block;
   color: #f6e2a0;
@@ -405,13 +404,6 @@ html.js[data-motion="ok"] .queue a:not(.is-on) { border-style: dashed; opacity: 
 .card p { margin: 0; color: #5c4a32; }
 .card .says { color: var(--parchment-ink); font-family: var(--serif); font-size: 1.12rem; line-height: 1.35; }
 .card a { color: #7a4e08; }
-.crew-mark {
-  font-family: var(--mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--gold);
-}
 
 .block { padding: 8px 0 12px; }
 .block h2 { margin: 0.2em 0 0.45em; font-size: clamp(1.7rem, 3vw, 2.2rem); }

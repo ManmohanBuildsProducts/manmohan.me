@@ -127,7 +127,7 @@ const fogOrigin = { x: 930, y: 96 };
           return (
             <g transform={`translate(${p.x} ${y})`}>
               <ellipse cx="4" cy="8" rx="18" ry="7" fill="#000" opacity="0.2" />
-              <a href={place.href} aria-label={place.kind === "workshop" ? "The Workshop: tinkering with AI" : "Watchtower. Job Scout keeps the lookout."}>
+              <a href={place.href} aria-label={place.kind === "workshop" ? "The Workshop: tinkering with AI" : "Watchtower"}>
                 <Structure kind={place.kind === "workshop" ? "workshop" : "tower"} />
                 {place.kind === "workshop" && (
                   <text x="0" y="22" text-anchor="middle" fill="#2a1c12" font-size="13">{place.label}</text>
