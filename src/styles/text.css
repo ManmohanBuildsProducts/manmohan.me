@@ -164,29 +164,37 @@ h2 {
 
 .hero-figure {
   margin: 0;
-  border-radius: 18px;
+  border-radius: 12px;
   overflow: hidden;
-  background: #efe6d4;
   line-height: 0;
+  background: #1a140e;
+  border: 1px solid rgba(42, 28, 16, 0.22);
+  box-shadow:
+    0 1px 0 rgba(255, 246, 230, 0.55),
+    0 18px 42px rgba(48, 28, 12, 0.2);
+  transition: transform 500ms ease, box-shadow 500ms ease;
 }
 
 .hero-figure img {
   display: block;
   width: 100%;
   height: auto;
-  transform: scale(1);
-  transition: transform 700ms ease;
 }
 
-.hero-figure:hover img { transform: scale(1.025); }
+.hero-figure:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 1px 0 rgba(255, 246, 230, 0.55),
+    0 26px 50px rgba(48, 28, 12, 0.26);
+}
 
 @media (min-width: 900px) {
   .hero {
-    grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.9fr);
-    gap: 2.5rem;
+    grid-template-columns: minmax(16rem, 0.82fr) minmax(22rem, 1.22fr);
+    gap: 2.25rem;
     align-items: center;
   }
-  .hero-figure { border-radius: 22px; }
+  .hero-figure { border-radius: 16px; }
 }
 
 @media (max-width: 899px) {
@@ -369,8 +377,8 @@ img { max-width: 100%; height: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-figure img { transition: none; }
-  .hero-figure:hover img { transform: none; }
+  .hero-figure { transition: none; }
+  .hero-figure:hover { transform: none; }
 }
 
 @media print {

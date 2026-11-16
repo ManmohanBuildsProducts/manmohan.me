@@ -13,7 +13,7 @@ const jsonLd = {
   sameAs: [person.x, person.github, person.linkedin],
 };
 
-const alt = "A painted town: a grocery shop, a mandi stall, a clinic, a trade hall, and a building still going up.";
+const alt = "A painted island at twilight: a turtle of rock carrying a lit town, lanterns over the water, and a tower still under a crane.";
 ---
 <Base title={person.name} description={person.sentence} wide>
   <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
@@ -31,18 +31,18 @@ const alt = "A painted town: a grocery shop, a mandi stall, a clinic, a trade ha
       <picture>
         <source
           type="image/avif"
-          srcset="/hero/town-480.avif 480w, /hero/town-768.avif 768w, /hero/town-1080.avif 1080w"
-          sizes="(min-width: 900px) 460px, 92vw"
+          srcset="/hero/island-640.avif 640w, /hero/island-960.avif 960w, /hero/island-1280.avif 1280w"
+          sizes="(min-width: 900px) 640px, 92vw"
         />
         <source
           type="image/webp"
-          srcset="/hero/town-480.webp 480w, /hero/town-768.webp 768w, /hero/town-1080.webp 1080w"
-          sizes="(min-width: 900px) 460px, 92vw"
+          srcset="/hero/island-640.webp 640w, /hero/island-960.webp 960w, /hero/island-1280.webp 1280w"
+          sizes="(min-width: 900px) 640px, 92vw"
         />
         <img
-          src="/hero/town-768.webp"
-          width="1080"
-          height="816"
+          src="/hero/island-960.webp"
+          width="1280"
+          height="720"
           alt={alt}
           fetchpriority="high"
         />
