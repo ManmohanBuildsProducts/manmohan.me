@@ -1,11 +1,12 @@
 import rss from '@astrojs/rss';
 import type { APIContext } from 'astro';
+import { person } from '../data/site';
 import { posts } from '../lib';
 
 export async function GET(context: APIContext) {
   return rss({
-    title: 'Manmohan · Writing',
-    description: 'Notes on making messy systems legible, for people and for models.',
+    title: 'Manmohan Singh Charan',
+    description: person.sentence,
     site: context.site!,
     items: (await posts()).map((p) => ({
       title: p.data.title,

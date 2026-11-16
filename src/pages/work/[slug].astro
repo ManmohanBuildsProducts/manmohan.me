@@ -1,0 +1,44 @@
+---
+import Base from "../../layouts/Base.astro";
+import { roles, type Role } from "../../data/site";
+
+export function getStaticPaths() {
+  return roles.map((role) => ({ params: { slug: role.slug }, props: { role } }));
+}
+
+interface Props { role: Role }
+const { role } = Astro.props;
+
+const sections = role.study
+  ? role.study.map((section) => [section.heading, section.paragraphs] as const)
+  : ([
+      ["The problem", role.problem],
+      ["The bet", role.bet],
+      ["What happened", role.happened],
+      ["What I learned", role.learned],
+    ] as const);
+---
+<Base title={`${role.study ? "Case study · " : ""}${role.company} · Manmohan Singh Charan`} description={role.description}>
+  <article class="story" style={`--mark: ${role.accent}`}>
+    <p class="back"><a href="/#work">Work</a></p>
+    {role.study && <p class="kicker">Case study</p>}
+    <p class="kicker">{role.dates}</p>
+    <h1>{role.study ? "Search that does not wait" : role.company}</h1>
+    <p class="story-kicker">{role.study ? `${role.company} · ${role.title}` : role.title}</p>
+    <div class="story-rule" aria-hidden="true"></div>
+    <p class="outcome">{role.outcome}</p>
+    {!role.study && (
+      <ul class="shipped">
+        {role.bullets.map((bullet) => <li>{bullet}</li>)}
+      </ul>
+    )}
+    {sections.map(([heading, paragraphs]) => (
+      <section>
+        <h2>{heading}</h2>
+        <div class="prose">
+          {paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+        </div>
+      </section>
+    ))}
+  </article>
+</Base>
