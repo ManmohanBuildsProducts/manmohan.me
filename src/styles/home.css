@@ -154,7 +154,7 @@ h1 {
 }
 .resources li svg { flex: none; }
 
-.saga { margin: 8px 0 28px; }
+.saga { margin: 0; }
 .stage {
   position: relative;
   padding: 8px;
@@ -449,11 +449,13 @@ html.js[data-motion="ok"] .queue a:not(.is-on) { border-style: dashed; opacity: 
     margin-left: auto;
     margin-right: 0;
     margin-top: -100svh;
-    padding: 100svh 0 8vh;
+    padding: 100svh 0 0;
     position: relative;
     z-index: 2;
     box-sizing: border-box;
+    background: transparent;
   }
+  .saga .age { min-height: 100svh; }
 }
 @media (max-width: 1023px) {
   .stage {
@@ -653,6 +655,11 @@ html[data-motion="ok"] .foam { animation: foam 2.4s ease-in-out infinite; }
   min-height: 0;
   border: 0;
   box-shadow: none;
+  overflow: hidden;
+  background: linear-gradient(
+    color-mix(in srgb, #f8d7c0, #f6b56a calc(var(--day) * 100%)),
+    color-mix(in srgb, #1d5c86, #14324f calc(var(--day) * 100%))
+  );
 }
 .pin .isl-frame::before {
   content: "";
@@ -787,11 +794,14 @@ html[data-motion="ok"] .waves { animation: isl-drift 14s ease-in-out infinite al
   background: linear-gradient(to top, rgba(8, 6, 4, 0.82) 0%, rgba(8, 6, 4, 0.28) 48%, transparent 100%);
   pointer-events: none;
 }
-.veil { transition: opacity 0.45s ease; }
 .veil a { pointer-events: auto; }
+.pin.is-reading .veil {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: none;
+}
 @media (min-width: 1024px) {
-  .pin.is-reading .veil { opacity: 0; }
-  .pin.is-reading .veil a { pointer-events: none; }
   .pin.is-reading .stage {
     width: calc(100% - min(560px, 42vw));
     transition: width 0.45s ease;
@@ -856,7 +866,8 @@ html[data-motion="ok"] .waves { animation: isl-drift 14s ease-in-out infinite al
 .quiet:hover { color: #fff; }
 
 .saga .age {
-  min-height: 72vh;
+  min-height: 100svh;
+  box-shadow: 20px 0 0 #14120e;
   max-width: none;
   margin: 0;
   padding: 8vh 40px 10vh 32px;
@@ -913,6 +924,9 @@ html[data-motion="ok"] .waves { animation: isl-drift 14s ease-in-out infinite al
   color: #f0d78c;
 }
 .saga .age .rows dd { color: #f6efe2; font-size: 1.05rem; line-height: 1.45; }
+@media (max-width: 1023px) {
+  .saga .age { min-height: 0; box-shadow: none; }
+}
 
 .lower { padding-bottom: 4rem; }
 .summary, .block {

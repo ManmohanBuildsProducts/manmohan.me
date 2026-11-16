@@ -143,26 +143,15 @@ function applyAge(order: number, withBanner: boolean, hold?: number) {
 }
 
 function ageFromScroll() {
-  const focus = window.innerHeight * 0.74;
-  let best = 0;
-  let bestDist = Infinity;
-  let passed = 0;
+  if (root.dataset.intro !== "play" && window.scrollY < window.innerHeight * 0.22) return max;
+  const line = window.innerHeight * 0.42;
+  let current = 1;
   for (const card of articles) {
     const heading = card.querySelector("h3");
     const y = (heading ?? card).getBoundingClientRect().top;
-    const order = Number(card.dataset.order);
-    if (y <= focus) passed = Math.max(passed, order);
-    const dist = Math.abs(y - focus);
-    if (dist < bestDist) {
-      bestDist = dist;
-      best = order;
-    }
+    if (y <= line) current = Number(card.dataset.order);
   }
-  if (root.dataset.intro !== "play" && window.scrollY < window.innerHeight * 0.22) return max;
-  if (bestDist <= window.innerHeight * 0.42) return best;
-  if (passed > 0 && passed === articles.length) return passed;
-  if (passed > 0) return passed;
-  return 1;
+  return current;
 }
 
 function syncFog() {
@@ -180,12 +169,21 @@ function syncParallax() {
   clouds?.setAttribute("transform", `translate(${-shift * 0.7} 0)`);
 }
 
+const sceneSvg = document.querySelector<SVGSVGElement>(".isl-svg");
+const heroView = "240 120 820 540";
+const readView = "240 40 820 980";
+
 function syncReading() {
   const pin = document.querySelector(".pin");
   const first = articles[0];
   if (!pin || !first) return;
   const reading = first.getBoundingClientRect().top < window.innerHeight * 0.82;
   pin.classList.toggle("is-reading", reading);
+  if (!sceneSvg) return;
+  const wide = window.matchMedia("(min-width: 1024px)").matches;
+  const fill = reading && wide;
+  sceneSvg.setAttribute("viewBox", fill ? readView : heroView);
+  sceneSvg.setAttribute("preserveAspectRatio", fill ? "xMidYMid slice" : "xMidYMid meet");
 }
 
 function introActive() {

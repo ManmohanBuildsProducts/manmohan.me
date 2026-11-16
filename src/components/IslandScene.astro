@@ -85,7 +85,7 @@ const smokeWorkshop = chimney("workshop", 92);
       <svg class="isl-svg" viewBox="240 120 820 540" preserveAspectRatio="xMidYMid meet" role="group" aria-labelledby="island-title">
         <title id="island-title">Living island: five ages, villagers, the Workshop, and an island in the fog</title>
         <defs>
-          <linearGradient id="skysea" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id="skysea" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="700">
             <stop class="sky-a" offset="0" stop-color="#f6b56a" />
             <stop class="sky-b" offset="0.3" stop-color="#e8894a" />
             <stop class="sky-c" offset="0.58" stop-color="#3d6e96" />
@@ -100,7 +100,7 @@ const smokeWorkshop = chimney("workshop", 92);
             <polygon points={diamond(0, 0)} />
           </clipPath>
         </defs>
-        <rect width="1180" height="700" fill="url(#skysea)" />
+        <rect width="1180" height="1100" fill="url(#skysea)" />
         <g class="sun-glow" aria-hidden="true">
           <circle class="sun-halo" r="70" />
           <circle class="sun" r="22" />
@@ -124,6 +124,9 @@ const smokeWorkshop = chimney("workshop", 92);
           <path d="M-30 430 q 30 -8 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0" />
           <path d="M40 560 q 26 -7 52 0 t 52 0 t 52 0 t 52 0 t 52 0 t 52 0 t 52 0 t 52 0 t 52 0" />
           <path d="M0 640 q 32 -8 64 0 t 64 0 t 64 0 t 64 0 t 64 0 t 64 0 t 64 0" />
+          <path d="M200 760 q 40 -8 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0" />
+          <path d="M240 860 q 36 -7 72 0 t 72 0 t 72 0 t 72 0 t 72 0 t 72 0 t 72 0 t 72 0 t 72 0" />
+          <path d="M180 960 q 40 -8 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0" />
         </g>
         <g aria-hidden="true">
           <g class="bird life" style="--by:150px;animation-duration:34s;animation-delay:-6s">
@@ -330,7 +333,7 @@ const smokeWorkshop = chimney("workshop", 92);
             <circle class="fly-glow" r="6" />
           </g>
         ))}
-        <rect class="day-wash" x="0" y="0" width="1180" height="700" pointer-events="none" />
+        <rect class="day-wash" x="0" y="0" width="1180" height="1100" pointer-events="none" />
       </svg>
       <div class="minimap" aria-hidden="true">
         <svg viewBox="0 0 120 86">
