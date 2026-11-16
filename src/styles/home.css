@@ -661,6 +661,159 @@ html[data-motion="ok"] .foam { animation: foam 2.4s ease-in-out infinite; }
     color-mix(in srgb, #1d5c86, #14324f calc(var(--day) * 100%))
   );
 }
+.world-frame::before {
+  background: radial-gradient(ellipse at 50% 42%, transparent 58%, rgba(18, 10, 6, 0.22) 100%);
+}
+.world-frame canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: pan-y;
+}
+.world-still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+html[data-world="live"] .world-still {
+  opacity: 0;
+  pointer-events: none;
+}
+html[data-world="still"] .world-frame canvas,
+html[data-world="still"] .world-labels { display: none; }
+.world-labels {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+.world-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  margin: 0;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(20, 14, 8, 0.78);
+  color: #f7f1e4;
+  font: 600 0.82rem/1.2 var(--sans);
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+  pointer-events: auto;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+}
+.world-label.is-focus {
+  background: #f4ead4;
+  color: #1a140c;
+}
+.world-label[hidden] { display: none; }
+
+.dossier {
+  width: min(38rem, calc(100vw - 2rem));
+  max-height: min(82vh, 44rem);
+  margin: auto;
+  padding: 0;
+  border: 1px solid rgba(240, 215, 140, 0.35);
+  border-radius: 18px;
+  background: #16130f;
+  color: #f6efe2;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+}
+.dossier::backdrop {
+  background: rgba(8, 6, 4, 0.62);
+}
+.dossier-sheet {
+  max-height: min(82vh, 44rem);
+  overflow: auto;
+  padding: 1.25rem 1.35rem 1.6rem;
+}
+.dossier-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  z-index: 1;
+  min-height: 44px;
+  margin: 0 0 0.4rem 0.6rem;
+  padding: 0 14px;
+  border: 1px solid rgba(240, 215, 140, 0.45);
+  border-radius: 999px;
+  background: #1a140c;
+  color: #f6efe2;
+  font: 600 0.95rem/1 var(--sans);
+}
+.dossier .kicker,
+.dossier h2 { padding-right: 5.4rem; }
+.dossier h2 {
+  margin: 0.15em 0 0.35em;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  letter-spacing: -0.03em;
+}
+.dossier h3 {
+  margin: 1.1rem 0 0.3rem;
+  font-size: 1.15rem;
+}
+.dossier p { margin: 0.45rem 0; line-height: 1.45; }
+.dossier-aka { color: #f0d78c; }
+.dossier-mark {
+  display: block;
+  color: #f0d78c;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.dossier-grand {
+  margin-top: 0.8rem;
+  color: #f4ead4;
+  font-family: var(--serif);
+  font-size: 1.2rem;
+}
+.dossier-links { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+.dossier-links a { color: #f0d78c; }
+.dossier-fallback { display: none; }
+html[data-world="still"] .dossier-fallback {
+  position: fixed;
+  z-index: 6;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(12, 10, 8, 0.92);
+}
+html[data-world="still"] .dossier-fallback button {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid rgba(240, 215, 140, 0.4);
+  border-radius: 999px;
+  background: transparent;
+  color: #f6efe2;
+  font: 600 0.9rem/1 var(--sans);
+}
+@media (max-width: 700px) {
+  .dossier {
+    width: 100%;
+    max-width: none;
+    max-height: 86vh;
+    margin: auto 0 0;
+    border-radius: 20px 20px 0 0;
+  }
+  .dossier-sheet { max-height: 86vh; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dossier, .world-still { transition: none; }
+}
 .pin .isl-frame::before {
   content: "";
   position: absolute;
