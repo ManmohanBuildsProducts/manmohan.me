@@ -67,6 +67,16 @@ function buildingBox(id: string) {
   return { w: Math.round(w * BUILD * boost), h: Math.round(h * BUILD * boost) };
 }
 const GROUND = 6;
+const cartFrom = iso(6.8, 7.6);
+const cartTo = iso(10.2, 6.4);
+const cartDx = Math.round(cartTo.x - cartFrom.x);
+const cartDy = Math.round(cartTo.y - cartFrom.y);
+const chimney = (id: string, lift: number) => {
+  const p = at(id);
+  return { x: p.x + 6, y: p.y - lift };
+};
+const smokeBlinkit = chimney("blinkit", 86);
+const smokeWorkshop = chimney("workshop", 92);
 ---
 
 <div class="stage">
@@ -75,35 +85,59 @@ const GROUND = 6;
       <svg class="isl-svg" viewBox="240 120 820 540" preserveAspectRatio="xMidYMid meet" role="group" aria-labelledby="island-title">
         <title id="island-title">Living island: five ages, villagers, the Workshop, and an island in the fog</title>
         <defs>
-          <linearGradient id="skysea" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#8fd4ef" />
-            <stop offset="0.28" stop-color="#3d92c8" />
-            <stop offset="0.55" stop-color="#1d6eae" />
-            <stop offset="1" stop-color="#0c4d86" />
+          <linearGradient id="skysea" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="700">
+            <stop class="sky-a" offset="0" stop-color="#f6b56a" />
+            <stop class="sky-b" offset="0.3" stop-color="#e8894a" />
+            <stop class="sky-c" offset="0.58" stop-color="#3d6e96" />
+            <stop class="sky-d" offset="1" stop-color="#163e66" />
           </linearGradient>
+          <radialGradient id="float-shadow" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stop-color="#041018" stop-opacity="0.42" />
+            <stop offset="0.62" stop-color="#041018" stop-opacity="0.16" />
+            <stop offset="1" stop-color="#041018" stop-opacity="0" />
+          </radialGradient>
           <clipPath id="tile-clip">
             <polygon points={diamond(0, 0)} />
           </clipPath>
         </defs>
-        <rect width="1180" height="700" fill="url(#skysea)" />
+        <rect width="1180" height="1100" fill="url(#skysea)" />
+        <g class="sun-glow" aria-hidden="true">
+          <circle class="sun-halo" r="70" />
+          <circle class="sun" r="22" />
+        </g>
         {waterArt && (
           <g opacity="0.5">
             <image href={waterArt} alt="" role="presentation" x="40" y="120" width="560" height="280" />
             <image href={waterArt} alt="" role="presentation" x="620" y="300" width="480" height="240" />
           </g>
         )}
-        <g class="clouds" aria-hidden="true">
+        <ellipse class="isle-shadow" cx="660" cy="508" rx="360" ry="72" fill="url(#float-shadow)" aria-hidden="true" />
+        <g class="clouds life" aria-hidden="true">
           <ellipse cx="220" cy="90" rx="78" ry="18" fill="#f4fbff" opacity="0.55" />
           <ellipse cx="280" cy="84" rx="52" ry="14" fill="#fff" opacity="0.7" />
           <ellipse cx="760" cy="120" rx="90" ry="20" fill="#e7f4fb" opacity="0.45" />
           <ellipse cx="830" cy="112" rx="48" ry="14" fill="#fff" opacity="0.55" />
         </g>
-        <g class="waves" aria-hidden="true">
+        <g class="waves life" aria-hidden="true">
           <path d="M-20 180 q 24 -8 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0 t 48 0" />
           <path d="M-10 240 q 28 -9 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0 t 56 0" />
           <path d="M-30 430 q 30 -8 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0" />
           <path d="M40 560 q 26 -7 52 0 t 52 0 t 52 0 t 52 0 t 52 0 t 52 0 t 52 0 t 52 0 t 52 0" />
           <path d="M0 640 q 32 -8 64 0 t 64 0 t 64 0 t 64 0 t 64 0 t 64 0 t 64 0" />
+          <path d="M200 760 q 40 -8 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0" />
+          <path d="M240 860 q 36 -7 72 0 t 72 0 t 72 0 t 72 0 t 72 0 t 72 0 t 72 0 t 72 0 t 72 0" />
+          <path d="M180 960 q 40 -8 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0" />
+        </g>
+        <g aria-hidden="true">
+          <g class="bird life" style="--by:150px;animation-duration:34s;animation-delay:-6s">
+            <path d="M0 0 q 5 -5 10 0 q 5 5 10 0" />
+          </g>
+          <g class="bird life" style="--by:210px;animation-duration:46s;animation-delay:-20s">
+            <path d="M0 0 q 4 -4 8 0 q 4 4 8 0" />
+          </g>
+          <g class="bird life" style="--by:250px;animation-duration:28s;animation-delay:-12s">
+            <path d="M0 0 q 5 -4 9 0 q 4 4 9 0" />
+          </g>
         </g>
 
         <g aria-hidden="true">
@@ -147,7 +181,7 @@ const GROUND = 6;
             const th = 96 * tree.s;
             const tw = th * (tree.i % 2 === 0 ? 217 / 360 : 329 / 360);
             return art ? (
-              <g>
+              <g class="tree life" data-x={tree.x} data-y={tree.y} style={`animation-delay:${-0.6 * (tree.i % 6)}s`}>
                 <ellipse cx={tree.x} cy={tree.y + 2} rx={tw * 0.28} ry={tw * 0.1} fill="#000" opacity="0.22" />
                 <image href={art} alt="" role="presentation" x={tree.x - tw / 2} y={tree.y - th} width={tw} height={th} />
               </g>
@@ -157,6 +191,21 @@ const GROUND = 6;
               </g>
             );
           })}
+        </g>
+
+        <g class="isl-prop" data-order="4" transform={`translate(${cartFrom.x} ${cartFrom.y})`} aria-hidden="true">
+          <g class="cart life" style={`--dx:${cartDx}px;--dy:${cartDy}px`}>
+            <ellipse cx="0" cy="10" rx="22" ry="6" fill="#000" opacity="0.22" />
+            <rect x="-20" y="-8" width="38" height="16" rx="2" fill="#8d5a32" />
+            <rect x="-20" y="-11" width="38" height="5" rx="1" fill="#c9864a" />
+            <rect x="-8" y="-11" width="8" height="5" fill="#c4473a" />
+            <ellipse cx="-6" cy="-16" rx="7" ry="5" fill="#f0ddb8" />
+            <ellipse cx="6" cy="-14" rx="5.5" ry="4" fill="#d7b98a" />
+            <circle cx="-12" cy="9" r="4.4" fill="#24180f" />
+            <circle cx="12" cy="9" r="4.4" fill="#24180f" />
+            <circle cx="-12" cy="9" r="1.6" fill="#e6c27a" />
+            <circle cx="12" cy="9" r="1.6" fill="#e6c27a" />
+          </g>
         </g>
 
         {ages.map((age) => {
@@ -176,7 +225,7 @@ const GROUND = 6;
           const y = art ? p.y : place.kind === "watchtower" ? p.y - 8 : p.y;
           const ground = GROUND;
           return (
-            <g transform={`translate(${p.x} ${y})`}>
+            <g class="liftable" transform={`translate(${p.x} ${y})`}>
               <ellipse cx="2" cy={ground} rx={box.w * 0.26} ry={box.w * 0.08} fill="#000" opacity="0.28" />
               <a href={place.href} aria-label={place.kind === "workshop" ? "The Workshop" : "Watchtower"}>
                 {art ? (
@@ -184,6 +233,7 @@ const GROUND = 6;
                 ) : (
                   <Structure kind={place.kind === "workshop" ? "workshop" : "tower"} />
                 )}
+                <ellipse class="lamp" cx="0" cy={ground - box.h * 0.62} rx="8" ry="4.5" />
               </a>
             </g>
           );
@@ -218,7 +268,7 @@ const GROUND = 6;
                       <Structure kind={age.kind} wonder={age.wonder} />
                     </g>
                   )}
-                  <text class="plaque" y={age.wonder ? 28 : 22} text-anchor="middle" fill="#f7f1e4" font-size="16" stroke="#1a140e" stroke-width="3" paint-order="stroke">{age.name}</text>
+                  <ellipse class="lamp" cx="2" cy={ground - box.h * 0.58} rx={age.wonder ? 12 : 8} ry="5" />
                 </g>
               </a>
             </g>
@@ -229,6 +279,15 @@ const GROUND = 6;
           const p = at(person.id);
           const y = person.id === "scout" ? p.y - 104 : p.y;
           return <Villager person={person} order={personOrder(person)} x={p.x} y={y} />;
+        })}
+
+        {ages.map((age) => {
+          const p = plotOf[age.id];
+          return (
+            <g class="isl-era isl-label" data-order={age.order} aria-hidden="true">
+              <text class="plaque" x={p.x} y={p.y + (age.wonder ? 28 : 22)} text-anchor="middle" fill="#f7f1e4" font-size="16" stroke="#1a140e" stroke-width="3" paint-order="stroke">{age.name}</text>
+            </g>
+          );
         })}
 
         {fogIslands.map((island) => (
@@ -256,6 +315,25 @@ const GROUND = 6;
           <ellipse cx="188" cy="72" rx="34" ry="14" fill="#fff" />
           <text x="168" y="108" text-anchor="middle" fill="#f7f4ec" font-size="14">{horizonNote}</text>
         </g>
+
+        <g class="smoke" transform={`translate(${smokeWorkshop.x} ${smokeWorkshop.y})`} aria-hidden="true">
+          <circle class="puff-rest" r="5" cy="-6" />
+          <circle class="puff life" r="4" />
+          <circle class="puff life" r="3.2" style="animation-delay:-1.1s" />
+          <circle class="puff life" r="2.4" style="animation-delay:-2s" />
+        </g>
+        <g class="isl-prop smoke" data-order="1" transform={`translate(${smokeBlinkit.x} ${smokeBlinkit.y})`} aria-hidden="true">
+          <circle class="puff-rest" r="4.5" cy="-4" />
+          <circle class="puff life" r="3.4" />
+          <circle class="puff life" r="2.6" style="animation-delay:-1.4s" />
+        </g>
+        {trees.filter((_, i) => i % 4 === 0).map((tree) => (
+          <g class="fly life" transform={`translate(${tree.x + 10} ${tree.y - 36})`} aria-hidden="true">
+            <circle r="2.4" />
+            <circle class="fly-glow" r="6" />
+          </g>
+        ))}
+        <rect class="day-wash" x="0" y="0" width="1180" height="1100" pointer-events="none" />
       </svg>
       <div class="minimap" aria-hidden="true">
         <svg viewBox="0 0 120 86">

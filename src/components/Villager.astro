@@ -9,9 +9,19 @@ interface Props {
   y: number;
 }
 const { person, order, x, y } = Astro.props;
-const art = sprites.villagers[person.id];
+const look = person.sprite ?? person.id;
+const art = sprites.villagers[look];
 const eager = order < 1;
 const height = 58;
+const working = person.era === "gobble";
+const step: Record<string, [number, number]> = {
+  blinkit: [14, 8],
+  bijak: [12, 10],
+  tago: [-10, 10],
+  badho: [8, 14],
+  gobble: [-14, 8],
+};
+const [sx, sy] = step[person.era] ?? [8, 8];
 const native: Record<string, { sw: number; ww?: number }> = {
   picker: { sw: 98 },
   trader: { sw: 125 },
@@ -24,39 +34,31 @@ const native: Record<string, { sw: number; ww?: number }> = {
   scout: { sw: 117 },
   builder: { sw: 151, ww: 140 },
 };
-const frame = native[person.id] ?? { sw: 110 };
+const frame = native[look] ?? { sw: 110 };
 const standW = Math.round((frame.sw * height) / 192);
 const walkW = Math.round(((frame.ww ?? frame.sw) * height) / 192);
+const spriteTag = (kind: "stand" | "step", href: string, width: number) =>
+  `<image class="${kind}" alt="" role="presentation" ${eager ? `href="${href}"` : `data-src="${href}"`} x="${-width / 2}" y="${4 - height}" width="${width}" height="${height}"></image>`;
 ---
 
-<g class="isl-npc" data-order={order} transform={`translate(${x} ${y})`} aria-hidden="true">
+<g
+  class="isl-npc"
+  data-order={order}
+  data-home={person.era}
+  style={`--step-x:${sx}px;--step-y:${sy}px`}
+  transform={`translate(${x} ${y})`}
+  aria-hidden="true"
+>
   {art?.stand ? (
     <g class:list={["fig", { "has-walk": Boolean(art.walk) }]}>
+      <g
+        class:list={["bob", "life", { stroll: person.drift !== 0, work: working }]}
+        style={`--dx:${Math.round(person.drift * 1.35)}px;--dy:${Math.round(person.drift * 0.55)}px;--walk:${7 + (order % 4)}s;--delay:${(order * 0.37).toFixed(2)}s`}
+      >
       <ellipse cx="0" cy="3" rx={standW * 0.34} ry="4.5" fill="#000" opacity="0.22" />
-      <image
-        class="stand"
-        alt=""
-        role="presentation"
-        href={eager ? art.stand : undefined}
-        data-src={eager ? undefined : art.stand}
-        x={-standW / 2}
-        y={4 - height}
-        width={standW}
-        height={height}
-      />
-      {art.walk && (
-        <image
-          class="step"
-          alt=""
-          role="presentation"
-          href={eager && art.walk ? art.walk : undefined}
-          data-src={eager ? undefined : art.walk}
-          x={-walkW / 2}
-          y={4 - height}
-          width={walkW}
-          height={height}
-        />
-      )}
+      <Fragment set:html={spriteTag("stand", art.stand, standW)} />
+      {art.walk && <Fragment set:html={spriteTag("step", art.walk, walkW)} />}
+      </g>
     </g>
   ) : (
     <g>

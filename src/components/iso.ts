@@ -51,13 +51,15 @@ export const anchor: Record<string, [number, number]> = {
   gobble: [11.85, 5.65],
   workshop: [2.15, 8.05],
   watchtower: [12.15, 2.55],
-  picker: [2.2, 7.15],
-  trader: [4.3, 6.15],
-  carer: [6.3, 5.35],
-  kirana1: [7.6, 4.15],
-  seller2: [8.3, 4.35],
-  seller1: [9.7, 4.05],
-  kirana2: [10.3, 5.55],
+  picker: [3.35, 8.15],
+  trader: [4.85, 7.15],
+  carer: [6.9, 6.55],
+  kirana1: [7.85, 4.85],
+  seller2: [8.55, 5.05],
+  seller1: [9.95, 4.85],
+  kirana2: [10.45, 6.15],
+  builder: [10.7, 6.85],
+  builder2: [12.75, 6.55],
 };
 
 export function at(id: string) {
