@@ -1,0 +1,33 @@
+---
+import Base from "../../layouts/Base.astro";
+import { roles, type Role } from "../../data/site";
+
+export function getStaticPaths() {
+  return roles.map((role) => ({ params: { slug: role.slug }, props: { role } }));
+}
+
+interface Props { role: Role }
+const { role } = Astro.props;
+
+const sections = [
+  ["The problem", role.problem],
+  ["The bet", role.bet],
+  ["What happened", role.happened],
+  ["What I learned", role.learned],
+] as const;
+---
+<Base title={`${role.company} · Manmohan Singh Charan`} description={role.description}>
+  <article class="story">
+    <p class="back"><a href="/#work">Work</a></p>
+    <h1>{role.company}</h1>
+    <p class="kicker">{role.title} · {role.dates}</p>
+    {sections.map(([heading, paragraphs]) => (
+      <section>
+        <h2>{heading}</h2>
+        <div class="prose">
+          {paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+        </div>
+      </section>
+    ))}
+  </article>
+</Base>

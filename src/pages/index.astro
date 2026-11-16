@@ -1,198 +1,83 @@
 ---
-import Home from "../layouts/Home.astro";
-import IslandScene from "../components/IslandScene.astro";
-import "../styles/home.css";
-import { contact, cv, home, islands, resources, workshop } from "../data/island";
+import Base from "../layouts/Base.astro";
+import { now, person, roles } from "../data/site";
 import { posts } from "../lib";
 
-const ages = home.ages;
-const fog = islands.filter((island) => island.kind === "fog");
-const count = ages.length;
+const notes = await posts();
 
-const ageCss = Array.from({ length: count }, (_, age) => {
-  const later = ages.filter((item) => item.order > age).map((item) => String(item.order));
-  if (!later.length) return "";
-  const hide = later
-        .map((order) => `html.js[data-age="${age}"] :is(.isl-era,.isl-road,.isl-npc,.isl-prop,.mm-dot)[data-order="${order}"]`)
-    .join(",");
-  const plots = later.map((order) => `html.js[data-age="${age}"] .isl-plot[data-order="${order}"]`).join(",");
-  return `${hide}{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .45s ease,visibility 0s linear .45s}${plots}{opacity:1;visibility:visible;transition:opacity .45s ease,visibility 0s}`;
-}).join("");
-
-const essays = await posts();
-const showWriting = essays.length > 0;
-
-const title = "Manmohan Singh Charan";
-const description = contact.line;
-
-const person = {
+const sameAs = [person.x, person.github, person.linkedin];
+const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
-  name: "Manmohan Singh Charan",
+  name: person.name,
   url: "https://manmohan.work/",
-  email: `mailto:${contact.email}`,
+  email: `mailto:${person.email}`,
   jobTitle: "Lead PM",
   worksFor: { "@type": "Organization", name: "GobbleCube" },
   alumniOf: { "@type": "CollegeOrUniversity", name: "IIT Roorkee" },
-  sameAs: [contact.x, contact.github, contact.linkedin],
+  sameAs,
 };
-
-const stats = resources.join(" · ");
 ---
-<Home title={title} description={description}>
-  <Fragment set:html={`<style>${ageCss}</style>`} />
-  <script type="application/ld+json" set:html={JSON.stringify(person)} />
-  <p class="sr" aria-live="polite" data-live></p>
-  <header class="top">
-    <a class="brand" href="/">Manmohan</a>
-    <nav aria-label="Primary">
-      <a href="#ages">Ages</a>
-      <a href="#build">How I build</a>
-      <a href="#contact">Contact</a>
-      {showWriting && <a href="/writing/">Writing</a>}
-    </nav>
-  </header>
-  <main id="content">
-    <div class="saga">
-      <div class="pin">
-        <div class="intro-card">
-          <p class="intro-kicker">A chronicle</p>
-          <h2 class="intro-title">Welcome to the Age of Manmohan</h2>
-          <button type="button" class="quiet intro-skip" data-skip-intro>Skip intro</button>
-        </div>
-        <IslandScene />
-        <div class="veil">
-          <p class="kicker">manmohan.work</p>
-          <h1>Manmohan Singh Charan</h1>
-          <p class="position">AI-native product leader. Lead PM at GobbleCube.</p>
-          <p class="stats">{stats}</p>
-          <div class="cta">
-            <a class="btn solid" href={contact.linkedin} target="_blank" rel="me noopener noreferrer">LinkedIn<span class="sr"> (opens in a new tab)</span></a>
-            <a class="btn solid" href={`mailto:${contact.email}`}>Email</a>
-            <a class="icon" href={contact.x} target="_blank" rel="me noopener noreferrer" aria-label="X, @ManmohanBuilds (opens in a new tab)">
-              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M14.7 10.3 22.4 1h-1.8l-6.7 8.1L8.2 1H1.5l8.1 12.2L1.5 23h1.8l7.1-8.6L15.8 23h6.7zM4 2.5h2.8l13.2 19h-2.8z"/></svg>
-            </a>
-            <a class="icon" href={contact.github} target="_blank" rel="me noopener noreferrer" aria-label="GitHub (opens in a new tab)">
-              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.2-3.4-1.2-.4-1.1-1-1.4-1-1.4-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.4-1.1.6-1.3-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.8 1a9.6 9.6 0 0 1 5 0c2-1.3 2.8-1 2.8-1 .5 1.4.2 2.4.1 2.7.7.7 1 1.6 1 2.7 0 3.9-2.3 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5A10 10 0 0 0 12 2"/></svg>
-            </a>
-            {cv.available && <a class="btn solid" href={cv.href}>CV</a>}
-          </div>
-          <a class="quiet" href="#summary">Skip the island</a>
-        </div>
-      </div>
-      <div class="chapters" id="ages">
-        <h2 class="sr">The ages</h2>
-        {ages.map((age) => (
-          <article
-            class:list={["age", { wonder: age.wonder }]}
-            id={age.id}
-            tabindex="-1"
-            data-age-card
-            data-order={age.order}
-            data-numeral={age.age}
-            data-name={age.name}
-            data-wonder={age.wonder ? "true" : "false"}
-            data-speaker={age.speaker}
-            data-banner-kicker={age.bannerKicker}
-            data-banner-title={age.bannerTitle}
-            data-banner-line={age.bannerLine}
-          >
-            <p class="kicker">{age.wonder ? `Age ${age.age} · the wonder` : `Age ${age.age}`}</p>
-            <h3>{age.name}</h3>
-            {age.role && <p class="role">{age.role}</p>}
-            {age.dates && <p class="when">{age.dates}</p>}
-            <p class="grand">{age.grand}</p>
-            <p class="lives">{age.lives}</p>
-            {age.could && <p class="toward"><span>Built toward</span> {age.could}</p>}
-            {age.extra.length > 0 && (
-              <dl class="rows">
-                {age.extra.map((row) => (
-                  <div>
-                    <dt>{row.label}</dt>
-                    <dd>{row.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            )}
-          </article>
-        ))}
-      </div>
-    </div>
-    <div class="wrap lower">
+<Base title={person.name} description={person.sentence}>
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <h1>{person.name}</h1>
+  <p class="lede">{person.sentence}</p>
+  <p class="credentials">{person.credentials}</p>
 
-    <section class="summary" id="summary">
-      <h2>The five ages, plainly</h2>
-      <ol>
-        {ages.map((age) => (
+  <section id="now" aria-labelledby="now-title">
+    <h2 id="now-title" class="label">Now</h2>
+    <div class="prose">
+      {now.map((paragraph) => (
+        <p>
+          {paragraph.map((span) =>
+            span.href ? <a href={span.href}>{span.text}</a> : span.text
+          )}
+        </p>
+      ))}
+    </div>
+  </section>
+
+  <section id="work" aria-labelledby="work-title">
+    <h2 id="work-title" class="label">Work</h2>
+    <ol class="index">
+      {roles.map((role) => (
+        <li>
+          <a href={`/work/${role.slug}/`}>
+            <span class="top">
+              <span class="co">{role.company}</span>
+              <span class="when">{role.dates}</span>
+            </span>
+            <span class="role">{role.title}</span>
+            <span class="line">{role.line}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  {notes.length > 0 && (
+    <section id="notes" aria-labelledby="notes-title">
+      <h2 id="notes-title" class="label">Notes</h2>
+      <ul class="index">
+        {notes.map((note) => (
           <li>
-            <a href={`#${age.id}`}>{age.name}</a>
-            {age.role ? <span> · {age.role}</span> : null}
-            <span> — {age.grand}</span>
+            <a href={`/writing/${note.id}/`}>
+              <span class="co">{note.data.title}</span>
+              <span class="line">{note.data.description}</span>
+            </a>
           </li>
         ))}
-      </ol>
+      </ul>
     </section>
+  )}
 
-    <section class="block" id="build" aria-labelledby="build-title">
-      <p class="kicker">Badho</p>
-      <h2 id="build-title">How I build with AI</h2>
-      <p class="proof">10+ production agent workflows. Hybrid search went from 9% to 28% of DAU in under 100ms, with zero LLM calls.</p>
-      <h3 class="subhead">{workshop.title}</h3>
-      <div class="benches">
-        {workshop.benches.map((bench) => (
-          <article class="card">
-            <h3>{bench.title}</h3>
-            <p>{bench.body}</p>
-            {bench.href && bench.linkLabel && (
-              <p style="margin-top:10px">
-                <a class="outlink" href={bench.href} target="_blank" rel="noopener noreferrer">
-                  {bench.linkLabel}<span aria-hidden="true"> ↗</span>
-                  <span class="sr"> (opens in a new tab)</span>
-                </a>
-              </p>
-            )}
-          </article>
-        ))}
-      </div>
-    </section>
-
-    <section class="block" id="islands" aria-labelledby="islands-title">
-      <h2 id="islands-title">The next island</h2>
-      <div class="islands">
-        {fog.map((island) => (
-          <article class="card" id={`island-${island.id}`}>
-            <p class="kicker">In the fog</p>
-            <h3>{island.name}</h3>
-            <p>{island.teaser}</p>
-            <p style="margin-top:8px">{island.scouted}</p>
-          </article>
-        ))}
-      </div>
-    </section>
-
-    <section class="block contact" id="contact" aria-labelledby="contact-title">
-      <div>
-        <h2 id="contact-title">Send a messenger</h2>
-        <p>{contact.line}</p>
-      </div>
-      <div class="actions">
-        <a class="btn primary" href={`mailto:${contact.email}`}>Email me</a>
-        <a class="btn ghost" href={contact.github} target="_blank" rel="me noopener noreferrer">GitHub<span class="sr"> (opens in a new tab)</span></a>
-        <a class="btn ghost" href={contact.x} target="_blank" rel="me noopener noreferrer">{contact.xLabel}<span class="sr"> (opens in a new tab)</span></a>
-        <a class="btn ghost" href={contact.linkedin} target="_blank" rel="me noopener noreferrer">LinkedIn<span class="sr"> (opens in a new tab)</span></a>
-      </div>
-    </section>
-    </div>
-  </main>
-  <footer class="wrap foot">
-    <span>manmohan.work</span>
-    <nav aria-label="Footer">
-      <a href="/rss.xml">RSS</a>
-      <a href={`mailto:${contact.email}`}>Email</a>
-      <a href={contact.x} target="_blank" rel="me noopener noreferrer">X @ManmohanBuilds<span class="sr"> (opens in a new tab)</span></a>
-      <a href={contact.github} target="_blank" rel="me noopener noreferrer">GitHub<span class="sr"> (opens in a new tab)</span></a>
-      <a href={contact.linkedin} target="_blank" rel="me noopener noreferrer">LinkedIn<span class="sr"> (opens in a new tab)</span></a>
-      {showWriting && <a href="/writing/">Writing</a>}
-    </nav>
-  </footer>
-</Home>
+  <section id="contact" aria-labelledby="contact-title">
+    <h2 id="contact-title" class="label">Contact</h2>
+    <ul class="links">
+      <li><a href={person.x} rel="me">{person.xLabel}</a></li>
+      <li><a href={person.github} rel="me">{person.githubLabel}</a></li>
+      <li><a href={person.linkedin} rel="me">{person.linkedinLabel}</a></li>
+      <li><a href={`mailto:${person.email}`}>{person.email}</a></li>
+    </ul>
+  </section>
+</Base>
