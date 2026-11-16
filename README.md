@@ -1,6 +1,14 @@
 # manmohan.work
 
-Personal site. The home page is the Living Island (`src/pages/index.astro`), drawn in SVG. Ages, villagers, and islands live in `src/data/island.ts`. `/writing` is an Astro blog.
+Personal site. The home page is the Living Island (`src/pages/index.astro`), a 3D diorama. Ages and the chronicle live in `src/data/island.ts`. The detail cards live in `src/data/dossiers.ts`. `/writing` is an Astro blog.
+
+## Island models
+
+The buildings, trees, rocks, cart, crates, and scaffold pieces are CC0 models, repacked into `public/models/island.glb` and `public/models/villager.glb` (meshopt geometry, KTX2 textures). `scripts/pack-island.mjs` is the packer. Villagers are not named.
+
+- KayKit Medieval Builder Pack by Kay Lousberg, [CC0](https://creativecommons.org/publicdomain/zero/1.0/). https://kaylousberg.itch.io/kaykit-medieval-builder-pack
+- Fantasy Town Kit, Nature Kit, and Survival Kit by Kenney, [CC0](https://creativecommons.org/publicdomain/zero/1.0/). https://kenney.nl
+- Animated Human by Quaternius, [CC0](https://creativecommons.org/publicdomain/zero/1.0/). https://quaternius.com
 
 ## Publish a post
 

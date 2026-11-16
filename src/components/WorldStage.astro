@@ -23,17 +23,25 @@
 
   if (!frame || reduce) showStill();
   else {
-    window.addEventListener(
-      "load",
-      () => {
-        import("../scripts/world.ts")
-          .then((mod) => {
-            mod.mount(frame);
-            if (frame.dataset.mode === "still") showStill();
-          })
-          .catch(() => showStill());
-      },
-      { once: true },
-    );
+    let started = false;
+    const boot = () => {
+      if (started) return;
+      started = true;
+      import("../scripts/world.ts")
+        .then((mod) => mod.mount(frame))
+        .then(() => {
+          if (frame.dataset.mode === "still") showStill();
+        })
+        .catch(() => showStill());
+    };
+    const arm = () => {
+      window.addEventListener("pointerdown", boot, { once: true });
+      window.addEventListener("keydown", boot, { once: true });
+      window.addEventListener("scroll", boot, { once: true, capture: true });
+      const idle = window.requestIdleCallback ?? ((fn: () => void) => window.setTimeout(fn, 400));
+      idle(() => window.setTimeout(boot, 2200), { timeout: 4000 });
+    };
+    if (document.readyState === "complete") arm();
+    else window.addEventListener("load", arm, { once: true });
   }
 </script>
