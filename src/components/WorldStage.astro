@@ -1,0 +1,39 @@
+<div class="stage">
+  <div class="isl-frame world-frame" data-world>
+    <canvas aria-hidden="true"></canvas>
+    <div class="world-labels" data-labels></div>
+    <img class="world-still" src="/island-still.webp" alt="The island of five ages, from Blinkit to GobbleCube, floating in the sea." />
+    <div class="isl-banner" data-banner hidden>
+      <p class="banner-k" data-banner-k></p>
+      <p class="banner-t" data-banner-t></p>
+      <p class="banner-d" data-banner-d></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  import "../scripts/island.ts";
+
+  const frame = document.querySelector<HTMLElement>("[data-world]");
+  const reduce = document.documentElement.dataset.motion === "reduce";
+
+  function showStill() {
+    document.documentElement.dataset.world = "still";
+  }
+
+  if (!frame || reduce) showStill();
+  else {
+    window.addEventListener(
+      "load",
+      () => {
+        import("../scripts/world.ts")
+          .then((mod) => {
+            mod.mount(frame);
+            if (frame.dataset.mode === "still") showStill();
+          })
+          .catch(() => showStill());
+      },
+      { once: true },
+    );
+  }
+</script>
