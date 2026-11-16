@@ -182,7 +182,7 @@ export const roles: Role[] = [
     accent: "#2f6f8f",
     title: "CPO and co-founder",
     dates: "Jun 2021 – Mar 2022",
-    outcome: "Building care for families. The company closed.",
+    outcome: "A family health locker on ABHA, and a tool for doctors.",
     bullets: [
       "A digital health locker on India’s ABHA infrastructure, so a family could hold its own record.",
       "A practice tool for doctors, so a clinic left a record instead of a slip.",

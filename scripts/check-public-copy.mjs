@@ -19,7 +19,7 @@ const required = [
   "Seven years",
   "450 stores",
   "Digitising mandi trade",
-  "Building care for families",
+  "family health locker",
   "20 lakh retailers",
   "11 states",
   "1M+ installs",
