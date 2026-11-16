@@ -10,8 +10,9 @@
 export const person = {
   name: "Manmohan Singh Charan",
   sentence:
-    "Seven years in pricing, marketplaces, and 0-to-1. Two companies co-founded. I use AI agents every day.",
-  credentials: "Lead PM at GobbleCube, on pricing and promo. IIT Roorkee.",
+    "I build products where a model has to face a real price, a real catalogue, and a person who will not wait.",
+  bio: "Lead PM at GobbleCube, two-time co-founder of Badho and Tago Care, IIT Roorkee.",
+  years: "Seven years across pricing and marketplaces.",
   email: "manmohanbuildsproducts@gmail.com",
   x: "https://x.com/ManmohanBuilds",
   xLabel: "X @ManmohanBuilds",
@@ -26,11 +27,15 @@ export const hero = {
   line: "I am a product manager with seven years across pricing, marketplaces, and 0-to-1 builds, and two companies I co-founded. I use AI agents every day for drafting, review, and automation.",
 };
 
-export const figures = [
-  { value: "Seven years", label: "Pricing and marketplaces" },
-  { value: "450 stores", label: "Blinkit partner network" },
-  { value: "20 lakh", label: "Retailers, 11 states" },
-  { value: "9% → 28%", label: "Of DAU, under 100ms" },
+export const creed = [
+  "Determinism first.",
+  "Nothing slow on the request.",
+  "The LLM is the smallest box on the canvas.",
+  "A wrong output costs someone money.",
+  "Kill your own work when the data says so.",
+  "Read your own SQL.",
+  "A model belongs where a person is slow.",
+  "A prototype is not a product.",
 ];
 
 export type Role = {
@@ -57,7 +62,7 @@ export const roles: Role[] = [
     accent: "#3d4eb5",
     title: "Lead PM, Pricing & Promo",
     dates: "May 2026 – Present",
-    outcome: "AI-first pricing and promo. Still being built.",
+    outcome: "AI-first pricing and promo, on elasticities. Still being built.",
     bullets: [
       "A planning engine on historical price sensitivities and elasticities. The product is the decision, not a black-box number.",
       "I build the optimizer and the allocator myself, with AI coding tools. The charter is AI-first.",
@@ -186,11 +191,11 @@ export const roles: Role[] = [
     accent: "#c48a1a",
     title: "Early PM, Offline Vertical",
     dates: "Jun 2019 – Oct 2020",
-    outcome: "Operating systems for a retail network. 450 stores.",
+    outcome: "Built the operating systems that let a 450-store partner network run.",
     bullets: [
-      "The partner network reached 450 stores. I did not grow that count.",
+      "Built the operating systems that let a 450-store partner network run.",
       "Store onboarding as software, a B2C pricing engine, and reordering off the point of sale.",
-      "The job was the system that lets a network run, not a person opening each store.",
+      "The job was the system, not a person opening each store by hand.",
     ],
     description:
       "Early PM on Blinkit’s offline vertical, June 2019 to October 2020. Operating systems for a partner-store network of 450 stores.",
@@ -198,10 +203,10 @@ export const roles: Role[] = [
       "Partner stores were how the offline business reached a neighbourhood. Opening a store, pricing what the customer paid, and restocking it were done by hand. That does not survive once the network is real.",
     ],
     bet: [
-      "Onboarding, the consumer price, and the reorder are the product. Build them as systems and the network can run without a person for every store. Growing the store count was not my job. The operating system was.",
+      "Onboarding, the consumer price, and the reorder are the product. Build them as systems and the network can run without a person for every store.",
     ],
     happened: [
-      "I was an early PM on the offline vertical, from June 2019 to October 2020, before the Zomato acquisition. The partner network reached 450 stores. I did not grow that number.",
+      "I was an early PM on the offline vertical, from June 2019 to October 2020, before the Zomato acquisition. I built the operating systems that let a 450-store partner network run.",
       "I built store onboarding as software, a B2C pricing engine for what the customer paid, and reordering driven by the point of sale. The idea under the vertical was controlled inventory and fulfilment from the neighbourhood. Blinkit’s later quick-commerce turn came out of that idea.",
     ],
     learned: [
@@ -235,6 +240,7 @@ export const frontier =
 export type Project = {
   name: string;
   meta: string;
+  line: string;
   body: string;
   href?: string;
 };
@@ -242,20 +248,23 @@ export type Project = {
 export const projects: Project[] = [
   {
     name: "Part Index",
-    meta: "whileyousleep.xyz · since May 2026",
+    meta: "whileyousleep.xyz",
     href: "https://whileyousleep.xyz",
-    body: "Search for Indian auto parts. People mix Hindi and English, transliterate, misspell, ask by symptom, and use a brand name as the generic. I am building an Indic tokenizer, BM25 with domain embeddings, and rank fusion that depends on the kind of query. There is a benchmark, and a written record of the architecture decisions. It is a prototype. I am not claiming customers.",
+    line: "Search for Indian auto parts. A prototype.",
+    body: "Search for Indian auto parts. A prototype.",
   },
   {
     name: "Gupshup MCP",
-    meta: "Open source · TypeScript",
+    meta: "Open source",
     href: "https://github.com/ManmohanBuildsProducts/gupshup-mcp",
-    body: "An MCP server that lets an agent send WhatsApp and SMS. Logging is redacted. Retries are explicit. An agent that cannot reach a person is not finished.",
+    line: "WhatsApp and SMS for an agent. A prototype.",
+    body: "WhatsApp and SMS for an agent. A prototype.",
   },
   {
     name: "Home lab",
-    meta: "Mac Mini · local models",
-    body: "Local models on a machine at home, with the routing above: a fast local model first, a larger or cloud model when a check fails. A workshop. I do not publish speeds, and I do not call an experiment a product.",
+    meta: "Mac Mini",
+    line: "Local models on a Mac Mini. A workshop, not a product.",
+    body: "Local models on a Mac Mini. A workshop, not a product.",
   },
 ];
 
