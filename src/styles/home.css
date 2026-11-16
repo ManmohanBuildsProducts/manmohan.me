@@ -936,3 +936,61 @@ html[data-motion="ok"] .waves { animation: isl-drift 14s ease-in-out infinite al
 }
 .contact { border-top: 0; padding-top: 0; }
 .block > .kicker { background: transparent; padding: 0; letter-spacing: 0.12em; font-family: var(--sans); font-size: 0.875rem; }
+
+html.js[data-intro="play"] .veil,
+html.js[data-intro="run"] .veil {
+  opacity: 0;
+  visibility: hidden;
+}
+.intro-card { display: none; }
+html.js[data-intro="play"] .intro-card,
+html.js[data-intro="run"] .intro-card {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  padding: 2rem 1.25rem 6rem;
+  text-align: center;
+  background: radial-gradient(ellipse at 50% 40%, rgba(18, 12, 6, 0.18), rgba(6, 10, 16, 0.62) 72%);
+  pointer-events: none;
+}
+.intro-title {
+  margin: 0;
+  max-width: 12ch;
+  padding: 0.35em 0.2em 0.2em;
+  border-block: 1px solid rgba(240, 215, 140, 0.7);
+  color: #f8edd4;
+  font: 600 clamp(2.7rem, 6.4vw, 5.1rem)/1.02 var(--serif);
+  letter-spacing: -0.03em;
+  text-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+.intro-kicker {
+  margin: 0;
+  color: #f0d78c;
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.intro-card .intro-skip {
+  pointer-events: auto;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(240, 215, 140, 0.8);
+  border-radius: 999px;
+  background: #1a140c;
+  color: #f6efe2;
+  font: 600 0.95rem/1 var(--sans);
+}
+html.js[data-intro="run"] .intro-kicker,
+html.js[data-intro="run"] .intro-title { display: none; }
+html.js[data-intro="run"] .intro-card {
+  background: none;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 0 7vw 2.4rem;
+}

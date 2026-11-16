@@ -55,7 +55,7 @@ function fillKicker(el: HTMLElement, text: string) {
   el.append(numeral, match[3]);
 }
 
-function showBanner(card: HTMLElement) {
+function showBanner(card: HTMLElement, hold?: number) {
   announce(card);
   if (!motionOk || !banner) return;
   const k = banner.querySelector<HTMLElement>("[data-banner-k]");
@@ -73,10 +73,11 @@ function showBanner(card: HTMLElement) {
   banner.classList.add("on");
   frame?.classList.add("age-flash");
   window.clearTimeout(bannerTimer);
+  const ms = hold ?? (card.dataset.wonder === "true" ? 2400 : 1500);
   bannerTimer = window.setTimeout(() => {
     banner.hidden = true;
     banner.classList.remove("on");
-  }, card.dataset.wonder === "true" ? 2400 : 1500);
+  }, ms);
 }
 
 function rise(order: number) {
@@ -112,14 +113,14 @@ function paint(order: number) {
   mountSprites(next);
 }
 
-function applyAge(order: number, withBanner: boolean) {
+function applyAge(order: number, withBanner: boolean, hold?: number) {
   const prev = age;
   paint(order);
   if (withBanner && order > prev && order > 0) {
     const card = articleByOrder(order);
     if (!card) return;
     rise(order);
-    showBanner(card);
+    showBanner(card, hold);
   }
 }
 
@@ -139,6 +140,7 @@ function ageFromScroll() {
       best = order;
     }
   }
+  if (root.dataset.intro !== "play" && window.scrollY < window.innerHeight * 0.22) return max;
   if (bestDist <= window.innerHeight * 0.42) return best;
   if (passed > 0 && passed === articles.length) return passed;
   if (passed > 0) return passed;
@@ -168,10 +170,54 @@ function syncReading() {
   pin.classList.toggle("is-reading", reading);
 }
 
+function introActive() {
+  return root.dataset.intro === "play" || root.dataset.intro === "run";
+}
+
+let introLock = introActive();
+const introTimers: number[] = [];
+const INTRO_KEY = "mm-island-intro";
+
+function endIntro() {
+  if (!introActive()) return;
+  introTimers.forEach((timer) => window.clearTimeout(timer));
+  introTimers.length = 0;
+  introLock = false;
+  root.dataset.intro = "done";
+  try {
+    sessionStorage.setItem(INTRO_KEY, "1");
+  } catch {
+    /* private mode */
+  }
+  if (banner) {
+    banner.hidden = true;
+    banner.classList.remove("on");
+  }
+  paint(max);
+  if (window.scrollY > 0) window.scrollTo(0, 0);
+}
+
+function playIntro() {
+  if (!introLock || reduce) return;
+  const titleHold = 1700;
+  const step = 880;
+  for (let order = 1; order <= max; order += 1) {
+    introTimers.push(
+      window.setTimeout(() => {
+        if (!introLock) return;
+        if (order === 1) root.dataset.intro = "run";
+        applyAge(order, true, 760);
+      }, titleHold + (order - 1) * step),
+    );
+  }
+  introTimers.push(window.setTimeout(endIntro, titleHold + max * step));
+}
+
 function onScroll() {
   syncParallax();
   syncFog();
   syncReading();
+  if (introLock) return;
   if (reduce) {
     highlight(ageFromScroll());
     return;
@@ -208,4 +254,40 @@ document.querySelector(".isl-svg")?.addEventListener("click", (event) => {
   document.getElementById("island-agents")?.focus({ preventScroll: false });
 });
 
-requestAnimationFrame(onScroll);
+document.querySelector("[data-skip-intro]")?.addEventListener("click", (event) => {
+  event.preventDefault();
+  endIntro();
+});
+
+window.addEventListener("keydown", (event) => {
+  if (!introLock || event.key === "Tab") return;
+  endIntro();
+});
+
+window.addEventListener("pointerdown", (event) => {
+  if (!introLock) return;
+  const target = event.target as Element | null;
+  if (target?.closest("[data-skip-intro]")) return;
+  endIntro();
+});
+
+window.addEventListener(
+  "wheel",
+  () => {
+    if (!introLock) return;
+    endIntro();
+  },
+  { passive: true },
+);
+
+window.addEventListener(
+  "touchmove",
+  () => {
+    if (!introLock) return;
+    endIntro();
+  },
+  { passive: true },
+);
+
+if (introLock) playIntro();
+else requestAnimationFrame(onScroll);

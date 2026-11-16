@@ -41,10 +41,18 @@ const image = new URL("/og.png", Astro.site);
   try {
     var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var root = document.documentElement;
+    var seen = false;
+    try { seen = sessionStorage.getItem("mm-island-intro") === "1"; } catch (e) {}
     root.classList.add("js");
     root.dataset.motion = reduce ? "reduce" : "ok";
-    root.dataset.age = reduce ? "5" : "1";
     root.dataset.fog = "";
+    if (reduce || seen) {
+      root.dataset.age = "5";
+      root.dataset.intro = "done";
+    } else {
+      root.dataset.age = "0";
+      root.dataset.intro = "play";
+    }
   } catch (e) {}
 })();
 </script>
