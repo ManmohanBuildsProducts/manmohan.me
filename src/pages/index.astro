@@ -1,6 +1,7 @@
 ---
 import Home from "../layouts/Home.astro";
 import WorldStage from "../components/WorldStage.astro";
+import AgeDossier from "../components/AgeDossier.astro";
 import "../styles/home.css";
 import { contact, cv, home, islands, resources, workshop } from "../data/island";
 import { posts } from "../lib";
@@ -184,6 +185,7 @@ const stats = resources.join(" · ");
     </section>
     </div>
   </main>
+  <AgeDossier />
   <footer class="wrap foot">
     <span>manmohan.work</span>
     <nav aria-label="Footer">

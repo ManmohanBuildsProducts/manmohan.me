@@ -1,0 +1,84 @@
+---
+import { dossiers } from "../data/dossiers";
+---
+
+<dialog class="dossier" data-dossier aria-labelledby="dossier-title">
+  <div class="dossier-sheet">
+    <button type="button" class="dossier-close" data-dossier-close>Close</button>
+    {dossiers.map((item) => (
+      <article class="dossier-panel" data-dossier-panel={item.id} hidden>
+        <p class="kicker">{item.role}{item.dates ? ` · ${item.dates}` : ""}</p>
+        <h2 id={item.id === "blinkit" ? "dossier-title" : undefined} data-dossier-title>{item.title}</h2>
+        {item.aka && <p class="dossier-aka">{item.aka}</p>}
+        {item.body.map((paragraph) => <p>{paragraph}</p>)}
+        {item.sections?.map((section) => (
+          <section>
+            <h3>{section.title}</h3>
+            {section.body.map((paragraph) => <p>{paragraph}</p>)}
+          </section>
+        ))}
+        {item.lives && <p><span class="dossier-mark">Whose lives.</span> {item.lives}</p>}
+        {item.could && <p><span class="dossier-mark">What it could have been.</span> {item.could}</p>}
+        {item.grand && <p class="dossier-grand">{item.grand}</p>}
+        {item.links && item.links.length > 0 && (
+          <p class="dossier-links">
+            {item.links.map((link) => (
+              <a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}<span class="sr"> (opens in a new tab)</span></a>
+            ))}
+          </p>
+        )}
+      </article>
+    ))}
+  </div>
+</dialog>
+
+<nav class="dossier-fallback" aria-label="Open an age">
+  {dossiers.map((item) => (
+    <button type="button" data-open-dossier={item.id}>{item.title}</button>
+  ))}
+</nav>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>("[data-dossier]");
+  const panels = [...document.querySelectorAll<HTMLElement>("[data-dossier-panel]")];
+  let returnFocus: HTMLElement | null = null;
+
+  function openDossier(id: string) {
+    if (!dialog) return;
+    const panel = panels.find((item) => item.dataset.dossierPanel === id);
+    if (!panel) return;
+    panels.forEach((item) => {
+      item.hidden = item !== panel;
+    });
+    const title = panel.querySelector("[data-dossier-title]");
+    if (title) title.id = "dossier-title";
+    panels.forEach((item) => {
+      if (item !== panel) item.querySelector("[data-dossier-title]")?.removeAttribute("id");
+    });
+    returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    if (!dialog.open) dialog.showModal();
+    dialog.querySelector<HTMLElement>("[data-dossier-close]")?.focus();
+  }
+
+  function closeDossier() {
+    dialog?.close();
+  }
+
+  dialog?.addEventListener("click", (event) => {
+    if (event.target === dialog) closeDossier();
+  });
+  dialog?.addEventListener("close", () => {
+    returnFocus?.focus();
+    returnFocus = null;
+  });
+  dialog?.querySelector("[data-dossier-close]")?.addEventListener("click", closeDossier);
+
+  document.querySelectorAll<HTMLButtonElement>("[data-open-dossier]").forEach((button) => {
+    button.addEventListener("click", () => openDossier(button.dataset.openDossier || ""));
+  });
+
+  window.addEventListener("mm-open-dossier", (event) => {
+    const id = (event as CustomEvent<{ id: string }>).detail?.id;
+    if (id) openDossier(id);
+  });
+</script>

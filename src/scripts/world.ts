@@ -180,7 +180,7 @@ export function mount(frame: HTMLElement) {
       if (button instanceof HTMLAnchorElement && plot.href.startsWith("#")) {
         event.preventDefault();
       }
-      focusPlot(plot.id, true);
+      focusPlot(plot.id);
     });
     return { plot, el: button, shown: false };
   });
@@ -200,7 +200,7 @@ export function mount(frame: HTMLElement) {
     let node: { userData: { plot?: Plot } } | null = hit?.object ?? null;
     while (node && !node.userData.plot && "parent" in node) node = (node as Mesh).parent;
     const plot = node?.userData.plot;
-    if (plot && shown(plot)) focusPlot(plot.id, true);
+    if (plot && shown(plot)) focusPlot(plot.id);
   });
   const down = { x: 0, y: 0 };
   canvas.addEventListener("pointerdown", (event) => {
@@ -257,16 +257,17 @@ export function mount(frame: HTMLElement) {
     return plot.order <= age;
   }
 
-  function focusPlot(id: string, scroll: boolean) {
+  function focusPlot(id: string) {
     const plot = plots.find((item) => item.id === id);
     if (!plot) return;
     holding = false;
     gliding = true;
     setWant(plot);
-    if (scroll) {
-      const target = plot.href.startsWith("#") ? plot.href.slice(1) : plot.id;
-      document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (plot.id === "watchtower") {
+      document.getElementById("islands")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
     }
+    window.dispatchEvent(new CustomEvent("mm-open-dossier", { detail: { id: plot.id } }));
   }
 
   function setWant(plot?: Plot) {
