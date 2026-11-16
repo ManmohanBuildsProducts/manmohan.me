@@ -17,10 +17,16 @@ const sections = [
 ] as const;
 ---
 <Base title={`${role.company} · Manmohan Singh Charan`} description={role.description}>
-  <article class="story">
+  <article class="story" style={`--mark: ${role.accent}`}>
     <p class="back"><a href="/#work">Work</a></p>
+    <p class="kicker">{role.dates}</p>
     <h1>{role.company}</h1>
-    <p class="kicker">{role.title} · {role.dates}</p>
+    <p class="story-kicker">{role.title}</p>
+    <div class="story-rule" aria-hidden="true"></div>
+    <p class="outcome">{role.outcome}</p>
+    <ul class="shipped">
+      {role.bullets.map((bullet) => <li>{bullet}</li>)}
+    </ul>
     {sections.map(([heading, paragraphs]) => (
       <section>
         <h2>{heading}</h2>

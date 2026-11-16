@@ -1,11 +1,9 @@
 ---
 import Base from "../layouts/Base.astro";
-import { now, person, roles } from "../data/site";
+import { figures, frontier, hero, patterns, person, projects, quote, roles, thesis } from "../data/site";
 import { posts } from "../lib";
 
 const notes = await posts();
-
-const sameAs = [person.x, person.github, person.linkedin];
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
@@ -15,49 +13,112 @@ const jsonLd = {
   jobTitle: "Lead PM",
   worksFor: { "@type": "Organization", name: "GobbleCube" },
   alumniOf: { "@type": "CollegeOrUniversity", name: "IIT Roorkee" },
-  sameAs,
+  sameAs: [person.x, person.github, person.linkedin],
 };
 ---
 <Base title={person.name} description={person.sentence}>
   <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+  <p class="kicker">{hero.kicker}</p>
   <h1>{person.name}</h1>
-  <p class="lede">{person.sentence}</p>
+  <p class="position">{hero.line}</p>
   <p class="credentials">{person.credentials}</p>
 
-  <section id="now" aria-labelledby="now-title">
-    <h2 id="now-title" class="label">Now</h2>
-    <div class="prose">
-      {now.map((paragraph) => (
-        <p>
-          {paragraph.map((span) =>
-            span.href ? <a href={span.href}>{span.text}</a> : span.text
-          )}
-        </p>
-      ))}
-    </div>
-  </section>
+  <ul class="stats" aria-label="Published figures">
+    {figures.map((figure) => (
+      <li>
+        <strong>{figure.value}</strong>
+        <span>{figure.label}</span>
+      </li>
+    ))}
+  </ul>
 
-  <section id="work" aria-labelledby="work-title">
-    <h2 id="work-title" class="label">Work</h2>
-    <ol class="index">
+  <section class="section" id="work" aria-labelledby="work-title">
+    <div class="section-head">
+      <h2 id="work-title">Work</h2>
+      <p>Current role first. Open a card for the decisions.</p>
+    </div>
+    <ol class="cards">
       {roles.map((role) => (
         <li>
-          <a href={`/work/${role.slug}/`}>
-            <span class="top">
-              <span class="co">{role.company}</span>
+          <a class="card" href={`/work/${role.slug}/`} style={`--mark: ${role.accent}`}>
+            <span class="card-top">
+              <span class="co"><span class="mark" aria-hidden="true"></span>{role.company}</span>
               <span class="when">{role.dates}</span>
             </span>
-            <span class="role">{role.title}</span>
-            <span class="line">{role.line}</span>
+            <span class="role-line">{role.title}</span>
+            <p class="outcome">{role.outcome}</p>
+            <ul>
+              {role.bullets.map((bullet) => <li>{bullet}</li>)}
+            </ul>
+            <span class="more">Read the story <i aria-hidden="true">→</i></span>
           </a>
         </li>
       ))}
     </ol>
   </section>
 
+  <section class="section" id="build" aria-labelledby="build-title">
+    <div class="section-head">
+      <h2 id="build-title">How I build with AI</h2>
+      <p>Grok Bot, Cursor, and Claude, plus a small team of assistants that read, draft, and keep the side work moving. No names. The patterns are the point.</p>
+    </div>
+    <blockquote class="pull"><p>{quote.text}</p></blockquote>
+    <ol class="patterns">
+      {patterns.map((pattern) => (
+        <li>
+          <h3>{pattern.title}</h3>
+          <p>{pattern.body}</p>
+        </li>
+      ))}
+    </ol>
+    <p class="credentials">{frontier}</p>
+  </section>
+
+  <section class="section" id="building" aria-labelledby="building-title">
+    <div class="section-head">
+      <h2 id="building-title">Building now</h2>
+      <p>A one-person studio. Prototypes stay labelled as prototypes.</p>
+    </div>
+    <div class="projects">
+      {projects.map((project) =>
+        project.href ? (
+          <a class="project" href={project.href}>
+            <h3>{project.name}</h3>
+            <span class="meta">{project.meta}</span>
+            <p>{project.body}</p>
+          </a>
+        ) : (
+          <article class="project">
+            <h3>{project.name}</h3>
+            <span class="meta">{project.meta}</span>
+            <p>{project.body}</p>
+          </article>
+        )
+      )}
+    </div>
+  </section>
+
+  <section class="section" id="thesis" aria-labelledby="thesis-title">
+    <div class="section-head">
+      <h2 id="thesis-title">The agent economy</h2>
+      <p>{thesis.lede}</p>
+    </div>
+    <ol class="thesis">
+      {thesis.items.map((item) => (
+        <li>
+          <h3>{item.title}</h3>
+          <p>{item.body}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
   {notes.length > 0 && (
-    <section id="notes" aria-labelledby="notes-title">
-      <h2 id="notes-title" class="label">Notes</h2>
+    <section class="section" id="notes" aria-labelledby="notes-title">
+      <div class="section-head">
+        <h2 id="notes-title">Notes</h2>
+      </div>
       <ul class="index">
         {notes.map((note) => (
           <li>
@@ -71,8 +132,10 @@ const jsonLd = {
     </section>
   )}
 
-  <section id="contact" aria-labelledby="contact-title">
-    <h2 id="contact-title" class="label">Contact</h2>
+  <section class="section" id="contact" aria-labelledby="contact-title">
+    <div class="section-head">
+      <h2 id="contact-title">Contact</h2>
+    </div>
     <ul class="links">
       <li><a href={person.x} rel="me">{person.xLabel}</a></li>
       <li><a href={person.github} rel="me">{person.githubLabel}</a></li>
