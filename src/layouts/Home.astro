@@ -49,9 +49,11 @@ const image = new URL("/og.png", Astro.site);
     if (reduce || seen) {
       root.dataset.age = "5";
       root.dataset.intro = "done";
+      root.style.setProperty("--day", "1");
     } else {
       root.dataset.age = "0";
       root.dataset.intro = "play";
+      root.style.setProperty("--day", "0");
     }
   } catch (e) {}
 })();

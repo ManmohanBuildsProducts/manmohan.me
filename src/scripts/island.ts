@@ -104,6 +104,23 @@ function mountSprites(order: number) {
   });
 }
 
+function setDay(value: number) {
+  const next = Math.max(0, Math.min(1, value));
+  root.style.setProperty("--day", next.toFixed(3));
+}
+
+function dayFromScroll() {
+  if (root.dataset.intro !== "play" && window.scrollY < window.innerHeight * 0.22) return 1;
+  const first = articles[0];
+  const last = articles[articles.length - 1];
+  if (!first || !last) return 1;
+  const focus = window.innerHeight * 0.74;
+  const a = first.getBoundingClientRect().top;
+  const b = last.getBoundingClientRect().top;
+  if (Math.abs(b - a) < 1) return 1;
+  return (focus - a) / (b - a);
+}
+
 function paint(order: number) {
   const next = Math.max(0, Math.min(max, order));
   if (!reduce) root.dataset.age = String(next);
@@ -111,6 +128,7 @@ function paint(order: number) {
   highlight(next);
   syncAmbient(next);
   mountSprites(next);
+  setDay(introActive() ? next / Math.max(1, max) : dayFromScroll());
 }
 
 function applyAge(order: number, withBanner: boolean, hold?: number) {
@@ -218,6 +236,7 @@ function onScroll() {
   syncFog();
   syncReading();
   if (introLock) return;
+  setDay(dayFromScroll());
   if (reduce) {
     highlight(ageFromScroll());
     return;
@@ -288,6 +307,97 @@ window.addEventListener(
   },
   { passive: true },
 );
+
+const stage = document.querySelector<HTMLElement>(".isl-frame");
+const world = document.querySelector<HTMLElement>(".isl-world");
+const trees = [...document.querySelectorAll<SVGGElement>(".tree")];
+const scene = document.querySelector<SVGSVGElement>(".isl-svg");
+
+function parkLife(paused: boolean) {
+  root.classList.toggle("is-paused", paused || document.hidden);
+}
+
+document.addEventListener("visibilitychange", () => {
+  root.classList.toggle("is-hidden", document.hidden);
+});
+
+if (stage && "IntersectionObserver" in window) {
+  const watcher = new IntersectionObserver(
+    ([entry]) => parkLife(!entry.isIntersecting),
+    { threshold: 0.08 },
+  );
+  watcher.observe(stage);
+}
+
+const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+if (motionOk && finePointer && stage && world && scene) {
+  let tiltX = 0;
+  let tiltY = 0;
+  let panX = 0;
+  let panY = 0;
+  let drag: { x: number; y: number; px: number; py: number } | null = null;
+
+  const pose = () => {
+    world.style.transform = `rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) translate(${panX.toFixed(1)}px, ${panY.toFixed(1)}px)`;
+  };
+
+  const rustle = (event: PointerEvent) => {
+    const matrix = scene.getScreenCTM();
+    if (!matrix) return;
+    const point = scene.createSVGPoint();
+    point.x = event.clientX;
+    point.y = event.clientY;
+    const local = point.matrixTransform(matrix.inverse());
+    let nearest: SVGGElement | null = null;
+    let best = 78;
+    for (const tree of trees) {
+      const dx = local.x - Number(tree.dataset.x || 0);
+      const dy = local.y - (Number(tree.dataset.y || 0) - 34);
+      const dist = Math.hypot(dx, dy);
+      if (dist < best) {
+        best = dist;
+        nearest = tree;
+      }
+    }
+    for (const tree of trees) tree.classList.toggle("rustle", tree === nearest);
+  };
+
+  stage.addEventListener("pointermove", (event) => {
+    if (root.classList.contains("is-paused") || event.pointerType !== "mouse") return;
+    const box = stage.getBoundingClientRect();
+    const nx = (event.clientX - box.left) / box.width - 0.5;
+    const ny = (event.clientY - box.top) / box.height - 0.5;
+    tiltX = Math.max(-2.4, Math.min(2.4, -ny * 4.2));
+    tiltY = Math.max(-3.2, Math.min(3.2, nx * 5.4));
+    rustle(event);
+    pose();
+  });
+  stage.addEventListener("pointerleave", () => {
+    tiltX = 0;
+    tiltY = 0;
+    for (const tree of trees) tree.classList.remove("rustle");
+    pose();
+  });
+  stage.addEventListener("pointerdown", (event) => {
+    if (event.pointerType !== "mouse" || event.button !== 0 || introActive()) return;
+    const target = event.target as Element | null;
+    if (target?.closest("a")) return;
+    drag = { x: event.clientX, y: event.clientY, px: panX, py: panY };
+  });
+  window.addEventListener("pointermove", (event) => {
+    if (!drag) return;
+    panX = Math.max(-20, Math.min(20, drag.px + event.clientX - drag.x));
+    panY = Math.max(-14, Math.min(14, drag.py + event.clientY - drag.y));
+    pose();
+  });
+  window.addEventListener("pointerup", () => {
+    if (!drag) return;
+    drag = null;
+    panX = 0;
+    panY = 0;
+    pose();
+  });
+}
 
 if (introLock) playIntro();
 else requestAnimationFrame(onScroll);

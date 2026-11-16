@@ -58,6 +58,8 @@ export type Person = {
   color: string;
   /** Horizontal wander in SVG units. 0 keeps them posted. */
   drift: number;
+  /** Sprite key when it differs from `id`. */
+  sprite?: string;
 };
 
 export type Place = {
@@ -280,6 +282,8 @@ const people: Person[] = [
   { id: "seller2", job: "", line: "", crew: false, era: "badho", x: 620, y: 458, color: "#A0522D", drift: -12 },
   { id: "seller1", job: "", line: "", crew: false, era: "badho", x: 700, y: 448, color: "#B8892B", drift: 16 },
   { id: "kirana2", job: "", line: "", crew: false, era: "badho", x: 730, y: 430, color: "#2F8F83", drift: 12 },
+  { id: "builder", sprite: "builder", job: "", line: "", crew: false, era: "gobble", x: 760, y: 400, color: "#8a5a32", drift: 0 },
+  { id: "builder2", sprite: "builder", job: "", line: "", crew: false, era: "gobble", x: 820, y: 420, color: "#a56b3c", drift: 0 },
 ];
 
 const places: Place[] = [
