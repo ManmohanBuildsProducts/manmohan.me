@@ -27,9 +27,9 @@ export const dossiers: Dossier[] = [
     role: "Early PM, offline vertical",
     dates: "Jun 2019 to Oct 2020",
     body: [
-      "An early employee in the offline partner-store business as the network grew to 450 stores.",
-      "He owned store onboarding, the B2C pricing engine and POS-driven reordering.",
-      "He built the operating systems that let a retail network scale.",
+      "I was an early employee in the offline partner-store business as the network grew to 450 stores.",
+      "I owned store onboarding, the B2C pricing engine and POS-driven reordering.",
+      "I built the operating systems that let a retail network scale.",
     ],
     grand: "Learning ops at real scale.",
   },
@@ -39,8 +39,8 @@ export const dossiers: Dossier[] = [
     role: "Product Consultant",
     dates: "Mar to Apr 2021",
     body: [
-      "Launched a new product line for an agri-trade platform in about a month, from idea to launch, managing three external teams.",
-      "The goal was capturing buyer data for credit underwriting.",
+      "I launched a new product line for an agri-trade platform in about a month, from idea to launch, managing three external teams.",
+      "My goal was capturing buyer data for credit underwriting.",
     ],
     grand: "Digitising mandi trade.",
   },
@@ -50,7 +50,7 @@ export const dossiers: Dossier[] = [
     role: "CPO and Co-founder",
     dates: "Jun 2021 to Mar 2022",
     body: [
-      "A digital health locker on India's ABHA infrastructure, plus a practice-digitization tool for doctors.",
+      "I built a digital health locker on India's ABHA infrastructure, plus a practice-digitization tool for doctors.",
     ],
     grand: "Building care for families.",
   },
@@ -61,33 +61,33 @@ export const dossiers: Dossier[] = [
     dates: "2022 to Apr 2026",
     body: [
       "A B2B FMCG platform connecting distributors and kirana retailers across North India: 20 lakh retailers, 11 states, 1M+ installs, four apps.",
-      "He built the product org from zero and later a three-person AI automation team.",
+      "I built the product org from zero and later a three-person AI automation team.",
     ],
     sections: [
       {
         title: "Marketplace and payments",
         body: [
-          "Escrow payments built from zero (COD, advance, partial advance, seller credit, with risk scoring and trust-tiered limits), and a revenue model rethought when commission economics didn't work for distributors.",
+          "I built escrow payments from zero (COD, advance, partial advance, seller credit, with risk scoring and trust-tiered limits), and I rethought the revenue model when commission economics didn't work for distributors.",
         ],
       },
       {
         title: "Logistics",
-        body: ["Delivery-as-a-service, built after 200+ field interviews."],
+        body: ["I built delivery-as-a-service after 200+ field interviews."],
       },
       {
         title: "Funnel decisions",
         body: [
-          "He found a severe checkout drop-off with his own SQL and redesigned checkout inline.",
-          "He killed five months of his own onboarding work when the data said so and replaced it with a concierge model.",
-          "He built A/B testing infrastructure so experiments shipped without engineering.",
+          "I found a severe checkout drop-off with my own SQL and redesigned checkout inline.",
+          "I killed five months of my own onboarding work when the data said so and replaced it with a concierge model.",
+          "I built A/B testing infrastructure so experiments shipped without engineering.",
         ],
       },
       {
         title: "Production AI",
         body: [
-          "10+ production agent workflows.",
-          "Hindi/Hinglish search rebuilt with local embeddings and phonetic fallback, taking search from 9% to 28% of DAU in under 100ms with zero LLM calls.",
-          "A catalogue product matcher. Automated branded promo videos. 100% sales-call QA coverage instead of sampling.",
+          "I built 10+ production agent workflows.",
+          "I rebuilt Hindi/Hinglish search with local embeddings and phonetic fallback, taking search from 9% to 28% of DAU in under 100ms with zero LLM calls.",
+          "I built a catalogue product matcher, automated branded promo videos, and covered 100% of sales calls instead of sampling.",
           "Deterministic steps first, a model only where rules run out, a human for low confidence.",
         ],
       },
@@ -102,8 +102,8 @@ export const dossiers: Dossier[] = [
     role: "Lead PM, AI-first Pricing and Promo",
     dates: "May 2026 to present",
     body: [
-      "Leads the promo optimization product, a planning engine built on price sensitivities and elasticities, and turns those estimates into planning decisions people can trust instead of a black box.",
-      "Runs the charter AI-first and builds optimizer tooling himself.",
+      "I lead the promo optimization product, a planning engine built on price sensitivities and elasticities, and I turn those estimates into planning decisions people can trust instead of a black box.",
+      "I run the charter AI-first and build optimizer tooling myself.",
     ],
     grand: "The current age, under construction.",
   },

@@ -1,5 +1,9 @@
 import {
   AmbientLight,
+  BackSide,
+  Box3,
+  BoxGeometry,
+  CanvasTexture,
   CircleGeometry,
   Color,
   ConeGeometry,
@@ -131,7 +135,8 @@ export function mount(frame: HTMLElement) {
   const grass = mat("#348a38");
   grass.vertexColors = true;
 
-  const hemi = new HemisphereLight("#ffe6c4", "#3d7a42", 0.72);
+  const hemi = new HemisphereLight("#fff0dc", "#6a8f62", 0.85);
+  scene.add(buildSky());
   const sun = new DirectionalLight("#ffd7a8", 1.35);
   sun.position.set(-8, 10, 4);
   const fill = new AmbientLight("#fff4e4", 0.28);
@@ -142,6 +147,13 @@ export function mount(frame: HTMLElement) {
   const island = buildIsland(grass);
   island.position.y = Y;
   land.add(island);
+  const foam = new Mesh(
+    new RingGeometry(11.15, 12.35, 80),
+    new MeshBasicMaterial({ color: "#f7fbff", transparent: true, opacity: 0.5, side: DoubleSide, depthWrite: false }),
+  );
+  foam.rotation.x = -Math.PI / 2;
+  foam.position.y = 0.12;
+  land.add(foam);
   const water = buildWater();
   scene.add(water);
   const shadow = new Mesh(
@@ -306,10 +318,10 @@ export function mount(frame: HTMLElement) {
     sun.color.copy(dawn).lerp(gold, day);
     sun.intensity = 1.15 + day * 0.35;
     sun.position.set(-10 + day * 16, 11 - day * 4, 6 - day * 8);
-    const skyDawn = new Color("#f7c9a4");
-    const skyGold = new Color("#f2a15a");
+    const skyDawn = new Color("#f6dcc4");
+    const skyGold = new Color("#f3c49a");
     const sky = skyDawn.lerp(skyGold, day);
-    scene.fog = new Fog(sky.getStyle(), 42, 90);
+    scene.fog = new Fog(sky.getStyle(), 48, 110);
     renderer.setClearColor(sky, 1);
     hemi.color.copy(dawn).lerp(new Color("#ffe0b0"), day);
     for (const [id, group] of buildings) {
@@ -325,47 +337,131 @@ export function mount(frame: HTMLElement) {
     }
   }
 
+  function blockedZones(rect: DOMRect) {
+    const zones: Array<{ x: number; y: number; w: number; h: number }> = [];
+    const banner = document.querySelector<HTMLElement>(".isl-banner");
+    if (banner && !banner.hidden) {
+      const box = relativeBox(banner, rect);
+      if (box.w > 8 && box.h > 8) zones.push(padBox(box, 10));
+    }
+    const veil = document.querySelector<HTMLElement>(".veil");
+    if (veil) {
+      const style = getComputedStyle(veil);
+      if (style.visibility !== "hidden" && Number(style.opacity) > 0.05) {
+        const box = relativeBox(veil, rect);
+        if (box.h > 8) zones.push(box);
+      }
+    }
+    return zones;
+  }
+
+  function screenBox(group: Group, rect: DOMRect) {
+    const bounds = new Box3().setFromObject(group);
+    if (bounds.isEmpty()) return null;
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    const point = new Vector3();
+    const xs = [bounds.min.x, bounds.max.x];
+    const ys = [bounds.min.y, bounds.max.y];
+    const zs = [bounds.min.z, bounds.max.z];
+    for (const x of xs) for (const y of ys) for (const z of zs) {
+      point.set(x, y, z).project(camera);
+      if (point.z > 1) return null;
+      const sx = (point.x * 0.5 + 0.5) * rect.width;
+      const sy = (-point.y * 0.5 + 0.5) * rect.height;
+      minX = Math.min(minX, sx);
+      maxX = Math.max(maxX, sx);
+      minY = Math.min(minY, sy);
+      maxY = Math.max(maxY, sy);
+    }
+    return { x: minX, y: minY, w: Math.max(18, maxX - minX), h: Math.max(18, maxY - minY) };
+  }
+
+  function labelSpot(
+    building: { x: number; y: number; w: number; h: number },
+    rect: DOMRect,
+    width: number,
+    height: number,
+    placed: Array<{ x: number; y: number; w: number; h: number }>,
+    required: boolean,
+  ) {
+    const cx = building.x + building.w / 2;
+    const candidates = [
+      { x: cx, y: building.y - 16 },
+      { x: cx, y: building.y - 44 },
+      { x: building.x - width * 0.2, y: building.y - 16 },
+      { x: building.x + building.w + width * 0.2, y: building.y - 16 },
+    ];
+    if (required) {
+      for (let y = 18; y < Math.min(rect.height * 0.42, building.y); y += 30) {
+        candidates.push({ x: 24 + width / 2, y: y + height }, { x: rect.width - 24 - width / 2, y: y + height });
+      }
+    }
+    const keepOff = padBox(building, 8);
+    for (const candidate of candidates) {
+      const box = { x: candidate.x - width / 2, y: candidate.y - height, w: width, h: height };
+      if (box.x < 6 || box.y < 6 || box.x + box.w > rect.width - 6 || box.y + box.h > rect.height - 6) continue;
+      if (overlaps(box, keepOff)) continue;
+      if (placed.some((other) => overlaps(box, other))) continue;
+      return box;
+    }
+    return null;
+  }
+
   function frameLabels() {
     const rect = frame.getBoundingClientRect();
     const root = document.documentElement;
     const intro = root.dataset.intro || "done";
     const age = Number(root.dataset.age || 5);
     const reading = document.querySelector(".pin")?.classList.contains("is-reading") ?? false;
-    const placed: Array<{ x: number; y: number; w: number; h: number }> = [];
+    const blocked = blockedZones(rect);
     const ranked = labels
       .map((item) => {
         const group = buildings.get(item.plot.id)!;
-        group.getWorldPosition(scratch);
-        const dist = camera.position.distanceTo(scratch);
-        scratch.y += 2.2;
-        scratch.project(camera);
-        return { ...item, sx: (scratch.x * 0.5 + 0.5) * rect.width, sy: (-scratch.y * 0.5 + 0.5) * rect.height, dist, behind: scratch.z > 1 };
+        const anchor = group.getWorldPosition(new Vector3());
+        const dist = camera.position.distanceTo(anchor);
+        const building = screenBox(group, rect);
+        return { ...item, anchor, dist, building, behind: building == null };
       })
       .sort((a, b) => {
-        const af = a.plot.order === age && a.plot.order > 0 ? -1 : 0;
-        const bf = b.plot.order === age && b.plot.order > 0 ? -1 : 0;
+        const af = a.plot.order === age && a.plot.order > 0 ? 0 : 1;
+        const bf = b.plot.order === age && b.plot.order > 0 ? 0 : 1;
         return af - bf || a.dist - b.dist;
       });
+    const focused = ranked.find((item) => item.plot.order === age && item.plot.order > 0 && item.building);
+    const placed: Array<{ x: number; y: number; w: number; h: number }> = [
+      ...blocked,
+      ...(focused?.building ? [padBox(focused.building, 8)] : []),
+    ];
+    let extras = 0;
     for (const item of ranked) {
       const current = item.plot.order === age && item.plot.order > 0;
       const allow =
         intro !== "play" &&
         shown(item.plot) &&
         !item.behind &&
-        item.dist < 24 &&
-        (intro === "run" ? current : item.dist < 30);
-      const width = Math.max(64, item.el.offsetWidth || 72);
-      const height = 26;
-      const box = { x: item.sx - width / 2, y: item.sy - height - 8, w: width, h: height };
-      const hit = placed.some((other) => overlaps(box, other));
-      const visible = allow && (current || !hit);
-      item.el.hidden = !visible;
-      item.el.classList.toggle("is-focus", Boolean(reading && current));
-      if (!visible) continue;
-      placed.push(box);
-      const fade = current ? 1 : MathUtils.clamp(1.15 - item.dist / 18, 0.55, 1);
-      item.el.style.opacity = fade.toFixed(2);
-      item.el.style.transform = `translate(${item.sx}px, ${item.sy}px) translate(-50%, -130%)`;
+        item.dist < 32 &&
+        (current || (intro !== "run" && extras < 2));
+      item.el.classList.toggle("is-focus", Boolean((reading || intro === "run") && current));
+      if (!allow || !item.building) {
+        item.el.hidden = true;
+        continue;
+      }
+      item.el.hidden = false;
+      const width = Math.max(item.el.offsetWidth, item.el.scrollWidth, 64);
+      const height = Math.max(item.el.offsetHeight, 22);
+      const spot = labelSpot(item.building, rect, width, height, placed, current);
+      if (!spot) {
+        item.el.hidden = true;
+        continue;
+      }
+      if (!current) extras += 1;
+      item.el.hidden = false;
+      placed.push(spot);
+      item.el.style.opacity = current ? "1" : "0.82";
+      item.el.style.transform = `translate(${spot.x + spot.w / 2}px, ${spot.y + spot.h}px) translate(-50%, -100%)`;
     }
   }
 
@@ -442,6 +538,15 @@ function overlaps(a: { x: number; y: number; w: number; h: number }, b: { x: num
   return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 }
 
+function padBox(box: { x: number; y: number; w: number; h: number }, n: number) {
+  return { x: box.x - n, y: box.y - n, w: box.w + n * 2, h: box.h + n * 2 };
+}
+
+function relativeBox(el: HTMLElement, frameRect: DOMRect) {
+  const rect = el.getBoundingClientRect();
+  return { x: rect.left - frameRect.left, y: rect.top - frameRect.top, w: rect.width, h: rect.height };
+}
+
 function buildIsland(material: MeshToonMaterial) {
   const geo = new CircleGeometry(11.6, 72);
   geo.rotateX(-Math.PI / 2);
@@ -452,7 +557,7 @@ function buildIsland(material: MeshToonMaterial) {
     const x = pos.getX(i);
     const z = pos.getZ(i);
     const radius = Math.hypot(x, z) / 11.6;
-    const sand = radius > 0.84;
+    const sand = radius > 0.72;
     tint.set(sand ? (i % 3 === 0 ? "#efd48a" : "#e2bc62") : i % 2 ? "#3c9a42" : "#2f8636");
     colors.push(tint.r, tint.g, tint.b);
     if (!sand) pos.setY(i, Math.sin(x * 1.4) * Math.cos(z * 1.1) * 0.07);
@@ -499,49 +604,113 @@ function buildPlot(plot: Plot, mat: (color: string) => MeshToonMaterial) {
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = 0.03;
   group.add(ring);
+  const shade = new Mesh(new CircleGeometry(plot.r * 1.25, 18), contactShadow());
+  shade.rotation.x = -Math.PI / 2;
+  shade.position.y = 0.015;
+  group.add(shade);
   return group;
+}
+
+let sharedShadow: MeshBasicMaterial | null = null;
+function contactShadow() {
+  if (!sharedShadow) {
+    const canvas = document.createElement("canvas");
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      const grd = ctx.createRadialGradient(32, 32, 2, 32, 32, 32);
+      grd.addColorStop(0, "rgba(42, 24, 10, 0.55)");
+      grd.addColorStop(0.6, "rgba(42, 24, 10, 0.16)");
+      grd.addColorStop(1, "rgba(42, 24, 10, 0)");
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, 64, 64);
+    }
+    const map = new CanvasTexture(canvas);
+    map.colorSpace = SRGBColorSpace;
+    sharedShadow = new MeshBasicMaterial({ map, transparent: true, depthWrite: false });
+  }
+  return sharedShadow;
+}
+
+function buildSky() {
+  const geo = new SphereGeometry(78, 20, 12);
+  const pos = geo.attributes.position;
+  const colors: number[] = [];
+  const zenith = new Color("#d5e9f2");
+  const mid = new Color("#f6dcc6");
+  const horizon = new Color("#f0c49a");
+  const tint = new Color();
+  for (let i = 0; i < pos.count; i++) {
+    const height = MathUtils.clamp((pos.getY(i) / 78 + 0.2) / 1.05, 0, 1);
+    tint.copy(horizon).lerp(mid, Math.min(1, height * 1.5)).lerp(zenith, Math.max(0, height - 0.35));
+    colors.push(tint.r, tint.g, tint.b);
+  }
+  geo.setAttribute("color", new Float32BufferAttribute(colors, 3));
+  return new Mesh(geo, new MeshBasicMaterial({ vertexColors: true, side: BackSide, fog: false }));
 }
 
 type Add = (mesh: Mesh, x?: number, y?: number, z?: number) => Mesh;
 
 function hut(add: Add, mat: (color: string) => MeshToonMaterial, chimney = true) {
-  add(new Mesh(new CylinderGeometry(1.15, 1.25, 1.15, 6), mat("#6b442c")), 0, 0.58, 0);
-  const roof = add(new Mesh(new ConeGeometry(1.55, 0.9, 6), mat("#c4a15a")), 0, 1.45, 0);
-  roof.rotation.y = 0.4;
-  add(new Mesh(new PlaneGeometry(0.38, 0.55), mat("#3a2416")), 0.15, 0.4, 1.22);
-  if (chimney) {
-    add(new Mesh(new CylinderGeometry(0.1, 0.12, 0.45, 5), mat("#5c4638")), 0.7, 1.7, -0.2);
-    add(new Mesh(new SphereGeometry(0.08, 6, 5), new MeshBasicMaterial({ color: "#f4efe6", transparent: true, opacity: 0.45 })), 0.7, 2.05, -0.2).name = "chimney";
+  add(new Mesh(new CylinderGeometry(1.15, 1.28, 1.2, 8), mat("#6b442c")), 0, 0.6, 0);
+  const roof = add(new Mesh(new ConeGeometry(1.6, 0.95, 8), mat("#c4a15a")), 0, 1.5, 0);
+  roof.rotation.y = 0.2;
+  for (let i = 0; i < 3; i++) {
+    const tile = add(new Mesh(new TorusGeometry(1.22 - i * 0.32, 0.045, 4, 12), mat(i % 2 ? "#a88840" : "#d7b56a")), 0, 1.18 + i * 0.22, 0);
+    tile.rotation.x = Math.PI / 2;
   }
-  add(new Mesh(new CylinderGeometry(0.22, 0.26, 0.32, 5), mat("#a56b3c")), 1.35, 0.16, 0.4);
+  add(new Mesh(new PlaneGeometry(0.46, 0.62), mat("#2a1c12")), 0.12, 0.42, 1.24);
+  add(new Mesh(new PlaneGeometry(0.28, 0.22), mat("#f3e2b0")), -0.45, 0.72, 1.22);
+  if (chimney) {
+    add(new Mesh(new CylinderGeometry(0.1, 0.13, 0.5, 6), mat("#5c4638")), 0.72, 1.75, -0.15);
+    add(new Mesh(new SphereGeometry(0.08, 6, 5), new MeshBasicMaterial({ color: "#f4efe6", transparent: true, opacity: 0.45 })), 0.72, 2.1, -0.15).name = "chimney";
+  }
+  add(new Mesh(new BoxGeometry(0.34, 0.28, 0.32), mat("#a56b3c")), 1.35, 0.16, 0.45);
+  add(new Mesh(new BoxGeometry(0.24, 0.2, 0.22), mat("#c4a574")), 1.55, 0.12, 0.12);
 }
 
 function stall(add: Add, mat: (color: string) => MeshToonMaterial) {
-  add(new Mesh(new CylinderGeometry(1.2, 1.3, 0.7, 6), mat("#8d5a32")), 0, 0.35, 0);
-  for (let i = 0; i < 5; i++) {
-    add(new Mesh(new PlaneGeometry(0.42, 0.55), mat(i % 2 ? "#f4ead4" : "#c4473a")), -0.85 + i * 0.42, 1.15, 0);
+  add(new Mesh(new BoxGeometry(2.1, 0.55, 1.25), mat("#8d5a32")), 0, 0.32, 0);
+  add(new Mesh(new BoxGeometry(2.2, 0.08, 1.4), mat("#a56b3c")), 0, 0.62, 0);
+  const cloth = add(new Mesh(new BoxGeometry(2.15, 0.05, 1.35), mat("#f4ead4")), 0, 1.42, 0.05);
+  cloth.rotation.x = -0.18;
+  for (let i = 0; i < 6; i++) {
+    add(new Mesh(new PlaneGeometry(0.32, 0.42), mat(i % 2 ? "#f7f1e4" : "#c4473a")), -0.85 + i * 0.34, 1.12, 0.62);
   }
-  add(new Mesh(new SphereGeometry(0.22, 8, 6), mat("#d7b98a")), -0.4, 0.85, 0.35);
-  add(new Mesh(new SphereGeometry(0.18, 8, 6), mat("#6aa84f")), 0.35, 0.82, 0.3);
-  add(new Mesh(new CylinderGeometry(0.06, 0.06, 1.1, 4), mat("#5c3a22")), -1.05, 0.7, -0.7);
-  add(new Mesh(new CylinderGeometry(0.06, 0.06, 1.1, 4), mat("#5c3a22")), 1.05, 0.7, -0.7);
+  add(new Mesh(new SphereGeometry(0.2, 8, 6), mat("#e6d2a8")), -0.45, 0.82, 0.15);
+  add(new Mesh(new SphereGeometry(0.16, 8, 6), mat("#6aa84f")), 0.4, 0.78, 0.1);
+  add(new Mesh(new CylinderGeometry(0.05, 0.05, 1.15, 5), mat("#5c3a22")), -0.95, 0.85, -0.5);
+  add(new Mesh(new CylinderGeometry(0.05, 0.05, 1.15, 5), mat("#5c3a22")), 0.95, 0.85, -0.5);
+  add(new Mesh(new BoxGeometry(0.28, 0.22, 0.28), mat("#c4a574")), 1.25, 0.14, 0.35);
 }
 
 function cottage(add: Add, mat: (color: string) => MeshToonMaterial) {
-  add(new Mesh(new CylinderGeometry(1.05, 1.15, 1.2, 6), mat("#d9c7a2")), 0, 0.6, 0);
-  add(new Mesh(new ConeGeometry(1.45, 0.85, 6), mat("#a35448")), 0, 1.5, 0);
-  add(new Mesh(new PlaneGeometry(0.32, 0.48), mat("#6b442c")), 0, 0.42, 1.12);
-  add(new Mesh(new SphereGeometry(0.16, 7, 5), mat("#3f8f4a")), 0.85, 0.2, 0.7);
-  add(new Mesh(new SphereGeometry(0.12, 7, 5), mat("#d45d78")), 0.95, 0.28, 0.55);
+  add(new Mesh(new CylinderGeometry(1.05, 1.18, 1.25, 8), mat("#e4d2ae")), 0, 0.62, 0);
+  add(new Mesh(new ConeGeometry(1.5, 0.9, 8), mat("#a35448")), 0, 1.55, 0);
+  for (let i = 0; i < 3; i++) {
+    const tile = add(new Mesh(new TorusGeometry(1.15 - i * 0.28, 0.04, 4, 12), mat("#8d4038")), 0, 1.22 + i * 0.2, 0);
+    tile.rotation.x = Math.PI / 2;
+  }
+  add(new Mesh(new PlaneGeometry(0.36, 0.55), mat("#5c3a22")), 0, 0.42, 1.16);
+  add(new Mesh(new PlaneGeometry(0.28, 0.24), mat("#f4e2bc")), 0.55, 0.78, 1.12);
+  add(new Mesh(new CylinderGeometry(0.08, 0.1, 0.4, 5), mat("#6b5344")), -0.55, 1.7, -0.2);
+  add(new Mesh(new SphereGeometry(0.16, 7, 5), mat("#3f8f4a")), 0.9, 0.18, 0.75);
+  add(new Mesh(new SphereGeometry(0.1, 6, 5), mat("#d45d78")), 1.02, 0.26, 0.58);
 }
 
 function dome(add: Add, mat: (color: string) => MeshToonMaterial) {
-  add(new Mesh(new CylinderGeometry(1.7, 1.9, 0.9, 8), mat("#e7d3a4")), 0, 0.45, 0);
-  add(new Mesh(new CylinderGeometry(1.35, 1.45, 0.7, 8), mat("#f0e2bc")), 0, 1.15, 0);
-  const domeMesh = add(new Mesh(new SphereGeometry(1.05, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), mat("#e6b325")), 0, 1.5, 0);
-  domeMesh.scale.y = 0.85;
-  add(new Mesh(new TorusGeometry(0.35, 0.06, 6, 16), mat("#f6e7a8")), 0, 2.35, 0);
-  add(new Mesh(new CylinderGeometry(0.08, 0.08, 0.4, 5), mat("#f6e7a8")), 0, 2.6, 0);
+  add(new Mesh(new CylinderGeometry(1.85, 2.05, 0.35, 10), mat("#e7d3a4")), 0, 0.18, 0);
+  add(new Mesh(new CylinderGeometry(1.55, 1.7, 0.85, 10), mat("#f0e2bc")), 0, 0.7, 0);
+  add(new Mesh(new CylinderGeometry(1.2, 1.35, 0.55, 10), mat("#f7edd2")), 0, 1.3, 0);
+  const domeMesh = add(new Mesh(new SphereGeometry(1.02, 18, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat("#e6b325")), 0, 1.55, 0);
+  domeMesh.scale.y = 0.8;
+  for (let i = 0; i < 4; i++) {
+    const angle = (i / 4) * Math.PI * 2;
+    add(new Mesh(new PlaneGeometry(0.22, 0.36), mat("#8a6a3a")), Math.cos(angle) * 1.45, 0.7, Math.sin(angle) * 1.45);
+  }
+  add(new Mesh(new TorusGeometry(0.32, 0.05, 6, 16), mat("#f6e7a8")), 0, 2.28, 0);
+  add(new Mesh(new CylinderGeometry(0.06, 0.08, 0.35, 6), mat("#f6e7a8")), 0, 2.5, 0);
 }
 
 function scaffold(add: Add, mat: (color: string) => MeshToonMaterial) {
@@ -597,13 +766,19 @@ function layTrees(scene: Object3D, mat: (color: string) => MeshToonMaterial) {
 
 function person(mat: (color: string) => MeshToonMaterial, shirt: string) {
   const group = new Group();
-  const body = new Mesh(new CylinderGeometry(0.16, 0.18, 0.42, 6), mat(shirt));
-  body.position.y = 0.48;
-  const head = new Mesh(new SphereGeometry(0.13, 8, 6), mat("#efd0a8"));
-  head.position.y = 0.78;
-  const leg = new Mesh(new CylinderGeometry(0.05, 0.05, 0.28, 4), mat("#3a2a1c"));
-  leg.position.y = 0.16;
-  group.add(body, head, leg);
+  const legL = new Mesh(new CylinderGeometry(0.045, 0.05, 0.32, 5), mat("#3e342c"));
+  legL.position.set(-0.07, 0.16, 0);
+  const legR = legL.clone();
+  legR.position.x = 0.07;
+  const torso = new Mesh(new BoxGeometry(0.28, 0.36, 0.16), mat(shirt));
+  torso.position.y = 0.5;
+  const head = new Mesh(new SphereGeometry(0.12, 8, 6), mat("#efd0a8"));
+  head.position.y = 0.8;
+  const armL = new Mesh(new BoxGeometry(0.07, 0.26, 0.07), mat(shirt));
+  armL.position.set(-0.18, 0.5, 0);
+  const armR = armL.clone();
+  armR.position.x = 0.18;
+  group.add(legL, legR, torso, head, armL, armR);
   return group;
 }
 
