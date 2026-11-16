@@ -1,6 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
-import { creed, person, projects, roles } from "../data/site";
+import { person, projects, roles } from "../data/site";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -13,96 +13,71 @@ const jsonLd = {
   sameAs: [person.x, person.github, person.linkedin],
 };
 
-const alt = "A painted island at twilight: a turtle of rock carrying a lit town, lanterns over the water, and a tower still under a crane.";
+const badho = roles.find((role) => role.slug === "badho");
 ---
-<Base title={person.name} description={person.sentence} wide>
+<Base title={person.name} description={person.sentence}>
   <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
-  <section class="hero" aria-labelledby="name">
-    <div class="hero-copy">
-      <h1 id="name">{person.name}</h1>
-      <p class="thesis">{person.sentence}</p>
-      <div class="hero-bio">
-        <p>{person.bio}</p>
-        <p>{person.years}</p>
-      </div>
-    </div>
-    <figure class="hero-figure">
-      <picture>
-        <source
-          type="image/avif"
-          srcset="/hero/island-640.avif 640w, /hero/island-960.avif 960w, /hero/island-1280.avif 1280w"
-          sizes="(min-width: 900px) 640px, 92vw"
-        />
-        <source
-          type="image/webp"
-          srcset="/hero/island-640.webp 640w, /hero/island-960.webp 960w, /hero/island-1280.webp 1280w"
-          sizes="(min-width: 900px) 640px, 92vw"
-        />
-        <img
-          src="/hero/island-960.webp"
-          width="1280"
-          height="720"
-          alt={alt}
-          fetchpriority="high"
-        />
-      </picture>
-    </figure>
+  <header class="hero" aria-labelledby="name">
+    <h1 id="name">{person.name}</h1>
+    <p class="thesis">{person.sentence}</p>
+    <p class="proof">{person.proof}</p>
+    <p class="aside">{person.aside}</p>
+  </header>
+
+  <section class="block" id="work" aria-labelledby="work-title">
+    <h2 id="work-title">Work</h2>
+    <ol class="jobs">
+      {roles.map((role) => (
+        <li>
+          <a href={`/work/${role.slug}/`}>
+            <span class="job-top">
+              <span class="company">{role.company}</span>
+              <span class="dates">{role.dates}</span>
+            </span>
+            <span class="role">{role.title}</span>
+            <span class="bet">{role.outcome}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
   </section>
 
-  <div class="column">
-    <section class="block" id="creed" aria-labelledby="creed-title">
-      <h2 id="creed-title">Notes on building</h2>
-      <ul class="creed">
-        {creed.map((line) => <li>{line}</li>)}
-      </ul>
+  {badho && (
+    <section class="block" id="case" aria-labelledby="case-title">
+      <h2 id="case-title">Case study</h2>
+      <p class="case-name"><a href={`/work/${badho.slug}/`}>Search that does not wait</a></p>
+      <p class="case-line">Badho. Hybrid search went from 9% to 28% of DAU, in under 100ms, with zero LLM calls.</p>
+      <p><a href={`/work/${badho.slug}/`}>Read the case study</a></p>
     </section>
+  )}
 
-    <section class="block" id="work" aria-labelledby="work-title">
-      <h2 id="work-title">Work</h2>
-      <ol class="jobs">
-        {roles.map((role) => (
-          <li>
-            <a href={`/work/${role.slug}/`}>
-              <span class="job-top">
-                <span class="company">{role.company}</span>
-                <span class="dates">{role.dates}</span>
-              </span>
-              <span class="role">{role.title}</span>
-              <span class="bet">{role.outcome}</span>
-            </a>
-          </li>
-        ))}
-      </ol>
-    </section>
+  <section class="block" id="now" aria-labelledby="now-title">
+    <h2 id="now-title">Building now</h2>
+    <p class="tools">I use Grok Bot, Cursor, and Claude.</p>
+    <ul class="now">
+      {projects.map((project) => (
+        <li>
+          {project.href ? (
+            <a href={project.href}>{project.name}</a>
+          ) : (
+            <span class="plain">{project.name}</span>
+          )}
+          <span class="dash" aria-hidden="true"> — </span>
+          <span>{project.line}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
 
-    <section class="block" id="now" aria-labelledby="now-title">
-      <h2 id="now-title">Building now</h2>
-      <p class="tools">I use Grok Bot, Cursor, and Claude.</p>
-      <ul class="now">
-        {projects.map((project) => (
-          <li>
-            {project.href ? (
-              <a href={project.href}>{project.name}</a>
-            ) : (
-              <span class="plain">{project.name}</span>
-            )}
-            <span class="dash" aria-hidden="true"> — </span>
-            <span>{project.line}</span>
-          </li>
-        ))}
-      </ul>
-    </section>
+  <section class="block" id="writing" aria-labelledby="writing-title">
+    <h2 id="writing-title">Writing</h2>
+    <p><a href="/writing/agent-economy/">The agent economy</a>. Questions I am willing to work on. Not products.</p>
+  </section>
 
-    <section class="block" id="contact" aria-labelledby="contact-title">
-      <h2 id="contact-title">Contact</h2>
-      <p class="contact-line">
-        <a href={person.x} rel="me">X</a>
-        <span aria-hidden="true"> · </span>
-        <a href={person.github} rel="me">GitHub</a>
-        <span aria-hidden="true"> · </span>
-        <a href={person.linkedin} rel="me">LinkedIn</a>
-      </p>
-    </section>
-  </div>
+  <section class="block" id="contact" aria-labelledby="contact-title">
+    <h2 id="contact-title">What I want</h2>
+    <p class="ask">I’m looking for PM roles at AI labs and AI-first companies. Remote from India, or relocation.</p>
+    <a class="button" href={person.linkedin} rel="me">LinkedIn</a>
+  </section>
 </Base>

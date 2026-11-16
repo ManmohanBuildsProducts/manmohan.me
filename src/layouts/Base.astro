@@ -7,10 +7,9 @@ interface Props {
   description: string;
   image?: string;
   type?: string;
-  wide?: boolean;
 }
 
-const { title, description, image = "/og.png", type = "website", wide = false } = Astro.props;
+const { title, description, image = "/og.png", type = "website" } = Astro.props;
 const url = new URL(Astro.url.pathname, Astro.site);
 const img = new URL(image, Astro.site);
 const path = Astro.url.pathname;
@@ -40,9 +39,9 @@ const home = path === "/";
 <meta name="twitter:image" content={img}>
 <link rel="alternate" type="application/rss+xml" title="Manmohan Singh Charan" href="/rss.xml">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="preload" as="image" href="/hero/island-960.avif" type="image/avif" media="(max-width: 899px)" imagesrcset="/hero/island-640.avif 640w, /hero/island-960.avif 960w" imagesizes="92vw">
+<link rel="preload" href="/fonts/newsreader-600.woff2" as="font" type="font/woff2" crossorigin>
 </head>
-<body class:list={[{ wide }]}>
+<body>
 <a class="skip" href="#content">Skip to content</a>
 <header class="site-header">
   <div class="wrap bar">
@@ -61,9 +60,9 @@ const home = path === "/";
   <div class="wrap bar">
     <span>manmohan.work</span>
     <nav class="foot-links" aria-label="Footer">
-      <a href={person.x} rel="me">X</a>
-      <a href={person.github} rel="me">GitHub</a>
-      <a href={person.linkedin} rel="me">LinkedIn</a>
+      {!home && <a href={person.x} rel="me">X</a>}
+      {!home && <a href={person.github} rel="me">GitHub</a>}
+      {!home && <a href={person.linkedin} rel="me">LinkedIn</a>}
       {!home && <a href={`mailto:${person.email}`}>Email</a>}
       <a href="/rss.xml">RSS</a>
     </nav>

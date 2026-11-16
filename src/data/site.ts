@@ -9,10 +9,10 @@
 
 export const person = {
   name: "Manmohan Singh Charan",
-  sentence:
+  sentence: "I’m a product manager who ships AI into messy, real-world commerce.",
+  proof: "Seven years. Two-time co-founder (Badho, Tago Care). Lead PM at GobbleCube.",
+  aside:
     "I build products where a model has to face a real price, a real catalogue, and a person who will not wait.",
-  bio: "Lead PM at GobbleCube, two-time co-founder of Badho and Tago Care, IIT Roorkee.",
-  years: "Seven years across pricing and marketplaces.",
   email: "manmohanbuildsproducts@gmail.com",
   x: "https://x.com/ManmohanBuilds",
   xLabel: "X @ManmohanBuilds",
@@ -52,6 +52,8 @@ export type Role = {
   bet: string[];
   happened: string[];
   learned: string[];
+  /** When set, the story page uses these headings instead of the four defaults. */
+  study?: { heading: string; paragraphs: string[] }[];
 };
 
 export const roles: Role[] = [
@@ -62,7 +64,7 @@ export const roles: Role[] = [
     accent: "#3d4eb5",
     title: "Lead PM, Pricing & Promo",
     dates: "May 2026 – Present",
-    outcome: "AI-first pricing and promo, on elasticities. Still being built.",
+    outcome: "Turns price elasticities into planning decisions. Still being built.",
     bullets: [
       "A planning engine on historical price sensitivities and elasticities. The product is the decision, not a black-box number.",
       "I build the optimizer and the allocator myself, with AI coding tools. The charter is AI-first.",
@@ -93,7 +95,7 @@ export const roles: Role[] = [
     title: "Co-founder and Head of Product",
     dates: "2022 – Apr 2026",
     outcome:
-      "Could have been a digital channel for general trade. 20 lakh retailers, 11 states, 1M+ installs.",
+      "Hybrid search went from 9% to 28% of DAU, in under 100ms, with zero LLM calls. 20 lakh retailers, 11 states, 1M+ installs.",
     bullets: [
       "Escrow from zero: cash on delivery, full advance, partial advance, and seller credit, with risk scoring and trust-tiered limits.",
       "Replaced commission with a subscription when it did not work for distributors. Contracted on purpose to fix unit economics, then rebuilt around delivery as a service.",
@@ -101,7 +103,50 @@ export const roles: Role[] = [
       "Killed my own onboarding when people were not coming back, and replaced it with a concierge. Experiments shipped without an engineer in the loop.",
     ],
     description:
-      "Co-founder and Head of Product at Badho, 2022 to April 2026. A digital channel for general trade. 20 lakh retailers, 11 states, 1M+ installs.",
+      "Case study: Hinglish search at Badho. Hybrid search went from 9% to 28% of DAU, in under 100ms, with zero LLM calls.",
+    study: [
+      {
+        heading: "Context",
+        paragraphs: [
+          "Badho could have been a digital channel for general trade. Shopkeepers and the brands trying to reach them. 20 lakh retailers, 11 states, 1M+ installs.",
+          "Search was the counter. The person using it was often standing in the shop, typing on a phone, in Hindi or Hinglish, with the name he actually uses.",
+        ],
+      },
+      {
+        heading: "The problem",
+        paragraphs: [
+          "The catalogue knew one name. He typed another. Search was a small slice of the day, and a miss did not get a second try. He asked someone, or he did not order.",
+        ],
+      },
+      {
+        heading: "Options I rejected",
+        paragraphs: [
+          "An LLM on the request. It can clean a messy query. I rejected it. He will not wait, and a model does not belong between a shopkeeper and a word he already knows.",
+          "An English keyword index. Fast, and blind to Hindi and Hinglish.",
+          "A hosted model on every query. The wait is the same, and the query leaves the machine. Same rejection.",
+        ],
+      },
+      {
+        heading: "The decision",
+        paragraphs: [
+          "Hybrid search. FAISS, local embeddings, and a phonetic fallback. No model on the request.",
+          "The model still worked. It worked off the path, on the catalogue, where a second does not matter. Determinism first: retrieval on the keystroke, a model only where the rules run out, a person when confidence is low.",
+        ],
+      },
+      {
+        heading: "The result",
+        paragraphs: [
+          "Hybrid search went from 9% to 28% of DAU, in under 100ms, with zero LLM calls.",
+          "10+ production agent workflows did the catalogue work beside it. They were not on the keystroke.",
+        ],
+      },
+      {
+        heading: "What I’d do differently",
+        paragraphs: [
+          "I would write the rule before the build. No model on the request. A wait a shopkeeper can feel. A person only off the path. I learned the rule by trying the slow shape. I would rather start from the rule.",
+        ],
+      },
+    ],
     problem: [
       "General trade is how most of India still buys. The kirana, the distributor, the brand’s salesman. Modern retail had software. The counter had a phone, a notebook, and credit that lived in someone’s head.",
       "Distributors and retailers were not short of demand. They were short of a rail that respected how the trade already worked: trust, credit, and a delivery van.",
@@ -137,7 +182,7 @@ export const roles: Role[] = [
     accent: "#2f6f8f",
     title: "CPO and co-founder",
     dates: "Jun 2021 – Mar 2022",
-    outcome: "Building care for families.",
+    outcome: "Building care for families. The company closed.",
     bullets: [
       "A digital health locker on India’s ABHA infrastructure, so a family could hold its own record.",
       "A practice tool for doctors, so a clinic left a record instead of a slip.",
@@ -164,7 +209,7 @@ export const roles: Role[] = [
     accent: "#2f7d4a",
     title: "Product Consultant",
     dates: "Mar – Apr 2021",
-    outcome: "Digitising mandi trade.",
+    outcome: "Digitising mandi trade, so a lender could read the record.",
     bullets: [
       "Launched a new product line for an agri-trade platform, from the idea through to launch.",
       "Outside teams built it with me. My job was to make the thing specific enough to be used.",
@@ -191,7 +236,7 @@ export const roles: Role[] = [
     accent: "#c48a1a",
     title: "Early PM, Offline Vertical",
     dates: "Jun 2019 – Oct 2020",
-    outcome: "Built the operating systems that let a 450-store partner network run.",
+    outcome: "Built the systems that ran a 450-store partner network.",
     bullets: [
       "Built the operating systems that let a 450-store partner network run.",
       "Store onboarding as software, a B2C pricing engine, and reordering off the point of sale.",
@@ -249,8 +294,8 @@ export const projects: Project[] = [
   {
     name: "Part Index",
     meta: "whileyousleep.xyz",
-    href: "https://whileyousleep.xyz",
-    line: "Search for Indian auto parts. A prototype.",
+    href: "https://github.com/ManmohanBuildsProducts/auto-parts-search",
+    line: "Search for Indian auto parts, at whileyousleep.xyz. A prototype.",
     body: "Search for Indian auto parts. A prototype.",
   },
   {
