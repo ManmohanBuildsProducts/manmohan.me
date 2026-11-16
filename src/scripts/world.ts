@@ -3,13 +3,14 @@ import {
   AnimationMixer,
   BackSide,
   Box3,
+  BufferAttribute,
+  BufferGeometry,
   CanvasTexture,
   CircleGeometry,
   Color,
   DataTexture,
   DirectionalLight,
   DoubleSide,
-  Float32BufferAttribute,
   Fog,
   Group,
   HemisphereLight,
@@ -54,24 +55,102 @@ type Plot = {
 
 type Box = { x: number; y: number; w: number; h: number };
 
-const Y = 0.7;
 const plots: Plot[] = [
-  { id: "workshop", name: "Workshop", order: 0, x: -10.2, z: 4.6, r: 1.7, href: "#build", label: "The Workshop" },
-  { id: "blinkit", name: "Blinkit", order: 1, x: -6.6, z: 1.15, r: 1.7, href: "#blinkit", label: "Blinkit" },
-  { id: "bijak", name: "Bijak", order: 2, x: -2.7, z: -1.7, r: 1.9, href: "#bijak", label: "Bijak" },
-  { id: "tago", name: "Tago Care", order: 3, x: 1.15, z: 2.35, r: 1.85, href: "#tago", label: "Tago Care" },
-  { id: "badho", name: "Badho", order: 4, x: 4.7, z: -1.15, r: 2.55, href: "#badho", label: "Badho" },
-  { id: "gobble", name: "GobbleCube", order: 5, x: 8.15, z: 2.15, r: 2.05, href: "#gobble", label: "GobbleCube" },
-  { id: "watchtower", name: "Watchtower", order: 0, x: 10.4, z: -3.7, r: 1.2, href: "#islands", label: "Watchtower" },
+  { id: "workshop", name: "Workshop", order: 0, x: -7.4, z: 2.8, r: 1.6, href: "#build", label: "The Workshop" },
+  { id: "blinkit", name: "Blinkit", order: 1, x: -4.6, z: -0.55, r: 1.55, href: "#blinkit", label: "Blinkit" },
+  { id: "bijak", name: "Bijak", order: 2, x: -1.15, z: -2.55, r: 1.8, href: "#bijak", label: "Bijak" },
+  { id: "tago", name: "Tago Care", order: 3, x: 1.25, z: 2.05, r: 1.7, href: "#tago", label: "Tago Care" },
+  { id: "badho", name: "Badho", order: 4, x: 4.5, z: -1.75, r: 2.5, href: "#badho", label: "Badho" },
+  { id: "gobble", name: "GobbleCube", order: 5, x: 8.05, z: 2.05, r: 1.75, href: "#gobble", label: "GobbleCube" },
+  { id: "watchtower", name: "Watchtower", order: 0, x: -8.7, z: -3.55, r: 1.15, href: "#islands", label: "Watchtower" },
 ];
 
-const road: Array<[number, number]> = [
-  [-8.6, 3.5], [-5.2, 4.15], [-1.2, 4.05], [2.5, 4.2], [6.2, 3.9],
-  [9.2, 2.15], [9.7, -0.4], [8.2, -3.15], [4.4, -4.15], [0.2, -4.05],
-  [-3.6, -4.05], [-7.2, -3.2], [-9.4, -0.7], [-9.5, 1.5],
+const roadRaw: Array<[number, number]> = [
+  [-6.5, 4.85], [-2.7, 4.95], [1.15, 4.7], [4.5, 4.65], [6.7, 4.9],
+  [9.9, 4.55], [10.7, 1.7], [10.15, -1.15], [7.55, -5.05], [3.3, -5.35],
+  [-0.7, -5.2], [-4.3, -4.35], [-6.7, -1.55], [-7.75, 1.55],
 ];
+
+const HOME_POS = new Vector3(4.6, 12.4, 16.4);
+const HOME_TARGET = new Vector3(0.7, 0.55, -0.85);
+const SHOW = new Vector3(1, 1, 1);
+const HIDE = new Vector3(0.001, 0.001, 0.001);
 
 let toonRamp: DataTexture | null = null;
+
+function islandRadius(theta: number) {
+  return 12.6 + Math.sin(theta * 2) * 0.9 + Math.cos(theta * 3) * 0.42 + Math.sin(theta * 5 + 0.7) * 0.28;
+}
+
+function smooth(edge0: number, edge1: number, value: number) {
+  const t = MathUtils.clamp((value - edge0) / (edge1 - edge0), 0, 1);
+  return t * t * (3 - 2 * t);
+}
+
+function shove(x: number, z: number, pad: number) {
+  let px = x;
+  let pz = z;
+  for (let pass = 0; pass < 3; pass += 1) {
+    for (const plot of plots) {
+      const dx = px - plot.x;
+      const dz = pz - plot.z;
+      const dist = Math.hypot(dx, dz);
+      const need = plot.r + pad;
+      if (dist < need) {
+        const k = need / Math.max(dist, 0.001);
+        px = plot.x + dx * k;
+        pz = plot.z + dz * k;
+      }
+    }
+  }
+  return [px, pz] as const;
+}
+
+function bakeRoad() {
+  const points: Array<[number, number]> = [];
+  const steps = 5;
+  for (let i = 0; i < roadRaw.length; i += 1) {
+    const a = roadRaw[i];
+    const b = roadRaw[(i + 1) % roadRaw.length];
+    for (let step = 0; step < steps; step += 1) {
+      const t = step / steps;
+      points.push(shove(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, 0.42));
+    }
+  }
+  return points;
+}
+
+const road = bakeRoad();
+
+function distToRoad(x: number, z: number) {
+  let best = 99;
+  for (let i = 0; i < road.length; i += 1) {
+    const a = road[i];
+    const b = road[(i + 1) % road.length];
+    const dx = b[0] - a[0];
+    const dz = b[1] - a[1];
+    const len = dx * dx + dz * dz || 1;
+    const t = MathUtils.clamp(((x - a[0]) * dx + (z - a[1]) * dz) / len, 0, 1);
+    best = Math.min(best, Math.hypot(x - (a[0] + dx * t), z - (a[1] + dz * t)));
+  }
+  return best;
+}
+
+function heightAt(x: number, z: number) {
+  const theta = Math.atan2(z, x);
+  const edge = islandRadius(theta);
+  const t = Math.hypot(x, z) / edge;
+  const wobble = Math.sin(x * 0.55) * Math.cos(z * 0.42) * 0.04;
+  const inland = 0.48 + wobble;
+  let y = inland * (1 - smooth(0.66, 1, t)) + -0.02 * smooth(0.66, 1, t);
+  const path = distToRoad(x, z);
+  if (path < 0.78 && t < 0.86) y -= (1 - path / 0.78) * 0.04;
+  return y;
+}
+
+function clearOfPlots(x: number, z: number, pad: number) {
+  return plots.every((plot) => Math.hypot(x - plot.x, z - plot.z) > plot.r + pad);
+}
 
 export async function mount(frame: HTMLElement) {
   const canvas = frame.querySelector("canvas");
@@ -79,8 +158,7 @@ export async function mount(frame: HTMLElement) {
   if (!canvas || !labelRoot) return () => {};
   const mobile = window.matchMedia("(max-width: 800px)").matches;
   const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
-  const cores = navigator.hardwareConcurrency ?? 8;
-  const modest = mobile || memory <= 4 || cores <= 4;
+  const modest = mobile || memory <= 4;
 
   let renderer: WebGLRenderer;
   try {
@@ -101,11 +179,20 @@ export async function mount(frame: HTMLElement) {
   }
 
   const scene = new Scene();
-  const camera = new PerspectiveCamera(46, 1, 0.1, 140);
-  camera.position.set(8, 15.5, 26);
+  const camera = new PerspectiveCamera(42, 1, 0.1, 160);
+  const homePos = HOME_POS.clone();
+  const homeTarget = HOME_TARGET.clone();
+  if (modest) {
+    homePos.set(2.2, 17.6, 20.8);
+    homeTarget.set(0.15, 0.25, -1.7);
+    camera.fov = 49;
+  }
+  camera.position.copy(homePos);
   renderer.outputColorSpace = SRGBColorSpace;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, modest ? 1 : 1.5));
-  renderer.setClearColor("#f6dcc4", 1);
+  const ratioCap = Math.min(window.devicePixelRatio || 1, modest ? 1 : 1.5);
+  let ratio = ratioCap;
+  renderer.setPixelRatio(ratio);
+  renderer.setClearColor("#f6d7b8", 1);
 
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true;
@@ -113,37 +200,37 @@ export async function mount(frame: HTMLElement) {
   controls.rotateSpeed = mobile ? 0.65 : 0.55;
   controls.zoomSpeed = 0.65;
   controls.panSpeed = 0.45;
-  controls.minPolarAngle = 0.32;
-  controls.maxPolarAngle = 1.08;
-  controls.minDistance = 8;
-  controls.maxDistance = 46;
-  controls.target.set(0, 0.8, 0);
+  controls.minPolarAngle = 0.38;
+  controls.maxPolarAngle = 1.12;
+  controls.minDistance = 7.5;
+  controls.maxDistance = 38;
+  controls.target.copy(homeTarget);
   controls.enabled = document.documentElement.dataset.intro === "done";
   canvas.style.touchAction = mobile ? "pan-y" : "none";
 
   scene.add(buildSky());
-  const hemi = new HemisphereLight("#fff1dc", "#6d8a55", 0.9);
-  const sun = new DirectionalLight("#ffd7a8", 1.45);
-  sun.position.set(-8, 12, 6);
-  scene.add(hemi, sun, new AmbientLight("#fff6ea", 0.32));
+  const hemi = new HemisphereLight("#fff1dc", "#6a8a45", 0.82);
+  const sun = new DirectionalLight("#ffc07a", 1.7);
+  sun.position.set(-12, 14, 8);
+  const fill = new DirectionalLight("#f0c9a2", 0.28);
+  fill.position.set(8, 6, -6);
+  scene.add(hemi, sun, fill, new AmbientLight("#fff4e6", 0.22));
 
   const land = new Group();
   scene.add(land);
-  const grass = paint("#3c8f3e");
-  grass.vertexColors = true;
-  const island = buildIsland(grass);
-  island.position.y = Y;
+  const groundMat = paint("#ffffff");
+  groundMat.vertexColors = true;
+  const island = buildIsland(groundMat, modest);
   land.add(island);
-  const foam = buildFoam();
-  land.add(foam.mesh);
-  const water = buildWater();
+  const water = buildWater(modest);
   scene.add(water);
   const shade = new Mesh(
-    new CircleGeometry(12.4, modest ? 24 : 40),
-    new MeshBasicMaterial({ color: "#062033", transparent: true, opacity: 0.28 }),
+    new CircleGeometry(13.2, modest ? 28 : 48),
+    new MeshBasicMaterial({ color: "#123044", transparent: true, opacity: 0.16, depthWrite: false }),
   );
   shade.rotation.x = -Math.PI / 2;
-  shade.position.y = 0.02;
+  shade.position.y = 0.01;
+  shade.scale.setScalar(1.25);
   scene.add(shade);
 
   try {
@@ -151,17 +238,16 @@ export async function mount(frame: HTMLElement) {
     const buildings = new Map<string, Group>();
     for (const plot of plots) {
       const group = compose(plot.id, loaded.templates, modest);
-      group.position.set(plot.x, Y, plot.z);
+      group.position.set(plot.x, heightAt(plot.x, plot.z), plot.z);
       group.userData.plot = plot;
       land.add(group);
       buildings.set(plot.id, group);
     }
-    layRoad(land, loaded.templates);
     layForest(land, loaded.templates, modest);
     layRocks(land, loaded.templates, modest);
     const villagers = makeVillagers(loaded.villagerScene, loaded.clips, land, modest);
     const cart = makeCart(loaded.templates, land);
-    const clouds = layClouds(scene, modest ? 3 : 5);
+    const clouds = layClouds(scene, modest ? 2 : 4);
     const smokes = laySmoke(buildings);
 
     const labels = plots.map((plot) => {
@@ -229,6 +315,8 @@ export async function mount(frame: HTMLElement) {
     const scratch = new Vector3();
     let running = true;
     let visible = true;
+    let ratioTimer = 0;
+    let frameDt = 0.016;
 
     controls.addEventListener("start", () => {
       holding = true;
@@ -241,6 +329,8 @@ export async function mount(frame: HTMLElement) {
     });
 
     function shown(plot: Plot) {
+      const intro = document.documentElement.dataset.intro || "done";
+      if (intro === "play" || intro === "run") return true;
       return plot.order <= Number(document.documentElement.dataset.age || 5);
     }
 
@@ -254,21 +344,31 @@ export async function mount(frame: HTMLElement) {
         document.getElementById("islands")?.scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
+      if (plot.id === "workshop") {
+        document.getElementById("build")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
       window.dispatchEvent(new CustomEvent("mm-open-dossier", { detail: { id: plot.id } }));
     }
 
     function setWant(plot?: Plot) {
       if (!plot) {
-        want.position.set(8, 15.5, 26);
-        want.target.set(0, 0.8, 0);
+        want.position.copy(homePos);
+        want.target.copy(homeTarget);
         return;
       }
-      const center = buildings.get(plot.id)?.getWorldPosition(new Vector3()) ?? new Vector3(plot.x, Y, plot.z);
-      want.target.set(center.x, center.y + 1.1, center.z);
+      const center = buildings.get(plot.id)?.getWorldPosition(new Vector3()) ?? new Vector3(plot.x, heightAt(plot.x, plot.z), plot.z);
+      if (plot.id === "gobble") {
+        want.target.set(center.x - 0.15, center.y + 1.55, center.z);
+        want.position.set(center.x + 0.35, center.y + 3.6, center.z + 7.4);
+        return;
+      }
+      want.target.set(center.x, center.y + 1.15, center.z);
       const outward = new Vector3(center.x, 0, center.z);
-      if (outward.length() < 0.4) outward.set(1, 0, 1);
+      if (outward.length() < 0.4) outward.set(0.4, 0, 1);
       outward.normalize();
-      want.position.set(center.x + outward.x * 7.4, center.y + 4.4, center.z + outward.z * 7.4);
+      const view = new Vector3(outward.x * 0.55 + 0.2, 0, Math.abs(outward.z) * 0.35 + 0.82).normalize();
+      want.position.set(center.x + view.x * 8.6, center.y + 4.6, center.z + view.z * 8.6);
     }
 
     function syncStory() {
@@ -287,24 +387,27 @@ export async function mount(frame: HTMLElement) {
       lastAge = age;
       lastIntro = intro;
       const day = Number(root.style.getPropertyValue("--day") || "1");
-      const dawn = new Color("#ffd8b0");
+      const dawn = new Color("#ffd2a4");
       const gold = new Color("#f0a05a");
       sun.color.copy(dawn).lerp(gold, day);
-      sun.intensity = 1.2 + day * 0.28;
-      sun.position.set(-11 + day * 16, 12 - day * 3, 7 - day * 8);
-      const sky = new Color("#f7e0c8").lerp(new Color("#f3c9a2"), day);
-      scene.fog = new Fog(sky.getStyle(), 50, 112);
+      sun.intensity = 1.45 + day * 0.28;
+      sun.position.set(-14 + day * 6, 15 - day * 2, 9 - day * 4);
+      const sky = new Color("#f7dcc4").lerp(new Color("#f0c09a"), day);
+      scene.fog = new Fog(sky.getStyle(), 42, 96);
       renderer.setClearColor(sky, 1);
-      hemi.color.copy(dawn).lerp(new Color("#ffe6c2"), day);
+      hemi.color.copy(dawn).lerp(new Color("#ffe0b8"), day);
+      const horizon = water.userData.horizon as Color | undefined;
+      horizon?.copy(sky);
       for (const [id, group] of buildings) {
-        const plot = plots.find((item) => item.id === id)!;
+        const plot = plots.find((item) => item.id === id);
+        if (!plot) continue;
         const on = shown(plot);
-        group.scale.lerp(new Vector3(on ? 1 : 0.001, on ? 1 : 0.001, on ? 1 : 0.001), on ? 0.12 : 0.2);
+        group.scale.lerp(on ? SHOW : HIDE, on ? 0.12 : 0.2);
         group.visible = group.scale.y > 0.05;
         const ring = group.getObjectByName("ring") as Mesh | undefined;
         const current = reading && plot.order === age && plot.order > 0;
         const ringMat = ring?.material as MeshBasicMaterial | undefined;
-        if (ringMat) ringMat.opacity = MathUtils.lerp(ringMat.opacity, current ? 0.85 : 0, 0.08);
+        if (ringMat) ringMat.opacity = MathUtils.lerp(ringMat.opacity, current ? 0.55 : 0, 0.08);
       }
     }
 
@@ -317,9 +420,11 @@ export async function mount(frame: HTMLElement) {
       const blocked = blockedZones(rect);
       const ranked = labels
         .map((item) => {
-          const group = buildings.get(item.plot.id)!;
+          const group = buildings.get(item.plot.id);
+          if (!group) return { ...item, dist: 999, screen: null, building: null, behind: true };
           const core = group.getObjectByName("core") ?? group;
-          const anchor = topPoint(core);
+          const mark = group.getObjectByName("label-anchor");
+          const anchor = mark ? mark.getWorldPosition(new Vector3()) : topPoint(core);
           const dist = camera.position.distanceTo(anchor);
           const screen = project(anchor, camera, rect);
           const building = screenBox(core, camera, rect);
@@ -345,15 +450,19 @@ export async function mount(frame: HTMLElement) {
         item.el.hidden = false;
         const width = Math.max(item.el.offsetWidth, item.el.scrollWidth, 64);
         const height = Math.max(item.el.offsetHeight, 22);
-        const spot = current
-          ? labelAbove(item.building, rect, width, height, placed, others)
-          : labelSpot(item.building, rect, width, height, placed);
+        const pinned = current && item.plot.id === "gobble" && item.screen
+          ? { x: item.screen.x - width / 2, y: Math.max(8, item.screen.y - height - 8), w: width, h: height }
+          : null;
+        const spot = pinned
+          ?? (current
+            ? labelAbove(item.building, rect, width, height, placed, others)
+            : labelSpot(item.building, rect, width, height, placed));
         if (!spot) {
           item.el.hidden = true;
           continue;
         }
         if (!current) extras += 1;
-        if (current && item.building) placed.push(padBox(item.building, 4));
+        if (current) placed.push(padBox(item.building, 4));
         placed.push(spot);
         item.el.style.opacity = current ? "1" : "0.84";
         item.el.style.transform = `translate(${spot.x + spot.w / 2}px, ${spot.y + spot.h}px) translate(-50%, -100%)`;
@@ -364,6 +473,7 @@ export async function mount(frame: HTMLElement) {
       const rect = frame.getBoundingClientRect();
       camera.aspect = Math.max(1, rect.width) / Math.max(1, rect.height);
       camera.updateProjectionMatrix();
+      renderer.setPixelRatio(ratio);
       renderer.setSize(Math.max(1, rect.width), Math.max(1, rect.height), false);
     }
     resize();
@@ -377,35 +487,49 @@ export async function mount(frame: HTMLElement) {
     function tick(now: number) {
       if (!running) return;
       requestAnimationFrame(tick);
-      const dt = Math.min(0.05, (now - clock.last) / 1000);
+      const dt = Math.min(0.05, Math.max(0, (now - clock.last) / 1000));
       clock.last = now;
       clock.t += dt;
+      frameDt = frameDt * 0.85 + dt * 0.15;
       if (!visible || document.hidden) return;
       syncStory();
       water.userData.spin(clock.t);
-      foam.spin(clock.t);
       for (const walker of villagers) walker.step(dt, clock.t);
       cart.step(clock.t);
       for (const cloud of clouds) cloud.step(dt);
-      for (const puff of smokes) puff.step(dt);
+      for (const puff of smokes) puff.step(dt, clock.t);
+      const gobble = buildings.get("gobble");
+      const crane = gobble?.userData.crane as Object3D | undefined;
+      const hook = gobble?.userData.hook as Object3D | undefined;
+      if (crane) crane.rotation.y = Math.sin(clock.t * 0.35) * 0.12;
+      if (hook) hook.position.y = 1.45 + Math.sin(clock.t * 0.9) * 0.16;
       if (gliding && !holding) {
         controls.target.lerp(want.target, 0.12);
         camera.position.lerp(want.position, 0.1);
-        if (camera.position.distanceTo(want.position) < 0.25) gliding = false;
+        if (camera.position.distanceTo(want.position) < 0.22) gliding = false;
       } else if (!holding && document.documentElement.dataset.intro === "done") {
         idleTimer += dt;
         if (idleTimer > 2.8) {
           spherical.setFromVector3(scratch.copy(camera.position).sub(controls.target));
-          spherical.theta += dt * 0.06;
+          spherical.theta += dt * 0.055;
           camera.position.copy(controls.target).add(scratch.setFromSpherical(spherical));
         }
       }
       const reach = Math.hypot(controls.target.x, controls.target.z);
-      if (reach > 8) {
-        controls.target.x *= 8 / reach;
-        controls.target.z *= 8 / reach;
+      if (reach > 7.5) {
+        controls.target.x *= 7.5 / reach;
+        controls.target.z *= 7.5 / reach;
       }
       controls.update();
+      ratioTimer += dt;
+      if (ratioTimer > 1.4) {
+        ratioTimer = 0;
+        const next = frameDt > 0.034 ? Math.max(modest ? 0.7 : 0.85, ratio - 0.15) : frameDt < 0.018 ? Math.min(ratioCap, ratio + 0.1) : ratio;
+        if (Math.abs(next - ratio) > 0.04) {
+          ratio = next;
+          resize();
+        }
+      }
       renderer.render(scene, camera);
       frameLabels();
     }
@@ -433,16 +557,15 @@ export async function mount(frame: HTMLElement) {
 function gradientMap() {
   if (toonRamp) return toonRamp;
   const data = new Uint8Array([
-    78, 70, 62, 255,
-    132, 122, 110, 255,
-    186, 174, 158, 255,
-    230, 220, 206, 255,
+    72, 64, 58, 255,
+    128, 118, 108, 255,
+    186, 176, 162, 255,
+    226, 218, 206, 255,
     255, 250, 244, 255,
   ]);
   toonRamp = new DataTexture(data, 5, 1);
   toonRamp.magFilter = NearestFilter;
   toonRamp.minFilter = NearestFilter;
-  toonRamp.colorSpace = SRGBColorSpace;
   toonRamp.needsUpdate = true;
   return toonRamp;
 }
@@ -466,108 +589,187 @@ async function loadAssets(renderer: WebGLRenderer) {
 
 function compose(id: string, templates: Map<string, Object3D>, modest: boolean) {
   const group = new Group();
-  const add = (name: string, height: number, x = 0, y = 0, z = 0, rot = 0) => {
-    const mesh = prop(templates, name, height);
-    mesh.position.set(x, y, z);
-    mesh.rotation.y = rot;
+  const add = (name: string, height: number, x = 0, y = 0, z = 0, rot = 0, footprint?: number) => {
+    const mesh = prop(templates, name, height, footprint);
+    mesh.position.x += x;
+    mesh.position.y += y;
+    mesh.position.z += z;
+    mesh.rotation.y += rot;
     group.add(mesh);
     return mesh;
   };
   if (id === "blinkit") {
-    add("house", 2.35).name = "core";
-    add("box", 0.42, 1.15, 0, 0.85, 0.4);
-    add("boxLarge", 0.55, 1.35, 0, 0.35, -0.2);
-    add("barrel", 0.48, -1.2, 0, 0.9);
-    if (!modest) add("lantern", 0.55, 0.7, 1.5, 1.05);
+    add("house", 2.05, 0, 0, 0, 0.35).name = "core";
+    add("boxLarge", 0.48, 0.15, 0, 1.15, 0.2);
+    add("box", 0.36, 0.55, 0.48, 1.12, 0.4);
+    add("box", 0.34, -0.35, 0, 1.2, -0.3);
+    add("barrel", 0.46, 1.05, 0, 0.85);
+    if (!modest) add("lantern", 0.48, 0.72, 1.35, 0.95);
   } else if (id === "bijak") {
-    add("market", 2.55).name = "core";
-    add("stall", 1.15, 1.45, 0, 0.2, 0.6);
-    add("cart", 0.85, -1.55, 0, 0.35, 0.8);
-    add("barrel", 0.42, 1.15, 0, -0.7);
-    add("box", 0.36, -1.15, 0, -0.55, 0.3);
+    add("market", 2.25, 0, 0, 0, -0.4).name = "core";
+    add("stall", 1.25, 1.35, 0, 0.85, 0.5);
+    add("cart", 0.82, -1.45, 0, 0.55, 0.9);
+    add("barrel", 0.4, 1.15, 0, -0.15);
+    add("box", 0.32, -1.05, 0, -0.35, 0.2);
+    add("box", 0.3, 0.85, 0, 1.15, -0.4);
   } else if (id === "tago") {
-    add("barracks", 2.15, 0, 0, 0, 0.4).name = "core";
-    add("well", 1.15, 1.55, 0, 0.85);
+    add("barracks", 2.15, 0, 0, 0, 0.25).name = "core";
+    add("well", 1.05, 1.45, 0, 0.95);
+    if (!modest) add("lantern", 0.42, -1.15, 0.9, 0.7);
   } else if (id === "badho") {
-    add("castle", 4.35).name = "core";
-    add("cart", 0.95, 2.15, 0, 1.15, 0.5);
-    if (!modest) add("cart", 0.8, -2.05, 0, 0.7, -0.4);
-    add("barrel", 0.5, 1.7, 0, -1.2);
-    add("boxLarge", 0.6, -1.6, 0, -1.15, 0.2);
+    add("castle", 4.55).name = "core";
+    add("cart", 0.95, 2.25, 0, 1.65, 0.45);
+    if (!modest) add("cart", 0.82, -2.15, 0, 1.35, -0.55);
+    add("barrel", 0.5, 1.85, 0, -0.4);
+    add("boxLarge", 0.58, -1.7, 0, -0.55, 0.2);
+    add("box", 0.36, 2.05, 0.42, 1.15);
   } else if (id === "gobble") {
     scaffold(group, templates);
   } else if (id === "workshop") {
-    add("lumbermill", 2.45, 0, 0, 0, 0.7).name = "core";
-    add("barrel", 0.46, 1.2, 0, 0.4);
-    add("box", 0.4, 1.35, 0, -0.15);
+    add("lumbermill", 2.35, 0, 0, 0, 0.85).name = "core";
+    add("barrel", 0.48, 1.15, 0, 0.55);
+    add("box", 0.38, 1.25, 0, -0.15);
+    add("box", 0.32, -1.05, 0, 0.7, 0.4);
+    const fire = new Mesh(new SphereGeometry(0.14, 8, 6), new MeshBasicMaterial({ color: "#ff8a3c" }));
+    fire.position.set(0.15, 0.42, 0.85);
+    fire.name = "fire";
+    group.add(fire);
   } else {
-    add("watchtower", 3.3).name = "core";
+    add("watchtower", 2.7).name = "core";
   }
   const ring = new Mesh(
-    new RingGeometry(id === "badho" ? 1.7 : 1.2, id === "badho" ? 2.05 : 1.5, 28),
+    new RingGeometry(id === "badho" ? 1.85 : 1.15, id === "badho" ? 2.2 : 1.42, 28),
     new MeshBasicMaterial({ color: "#f0d78c", transparent: true, opacity: 0, side: DoubleSide, depthWrite: false }),
   );
   ring.name = "ring";
   ring.rotation.x = -Math.PI / 2;
-  ring.position.y = 0.04;
+  ring.position.y = 0.045;
   group.add(ring);
-  const shadow = new Mesh(new CircleGeometry(id === "badho" ? 2.1 : 1.45, 16), contactShadow());
+  const shadow = new Mesh(new CircleGeometry(id === "badho" ? 2.35 : id === "gobble" ? 1.7 : 1.4, 18), contactShadow());
   shadow.rotation.x = -Math.PI / 2;
   shadow.position.y = 0.03;
+  shadow.position.x = 0.18;
   group.add(shadow);
   if (!group.getObjectByName("label-anchor")) {
     group.updateMatrixWorld(true);
-    const box = new Box3().setFromObject(group);
+    const core = group.getObjectByName("core") ?? group;
+    const box = new Box3().setFromObject(core);
     const anchor = new Object3D();
     anchor.name = "label-anchor";
-    anchor.position.set(0, box.max.y - group.position.y + 0.15, 0);
+    anchor.position.set(0, box.max.y - group.position.y + 0.28, 0);
     group.add(anchor);
   }
   return group;
 }
 
 function scaffold(group: Group, templates: Map<string, Object3D>) {
-  const frame = prop(templates, "poles", 2.8);
-  frame.name = "core";
-  group.add(frame);
-  const deck = prop(templates, "planks", 0.1);
-  deck.position.y = 1.25;
-  group.add(deck);
-  const crane = prop(templates, "poles", 1.5);
-  crane.rotation.z = -0.7;
-  crane.position.set(1.15, 1.7, 0);
-  group.add(crane);
-  const hook = prop(templates, "box", 0.28);
-  hook.position.set(1.7, 1.15, 0.2);
-  group.add(hook);
+  const core = new Group();
+  core.name = "core";
+  group.add(core);
+  const post = (x: number, z: number, height = 2.45) => {
+    const pole = sized(templates, "poles", 0.14, height, 0.14);
+    pole.position.set(x, 0, z);
+    core.add(pole);
+  };
+  post(-0.78, -0.52);
+  post(0.78, -0.52);
+  post(-0.78, 0.52);
+  post(0.78, 0.52);
+  const deck = (y: number) => {
+    const plank = sized(templates, "planks", 1.9, 0.06, 1.25);
+    plank.position.set(0, y, 0);
+    core.add(plank);
+  };
+  deck(1.05);
+  deck(2.05);
+  const mast = sized(templates, "poles", 0.14, 3.05, 0.14);
+  mast.position.set(1.05, 0, 0.15);
+  core.add(mast);
+  const crane = sized(templates, "planks", 1.15, 0.07, 0.12);
+  crane.position.set(0.42, 2.62, 0);
+  core.add(crane);
+  group.userData.crane = crane;
+  const hook = sized(templates, "box", 0.28, 0.28, 0.28);
+  hook.position.set(0.12, 1.55, 0.05);
+  core.add(hook);
+  group.userData.hook = hook;
+  for (const [x, z] of [[-0.28, 0.05], [0.22, -0.18]] as Array<[number, number]>) {
+    const box = sized(templates, "boxLarge", 0.46, 0.38, 0.46);
+    box.position.set(x, 0, z);
+    core.add(box);
+  }
+  core.updateMatrixWorld(true);
+  const top = new Box3().setFromObject(core);
   const anchor = new Object3D();
   anchor.name = "label-anchor";
-  anchor.position.set(0, 3.05, 0);
+  anchor.position.set(0, top.max.y + 0.3, 0);
   group.add(anchor);
 }
 
-function prop(templates: Map<string, Object3D>, name: string, height: number) {
+function sized(templates: Map<string, Object3D>, name: string, xSize: number, ySize: number, zSize: number) {
   const source = templates.get(name);
   if (!source) return new Group();
-  const mesh = source.clone(true);
-  toonize(mesh);
-  fit(mesh, height);
-  return mesh;
-}
-
-function fit(obj: Object3D, height: number) {
+  const obj = source.clone(true);
+  toonize(obj);
   obj.position.set(0, 0, 0);
   obj.rotation.set(0, 0, 0);
   obj.scale.set(1, 1, 1);
   obj.updateMatrixWorld(true);
-  const box = new Box3().setFromObject(obj);
-  const size = box.getSize(new Vector3());
-  obj.scale.setScalar(height / Math.max(size.y, 0.001));
+  const size = new Box3().setFromObject(obj).getSize(new Vector3());
+  obj.scale.set(
+    xSize / Math.max(size.x, 0.001),
+    ySize / Math.max(size.y, 0.001),
+    zSize / Math.max(size.z, 0.001),
+  );
+  settle(obj);
+  return obj;
+}
+
+function prop(templates: Map<string, Object3D>, name: string, height: number, footprint?: number) {
+  const source = templates.get(name);
+  if (!source) return new Group();
+  const mesh = source.clone(true);
+  toonize(mesh);
+  fit(mesh, height, footprint);
+  return mesh;
+}
+
+function settle(obj: Object3D) {
   obj.updateMatrixWorld(true);
-  const grounded = new Box3().setFromObject(obj);
-  obj.position.y -= grounded.min.y;
-  obj.position.x -= (grounded.min.x + grounded.max.x) / 2;
-  obj.position.z -= (grounded.min.z + grounded.max.z) / 2;
+  const box = new Box3().setFromObject(obj);
+  obj.position.x -= (box.min.x + box.max.x) / 2;
+  obj.position.z -= (box.min.z + box.max.z) / 2;
+  obj.position.y -= box.min.y;
+}
+
+function fit(obj: Object3D, height: number, footprint?: number) {
+  obj.position.set(0, 0, 0);
+  obj.rotation.set(0, 0, 0);
+  obj.scale.set(1, 1, 1);
+  obj.updateMatrixWorld(true);
+  const size = new Box3().setFromObject(obj).getSize(new Vector3());
+  obj.scale.setScalar(height / Math.max(size.y, 0.001));
+  if (footprint) {
+    obj.updateMatrixWorld(true);
+    const foot = new Box3().setFromObject(obj).getSize(new Vector3());
+    const wide = Math.max(foot.x, foot.z);
+    if (wide > footprint) {
+      const k = footprint / wide;
+      obj.scale.x *= k;
+      obj.scale.z *= k;
+    }
+  }
+  settle(obj);
+}
+
+function toneOf(material: { color?: Color; name?: string }) {
+  const name = (material.name || "").toLowerCase();
+  if (name.includes("grass")) return new Color("#6f9a3a");
+  if (name.includes("water")) return new Color("#79b4ba");
+  if (name.includes("stone")) return new Color("#d9c7a6");
+  if (name.includes("white")) return new Color("#f4e6cc");
+  if (material.color) return material.color.clone();
+  return new Color("#c4a574");
 }
 
 function toonize(root: Object3D) {
@@ -575,16 +777,15 @@ function toonize(root: Object3D) {
   root.traverse((node) => {
     const mesh = node as Mesh;
     if (!mesh.isMesh) return;
-    const source = mesh.material;
+    const source = mesh.material as Material | Material[];
     const list = Array.isArray(source) ? source : [source];
     const next = list.map((material) => {
-      const colored = material as Material & { color?: Color; map?: MeshToonMaterial["map"] };
-      const mat = new MeshToonMaterial({
-        color: colored.map ? new Color("#ffffff") : colored.color ? colored.color.clone() : new Color("#c4a574"),
+      const colored = material as Material & { color?: Color; map?: MeshToonMaterial["map"]; name?: string };
+      return new MeshToonMaterial({
+        color: colored.map ? new Color("#ffffff") : toneOf(colored),
         map: colored.map ?? null,
         gradientMap: ramp,
       });
-      return mat;
     });
     mesh.material = Array.isArray(source) ? next : next[0];
     mesh.castShadow = false;
@@ -593,89 +794,51 @@ function toonize(root: Object3D) {
 }
 
 function layForest(land: Group, templates: Map<string, Object3D>, modest: boolean) {
-  const names = modest ? ["treeA", "treeC"] : ["treeA", "treeB", "treeC", "pine"];
-  const spots: Array<[number, number, number]> = [
-    [-8.2, 1.2, 1], [-5.6, 2.6, 0.9], [-3.2, 3.6, 1.1], [0.4, 4.7, 0.85], [3.6, 4.55, 1],
-    [6.8, 3.3, 0.95], [8.6, 0.4, 1.05], [7.2, -2.4, 0.9], [3.0, -3.4, 1], [-1.0, -3.0, 0.85],
-    [-4.8, -2.4, 1.1], [-7.8, -1.1, 0.9], [-4.4, 0.5, 0.8], [6.0, -0.8, 1],
-  ];
-  const used = spots.filter(([x, z], index) => clearOfPlots(x, z, 0.85) && Math.hypot(x, z) < 10.3 && (!modest || index % 2 === 0));
-  for (const name of names) {
+  const names = modest ? ["treeA", "pine"] : ["treeA", "treeB", "treeC", "pine"];
+  const count = modest ? 9 : 18;
+  const spots: Array<[number, number, number]> = [];
+  for (let i = 0; i < count * 2 && spots.length < count; i += 1) {
+    const theta = (i / (count * 2)) * Math.PI * 2 + (i % 3) * 0.17;
+    const edge = islandRadius(theta);
+    const radius = edge * (0.48 + (i % 5) * 0.07);
+    const x = Math.cos(theta) * radius;
+    const z = Math.sin(theta) * radius;
+    if (clearOfPlots(x, z, 0.7) && distToRoad(x, z) > 0.9) spots.push([x, z, 0.85 + (i % 5) * 0.08]);
+  }
+  names.forEach((name, nameIndex) => {
     const source = templates.get(name);
-    if (!source) continue;
+    if (!source) return;
+    const chosen = spots.filter((_, index) => index % names.length === nameIndex);
+    if (!chosen.length) return;
     const sample = source.clone(true);
     toonize(sample);
-    fit(sample, name === "pine" ? 1.65 : 2.1);
+    fit(sample, name === "pine" ? 2.35 : 2.9);
     sample.updateMatrixWorld(true);
-    const chosen = used.filter((_, index) => index % names.length === names.indexOf(name));
-    if (!chosen.length) continue;
-    const meshes: Mesh[] = [];
-    sample.traverse((node) => {
-      const mesh = node as Mesh;
-      if (mesh.isMesh) meshes.push(mesh);
-    });
-    for (const mesh of meshes) {
-      const geo = mesh.geometry.clone();
-      geo.applyMatrix4(mesh.matrixWorld);
-      const inst = new InstancedMesh(geo, mesh.material as Material, chosen.length);
-      chosen.forEach(([x, z, s], index) => {
-        const matrix = new Matrix4().makeRotationY(index * 1.3);
-        matrix.scale(new Vector3(s, s, s));
-        matrix.setPosition(x, Y, z);
-        inst.setMatrixAt(index, matrix);
-      });
-      inst.instanceMatrix.needsUpdate = true;
-      land.add(inst);
-    }
-  }
+    instanceAt(land, sample, chosen.map(([x, z, s]) => ({ x, y: heightAt(x, z), z, s, rot: x * 1.7 })));
+  });
 }
 
 function layRocks(land: Group, templates: Map<string, Object3D>, modest: boolean) {
-  const spots: Array<[number, number]> = [
-    [-9.4, -2.2], [-6.6, -4.7], [1.6, -5.2], [7.8, -4.3], [10.3, 1.2], [-9.9, 3.4], [4.6, 5.3], [-2.4, 5.5],
-  ];
-  const count = modest ? 4 : spots.length;
   const source = templates.get("rocksSmall") ?? templates.get("stone");
   if (!source) return;
+  const count = modest ? 5 : 10;
+  const spots: Array<[number, number, number]> = [];
+  for (let i = 0; i < count; i += 1) {
+    const theta = (i / count) * Math.PI * 2 + 0.35;
+    const edge = islandRadius(theta);
+    const radius = edge * (0.9 + (i % 3) * 0.025);
+    const x = Math.cos(theta) * radius;
+    const z = Math.sin(theta) * radius;
+    if (clearOfPlots(x, z, 0.3)) spots.push([x, z, 0.7 + (i % 3) * 0.18]);
+  }
   const sample = source.clone(true);
   toonize(sample);
-  fit(sample, 0.55);
+  fit(sample, 0.48);
   sample.updateMatrixWorld(true);
-  const meshes: Mesh[] = [];
-  sample.traverse((node) => {
-    const mesh = node as Mesh;
-    if (mesh.isMesh) meshes.push(mesh);
-  });
-  for (const mesh of meshes) {
-    const geo = mesh.geometry.clone();
-    geo.applyMatrix4(mesh.matrixWorld);
-    const inst = new InstancedMesh(geo, mesh.material as Material, count);
-    for (let index = 0; index < count; index++) {
-      const [x, z] = spots[index];
-      const matrix = new Matrix4().makeRotationY(index * 0.7);
-      matrix.setPosition(x, Y - 0.02, z);
-      inst.setMatrixAt(index, matrix);
-    }
-    inst.instanceMatrix.needsUpdate = true;
-    land.add(inst);
-  }
+  instanceAt(land, sample, spots.map(([x, z, s]) => ({ x, y: Math.max(0.02, heightAt(x, z) - 0.04), z, s, rot: z })));
 }
 
-function layRoad(land: Group, templates: Map<string, Object3D>) {
-  const source = templates.get("road");
-  if (!source) return;
-  const sample = source.clone(true);
-  toonize(sample);
-  fit(sample, 0.06);
-  sample.updateMatrixWorld(true);
-  const matrices: Matrix4[] = [];
-  for (let i = 0; i < road.length; i++) {
-    const a = road[i];
-    const b = road[(i + 1) % road.length];
-    const matrix = new Matrix4().makeRotationY(Math.atan2(b[0] - a[0], b[1] - a[1]));
-    matrix.setPosition((a[0] + b[0]) / 2, Y + 0.035, (a[1] + b[1]) / 2);
-    matrices.push(matrix);
-  }
+function instanceAt(land: Group, sample: Object3D, spots: Array<{ x: number; y: number; z: number; s: number; rot: number }>) {
   const meshes: Mesh[] = [];
   sample.traverse((node) => {
     const mesh = node as Mesh;
@@ -684,8 +847,13 @@ function layRoad(land: Group, templates: Map<string, Object3D>) {
   for (const mesh of meshes) {
     const geo = mesh.geometry.clone();
     geo.applyMatrix4(mesh.matrixWorld);
-    const inst = new InstancedMesh(geo, mesh.material as Material, matrices.length);
-    matrices.forEach((matrix, index) => inst.setMatrixAt(index, matrix));
+    const inst = new InstancedMesh(geo, mesh.material as Material, spots.length);
+    spots.forEach((spot, index) => {
+      const matrix = new Matrix4().makeRotationY(spot.rot);
+      matrix.scale(new Vector3(spot.s, spot.s, spot.s));
+      matrix.setPosition(spot.x, spot.y, spot.z);
+      inst.setMatrixAt(index, matrix);
+    });
     inst.instanceMatrix.needsUpdate = true;
     land.add(inst);
   }
@@ -694,204 +862,335 @@ function layRoad(land: Group, templates: Map<string, Object3D>) {
 function makeVillagers(source: Object3D, clips: AnimationClip[], land: Group, modest: boolean) {
   const find = (name: string) => clips.find((clip) => clip.name === name || clip.name.endsWith(name));
   const walkClip = find("Walk");
-  const workClip = find("Working") ?? find("Idle");
-  const curve = road.map(([x, z]) => new Vector3(x, Y, z));
-  const count = modest ? 4 : 7;
-  const walkers = Array.from({ length: count }, (_, index) => {
+  const idleClip = find("Idle");
+  const workClip = find("Working") ?? idleClip;
+  const curve = road.map(([x, z]) => new Vector3(x, heightAt(x, z), z));
+  const count = modest ? 3 : 5;
+  const tints = ["#ffffff", "#fff0e0", "#f3e2c4", "#ffe8d4", "#f7f1e6"];
+  const spawn = (height: number, tint: string) => {
     const holder = new Group();
     const model = cloneSkinned(source);
     toonize(model);
-    fit(model, 0.92);
-    model.rotation.y = Math.PI;
+    tintMesh(model, tint);
+    fit(model, height);
     holder.add(model);
     land.add(holder);
+    return { holder, model };
+  };
+  const walkers = Array.from({ length: count }, (_, index) => {
+    const { holder, model } = spawn(0.96, tints[index % tints.length]);
     const mixer = new AnimationMixer(model);
     if (walkClip) mixer.clipAction(walkClip).play();
-    const era = index < 1 ? 1 : index < 2 ? 2 : index < 3 ? 3 : index < 6 ? 4 : 5;
+    const era = [1, 2, 3, 4, 4][index] ?? 4;
     return {
       step(dt: number, t: number) {
+        const intro = document.documentElement.dataset.intro || "done";
         const age = Number(document.documentElement.dataset.age || 5);
-        holder.visible = era <= age;
+        holder.visible = intro === "play" || intro === "run" || era <= age;
         mixer.update(dt);
-        if (!holder.visible) return;
-        const u = (t * 0.03 + index / count) % 1;
+        if (!holder.visible || curve.length < 2) return;
+        const u = (((t * 0.045 + index / count) % 1) + 1) % 1;
         const f = u * curve.length;
         const i = Math.floor(f) % curve.length;
         const n = (i + 1) % curve.length;
-        holder.position.lerpVectors(curve[i], curve[n], f - Math.floor(f));
-        holder.position.y = Y;
-        holder.lookAt(curve[n].x, Y, curve[n].z);
+        const span = f - Math.floor(f);
+        const a = curve[i];
+        const b = curve[n];
+        if (!a || !b) return;
+        const x = a.x + (b.x - a.x) * span;
+        const z = a.z + (b.z - a.z) * span;
+        const [sx, sz] = shove(x, z, 0.28);
+        holder.position.set(sx, heightAt(sx, sz), sz);
+        const ahead = (u + 0.02) % 1;
+        const af = ahead * curve.length;
+        const ai = Math.floor(af) % curve.length;
+        const an = (ai + 1) % curve.length;
+        const aspan = af - Math.floor(af);
+        const pa = curve[ai];
+        const pb = curve[an];
+        if (!pa || !pb) return;
+        const [ax, az] = shove(pa.x + (pb.x - pa.x) * aspan, pa.z + (pb.z - pa.z) * aspan, 0.28);
+        holder.lookAt(ax, holder.position.y, az);
       },
     };
   });
-  const crew = modest ? [[8.95, 3.3]] : [[8.95, 3.3], [7.25, 3.15]];
-  const builders = crew.map(([x, z]) => {
-    const holder = new Group();
-    const model = cloneSkinned(source);
-    toonize(model);
-    fit(model, 0.92);
-    model.rotation.y = Math.PI;
-    holder.add(model);
-    holder.position.set(x, Y, z);
-    holder.lookAt(8.15, Y, 2.15);
-    land.add(holder);
+  const posted = modest
+    ? [{ era: 1, x: -4.55, z: 1.45 }, { era: 4, x: 4.5, z: 1.35 }]
+    : [
+        { era: 1, x: -4.55, z: 1.45 },
+        { era: 2, x: -3.15, z: -2.15 },
+        { era: 3, x: 2.85, z: 2.15 },
+        { era: 4, x: 4.5, z: 1.35 },
+      ];
+  const idlers = posted.map((spot, index) => {
+    const [x, z] = shove(spot.x, spot.z, 0.35);
+    const { holder, model } = spawn(0.96, tints[(index + 2) % tints.length]);
+    holder.position.set(x, heightAt(x, z), z);
+    const home = plots.find((plot) => plot.order === spot.era) ?? plots[1];
+    holder.lookAt(home.x, holder.position.y, home.z);
+    const mixer = new AnimationMixer(model);
+    if (idleClip) mixer.clipAction(idleClip).play();
+    return {
+      step(dt: number) {
+        const intro = document.documentElement.dataset.intro || "done";
+        const age = Number(document.documentElement.dataset.age || 5);
+        holder.visible = intro === "play" || intro === "run" || spot.era <= age;
+        mixer.update(dt);
+      },
+    };
+  });
+  const crew = modest ? [[6.15, 2.35]] : [[6.15, 2.35], [8.05, 4.15]];
+  const builders = crew.map(([x, z], index) => {
+    const [sx, sz] = shove(x, z, 0.2);
+    const { holder, model } = spawn(0.96, index ? "#f6e4cc" : "#fff6ea");
+    holder.position.set(sx, heightAt(sx, sz), sz);
+    holder.lookAt(8.05, holder.position.y, 2.05);
     const mixer = new AnimationMixer(model);
     if (workClip) mixer.clipAction(workClip).play();
     return {
       step(dt: number) {
-        holder.visible = Number(document.documentElement.dataset.age || 5) >= 5;
+        const intro = document.documentElement.dataset.intro || "done";
+        const age = Number(document.documentElement.dataset.age || 5);
+        holder.visible = intro === "play" || intro === "run" || age >= 5;
         mixer.update(dt);
-        holder.position.y = Y;
       },
     };
   });
-  return [...walkers, ...builders];
+  return [...walkers, ...idlers, ...builders];
+}
+
+function tintMesh(root: Object3D, hex: string) {
+  const tint = new Color(hex);
+  root.traverse((node) => {
+    const mesh = node as Mesh;
+    if (!mesh.isMesh) return;
+    const material = mesh.material as MeshToonMaterial;
+    material.color.multiply(tint);
+  });
 }
 
 function makeCart(templates: Map<string, Object3D>, land: Group) {
-  const cart = prop(templates, "cart", 0.72);
+  const cart = prop(templates, "cart", 0.78);
   land.add(cart);
-  const path = [new Vector3(-4.4, Y, 0.15), new Vector3(-1.2, Y, -0.25), new Vector3(2.2, Y, 0.1), new Vector3(6.5, Y, 0.9)];
+  const path = [
+    [-5.6, 4.15], [-2.4, 4.25], [1.3, 4.15], [4.6, 4.05],
+  ].map(([x, z]) => {
+    const [sx, sz] = shove(x, z, 0.5);
+    return new Vector3(sx, heightAt(sx, sz), sz);
+  });
   return {
     step(t: number) {
+      const intro = document.documentElement.dataset.intro || "done";
       const age = Number(document.documentElement.dataset.age || 5);
-      cart.visible = age >= 2;
-      if (!cart.visible) return;
-      const scaled = ((Math.sin(t * 0.16) + 1) / 2) * (path.length - 1);
-      const i = Math.min(path.length - 2, Math.floor(scaled));
-      cart.position.lerpVectors(path[i], path[i + 1], scaled - i);
+      cart.visible = intro === "play" || intro === "run" || age >= 2;
+      if (!cart.visible || path.length < 2) return;
+      const scaled = ((Math.sin(t * 0.18) + 1) / 2) * (path.length - 1);
+      const i = MathUtils.clamp(Math.floor(scaled), 0, path.length - 2);
+      const span = MathUtils.clamp(scaled - i, 0, 1);
+      const a = path[i];
+      const b = path[i + 1];
+      if (!a || !b) return;
+      cart.position.lerpVectors(a, b, span);
+      cart.position.y = heightAt(cart.position.x, cart.position.z);
       const next = path[Math.min(path.length - 1, i + 1)];
-      cart.lookAt(next.x, cart.position.y, next.z);
+      if (next) cart.lookAt(next.x, cart.position.y, next.z);
     },
   };
 }
 
-function clearOfPlots(x: number, z: number, pad: number) {
-  return plots.every((plot) => Math.hypot(x - plot.x, z - plot.z) > plot.r + pad);
-}
-
-function buildIsland(material: MeshToonMaterial) {
-  const geo = new CircleGeometry(11.4, 64);
-  geo.rotateX(-Math.PI / 2);
-  const pos = geo.attributes.position;
+function buildIsland(material: MeshToonMaterial, modest: boolean) {
+  const segs = modest ? 48 : 80;
+  const rings = modest ? 16 : 24;
+  const positions: number[] = [];
   const colors: number[] = [];
+  const grassA = new Color("#86a84e");
+  const grassB = new Color("#6f9440");
+  const grassC = new Color("#9bb85a");
+  const sandA = new Color("#f0d7a4");
+  const sandB = new Color("#e4c184");
+  const dirt = new Color("#c9a15c");
   const tint = new Color();
-  for (let i = 0; i < pos.count; i++) {
-    const x = pos.getX(i);
-    const z = pos.getZ(i);
-    const radius = Math.hypot(x, z) / 11.4;
-    const sand = radius > 0.78;
-    tint.set(sand ? (i % 3 === 0 ? "#f0d59a" : "#e4c27a") : i % 2 ? "#3f9444" : "#327c38");
+  const push = (x: number, z: number) => {
+    const y = heightAt(x, z);
+    const theta = Math.atan2(z, x);
+    const t = Math.hypot(x, z) / islandRadius(theta);
+    const n = hash(x, z);
+    if (t > 0.78) tint.copy(n > 0.5 ? sandA : sandB);
+    else if (n > 0.66) tint.copy(grassC);
+    else if (n > 0.33) tint.copy(grassA);
+    else tint.copy(grassB);
+    const path = distToRoad(x, z);
+    if (path < 0.9 && t < 0.84) tint.lerp(dirt, (1 - path / 0.9) * 0.88);
+    let shade = 1;
+    for (const plot of plots) {
+      const d = Math.hypot(x - plot.x, z - plot.z);
+      const reach = plot.r * 0.95;
+      if (d < reach) shade *= 0.58 + 0.42 * (d / reach);
+    }
+    shade *= 1 - smooth(0.9, 1, t) * 0.18;
+    tint.multiplyScalar(shade);
+    positions.push(x, y, z);
     colors.push(tint.r, tint.g, tint.b);
-    if (!sand) pos.setY(i, Math.sin(x * 1.3) * Math.cos(z * 1.05) * 0.05);
+  };
+  push(0, 0);
+  for (let ring = 1; ring <= rings; ring += 1) {
+    for (let s = 0; s < segs; s += 1) {
+      const theta = (s / segs) * Math.PI * 2;
+      const radius = (ring / rings) * islandRadius(theta);
+      push(Math.cos(theta) * radius, Math.sin(theta) * radius);
+    }
   }
-  geo.setAttribute("color", new Float32BufferAttribute(colors, 3));
+  const indices: number[] = [];
+  for (let s = 0; s < segs; s += 1) indices.push(0, 1 + ((s + 1) % segs), 1 + s);
+  for (let ring = 1; ring < rings; ring += 1) {
+    const row = 1 + (ring - 1) * segs;
+    const next = 1 + ring * segs;
+    for (let s = 0; s < segs; s += 1) {
+      const s2 = (s + 1) % segs;
+      indices.push(row + s, row + s2, next + s2, row + s, next + s2, next + s);
+    }
+  }
+  const geo = new BufferGeometry();
+  geo.setAttribute("position", new BufferAttribute(new Float32Array(positions), 3));
+  geo.setAttribute("color", new BufferAttribute(new Float32Array(colors), 3));
+  geo.setIndex(indices);
   geo.computeVertexNormals();
   return new Mesh(geo, material);
 }
 
-function buildWater() {
-  const geo = new CircleGeometry(46, 40);
+function hash(x: number, z: number) {
+  const n = Math.sin(x * 127.1 + z * 311.7) * 43758.5453;
+  return n - Math.floor(n);
+}
+
+function buildWater(modest: boolean) {
+  const geo = new CircleGeometry(50, modest ? 32 : 64);
   geo.rotateX(-Math.PI / 2);
+  const horizon = new Color("#f3c9a2");
   const mesh = new Mesh(
     geo,
     new ShaderMaterial({
-      uniforms: { uTime: { value: 0 } },
+      uniforms: { uTime: { value: 0 }, uHorizon: { value: horizon } },
       vertexShader: `
         uniform float uTime;
         varying float vWave;
+        varying vec3 vWorld;
         void main() {
-          vec3 p = position;
-          float w = sin(p.x * 0.22 + uTime * 0.7) * cos(p.z * 0.18 + uTime * 0.55);
-          p.y += w * 0.16;
+          vec4 world = modelMatrix * vec4(position, 1.0);
+          float w = sin(world.x * 0.33 + uTime * 0.85) * cos(world.z * 0.27 + uTime * 0.62);
+          w += sin(world.x * 0.12 - world.z * 0.09 + uTime * 0.4) * 0.65;
+          world.y += w * 0.07;
           vWave = w;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+          vWorld = world.xyz;
+          gl_Position = projectionMatrix * viewMatrix * world;
         }
       `,
       fragmentShader: `
+        uniform float uTime;
+        uniform vec3 uHorizon;
         varying float vWave;
+        varying vec3 vWorld;
+        float coast(float theta) {
+          return 12.6 + sin(theta * 2.0) * 0.9 + cos(theta * 3.0) * 0.42 + sin(theta * 5.0 + 0.7) * 0.28;
+        }
         void main() {
-          float f = smoothstep(-1.0, 1.0, vWave);
-          vec3 deep = vec3(0.11, 0.32, 0.48);
-          vec3 crest = vec3(0.35, 0.62, 0.74);
-          gl_FragColor = vec4(mix(deep, crest, f), 0.96);
+          float theta = atan(vWorld.z, vWorld.x);
+          float into = coast(theta) - length(vWorld.xz);
+          float depth = clamp(-into / 9.0, 0.0, 1.0);
+          vec3 shallow = vec3(0.45, 0.74, 0.76);
+          vec3 deep = vec3(0.11, 0.38, 0.55);
+          vec3 col = mix(shallow, deep, smoothstep(0.0, 0.7, depth));
+          col += vec3(0.03, 0.045, 0.04) * vWave * (1.0 - depth);
+          float band = smoothstep(-1.25, -0.4, into) * smoothstep(0.18, -0.2, into);
+          float ripple = 0.4 + 0.6 * sin(theta * 9.0 - uTime * 2.0);
+          col = mix(col, vec3(0.95, 0.98, 0.97), band * ripple * 0.72);
+          float far = smoothstep(16.0, 46.0, length(vWorld.xz));
+          col = mix(col, uHorizon, far);
+          gl_FragColor = vec4(col, 1.0);
         }
       `,
     }),
   );
-  mesh.position.y = -0.12;
+  mesh.position.y = 0.03;
+  mesh.userData.horizon = horizon;
   mesh.userData.spin = (t: number) => {
     (mesh.material as ShaderMaterial).uniforms.uTime.value = t;
   };
   return mesh;
 }
 
-function buildFoam() {
-  const mesh = new Mesh(
-    new RingGeometry(10.85, 12.15, 72),
-    new MeshBasicMaterial({ color: "#f4fbff", transparent: true, opacity: 0.45, side: DoubleSide, depthWrite: false }),
-  );
-  mesh.rotation.x = -Math.PI / 2;
-  mesh.position.y = 0.1;
-  return {
-    mesh,
-    spin(t: number) {
-      const mat = mesh.material as MeshBasicMaterial;
-      mat.opacity = 0.32 + Math.sin(t * 1.3) * 0.12;
-      mesh.scale.setScalar(1 + Math.sin(t * 0.8) * 0.012);
-    },
-  };
-}
-
 function buildSky() {
-  const geo = new SphereGeometry(80, 18, 10);
+  const geo = new SphereGeometry(90, 24, 14);
   const pos = geo.attributes.position;
   const colors: number[] = [];
-  const zenith = new Color("#d7ebf4");
-  const mid = new Color("#f6dcc4");
-  const horizon = new Color("#f0c196");
+  const zenith = new Color("#b9d7ea");
+  const mid = new Color("#f6dcc6");
+  const horizon = new Color("#f0b98a");
+  const sun = new Color("#ffe3b4");
+  const sunDir = new Vector3(-0.55, 0.32, 0.42).normalize();
   const tint = new Color();
-  for (let i = 0; i < pos.count; i++) {
-    const height = MathUtils.clamp((pos.getY(i) / 80 + 0.18) / 1.05, 0, 1);
-    tint.copy(horizon).lerp(mid, Math.min(1, height * 1.4)).lerp(zenith, Math.max(0, height - 0.4));
+  const dir = new Vector3();
+  for (let i = 0; i < pos.count; i += 1) {
+    dir.set(pos.getX(i), pos.getY(i), pos.getZ(i)).normalize();
+    const height = MathUtils.clamp((dir.y + 0.08) / 1.05, 0, 1);
+    tint.copy(horizon).lerp(mid, Math.min(1, height * 1.35)).lerp(zenith, Math.max(0, height - 0.35));
+    const glow = Math.pow(Math.max(0, dir.dot(sunDir)), 16);
+    tint.lerp(sun, glow);
     colors.push(tint.r, tint.g, tint.b);
   }
-  geo.setAttribute("color", new Float32BufferAttribute(colors, 3));
+  geo.setAttribute("color", new BufferAttribute(new Float32Array(colors), 3));
   return new Mesh(geo, new MeshBasicMaterial({ vertexColors: true, side: BackSide, fog: false }));
 }
 
 function layClouds(scene: Scene, count: number) {
+  const puff = new SphereGeometry(1, 8, 6);
+  const mat = new MeshBasicMaterial({ color: "#fff8ef", transparent: true, opacity: 0.9, depthWrite: false, fog: false });
   return Array.from({ length: count }, (_, index) => {
-    const cloud = new Mesh(new SphereGeometry(1.05 + index * 0.12, 8, 6), new MeshBasicMaterial({ color: "#fffaf3", transparent: true, opacity: 0.82 }));
-    cloud.scale.set(1.8, 0.55, 1);
-    cloud.position.set(-8 + index * 5, 7.4 + (index % 2) * 0.4, -3 + index);
+    const cloud = new Group();
+    const bits: Array<[number, number, number, number]> = [[0, 0, 0, 1.15], [0.95, 0.12, 0.08, 0.78], [-0.9, 0.05, -0.05, 0.7], [0.3, 0.32, -0.15, 0.55]];
+    for (const [x, y, z, s] of bits) {
+      const mesh = new Mesh(puff, mat);
+      mesh.position.set(x, y, z);
+      mesh.scale.setScalar(s);
+      cloud.add(mesh);
+    }
+    cloud.position.set(-11 + index * 7.2, 6.4 + (index % 2) * 0.55, -5.2 - index);
+    cloud.scale.setScalar(1.15);
     scene.add(cloud);
     return {
       step(dt: number) {
-        cloud.position.x += dt * 0.15;
-        if (cloud.position.x > 18) cloud.position.x = -18;
+        cloud.position.x += dt * 0.18;
+        if (cloud.position.x > 20) cloud.position.x = -20;
       },
     };
   });
 }
 
 function laySmoke(buildings: Map<string, Group>) {
-  return ["blinkit", "workshop"].flatMap((id) => {
+  return ["workshop", "blinkit"].flatMap((id) => {
     const host = buildings.get(id);
     if (!host) return [];
-    const puff = new Mesh(new SphereGeometry(0.12, 6, 5), new MeshBasicMaterial({ color: "#f7f1e6", transparent: true, opacity: 0.35, depthWrite: false }));
-    puff.position.set(0.4, 2.5, 0.2);
+    const puff = new Mesh(
+      new SphereGeometry(0.12, 6, 5),
+      new MeshBasicMaterial({ color: "#f7f1e6", transparent: true, opacity: 0.35, depthWrite: false }),
+    );
+    puff.position.set(id === "workshop" ? 0.2 : 0.35, id === "workshop" ? 2.15 : 2.2, 0.15);
     host.add(puff);
+    const fire = host.getObjectByName("fire") as Mesh | undefined;
     return [{
-      step(dt: number) {
+      step(dt: number, t: number) {
         puff.position.y += dt * 0.22;
         puff.scale.addScalar(dt * 0.35);
         const mat = puff.material as MeshBasicMaterial;
-        mat.opacity -= dt * 0.1;
+        mat.opacity -= dt * 0.08;
         if (mat.opacity <= 0.02) {
-          puff.position.y = 2.4;
+          puff.position.y = id === "workshop" ? 2.05 : 2.15;
           puff.scale.setScalar(1);
-          mat.opacity = 0.35;
+          mat.opacity = 0.32;
+        }
+        if (fire) {
+          const s = 0.85 + Math.sin(t * 7) * 0.12;
+          fire.scale.setScalar(s);
         }
       },
     }];
@@ -907,9 +1206,9 @@ function contactShadow() {
   const ctx = canvas.getContext("2d");
   if (ctx) {
     const grd = ctx.createRadialGradient(32, 32, 2, 32, 32, 32);
-    grd.addColorStop(0, "rgba(42, 24, 10, 0.5)");
-    grd.addColorStop(0.6, "rgba(42, 24, 10, 0.16)");
-    grd.addColorStop(1, "rgba(42, 24, 10, 0)");
+    grd.addColorStop(0, "rgba(48, 28, 14, 0.45)");
+    grd.addColorStop(0.55, "rgba(48, 28, 14, 0.16)");
+    grd.addColorStop(1, "rgba(48, 28, 14, 0)");
     ctx.fillStyle = grd;
     ctx.fillRect(0, 0, 64, 64);
   }
@@ -921,7 +1220,7 @@ function contactShadow() {
 
 function topPoint(object: Object3D) {
   const bounds = new Box3().setFromObject(object);
-  return new Vector3((bounds.min.x + bounds.max.x) / 2, bounds.max.y, (bounds.min.z + bounds.max.z) / 2);
+  return new Vector3((bounds.min.x + bounds.max.x) / 2, bounds.max.y + 0.2, (bounds.min.z + bounds.max.z) / 2);
 }
 
 function project(point: Vector3, camera: PerspectiveCamera, rect: DOMRect) {
@@ -1001,6 +1300,16 @@ function blockedZones(rect: DOMRect) {
       const box = relativeBox(veil, rect);
       if (box.h > 8) zones.push(box);
     }
+  }
+  const skip = document.querySelector<HTMLElement>("[data-skip-intro]");
+  if (skip && getComputedStyle(skip).display !== "none") {
+    const box = relativeBox(skip, rect);
+    if (box.w > 8 && box.h > 8) zones.push(padBox(box, 8));
+  }
+  const top = document.querySelector<HTMLElement>(".top");
+  if (top) {
+    const box = relativeBox(top, rect);
+    if (box.h > 8) zones.push(box);
   }
   return zones;
 }
