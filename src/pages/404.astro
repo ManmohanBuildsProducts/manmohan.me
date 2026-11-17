@@ -1,8 +1,15 @@
 ---
 import Base from '../layouts/Base.astro';
 ---
-<Base title="Not found · Manmohan" description="This page doesn't exist.">
-  <div class="kick">404</div>
-  <h1>This page got lost in the <em>chaos.</em></h1>
-  <p><a href="/">Back to the start</a></p>
+<Base title="Not found · Manmohan Singh Charan" description="This page doesn't exist." canonicalPath="/404">
+  <main id="main">
+    <div class="row page-intro">
+      <div aria-hidden="true"></div>
+      <div>
+        <p class="name">404</p>
+        <h1>This page doesn't exist.</h1>
+        <p class="summary"><a class="ln" href="/">Back to the start</a></p>
+      </div>
+    </div>
+  </main>
 </Base>

@@ -1,0 +1,10 @@
+Newsreader (public/fonts/newsreader.woff2)
+Copyright 2020 The Newsreader Project Authors (https://github.com/productiontype/newsreader)
+Variable axes: wght, opsz. Subset woff2 used by manmohan.work.
+
+Geist Mono (public/fonts/geist-mono.woff2)
+Copyright 2024 Vercel, Inc. (https://github.com/vercel/geist-font)
+Variable axis: wght. Subset woff2 used by manmohan.work.
+
+Both fonts are licensed under the SIL Open Font License, Version 1.1.
+The license is at https://openfontlicense.org/open-font-license-official-text/
