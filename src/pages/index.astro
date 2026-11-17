@@ -1,198 +1,79 @@
 ---
-import Home from "../layouts/Home.astro";
-import IslandScene from "../components/IslandScene.astro";
-import "../styles/home.css";
-import { contact, cv, home, islands, resources, workshop } from "../data/island";
-import { posts } from "../lib";
-
-const ages = home.ages;
-const fog = islands.filter((island) => island.kind === "fog");
-const count = ages.length;
-
-const ageCss = Array.from({ length: count }, (_, age) => {
-  const later = ages.filter((item) => item.order > age).map((item) => String(item.order));
-  if (!later.length) return "";
-  const hide = later
-        .map((order) => `html.js[data-age="${age}"] :is(.isl-era,.isl-road,.isl-npc,.isl-prop,.mm-dot)[data-order="${order}"]`)
-    .join(",");
-  const plots = later.map((order) => `html.js[data-age="${age}"] .isl-plot[data-order="${order}"]`).join(",");
-  return `${hide}{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .45s ease,visibility 0s linear .45s}${plots}{opacity:1;visibility:visible;transition:opacity .45s ease,visibility 0s}`;
-}).join("");
+import Base from '../layouts/Base.astro';
+import PostList from '../components/PostList.astro';
+import { posts } from '../lib';
 
 const essays = await posts();
-const showWriting = essays.length > 0;
-
-const title = "Manmohan Singh Charan";
-const description = contact.line;
+const title = 'Manmohan Singh Charan · Product manager';
+const description = 'Manmohan Singh Charan, Lead PM at GobbleCube. Seven years in product: at scale, from zero, and now from one to ten.';
 
 const person = {
-  "@context": "https://schema.org",
-  "@type": "Person",
-  name: "Manmohan Singh Charan",
-  url: "https://manmohan.work/",
-  email: `mailto:${contact.email}`,
-  jobTitle: "Lead PM",
-  worksFor: { "@type": "Organization", name: "GobbleCube" },
-  alumniOf: { "@type": "CollegeOrUniversity", name: "IIT Roorkee" },
-  sameAs: [contact.x, contact.github, contact.linkedin],
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Manmohan Singh Charan',
+  url: 'https://manmohan.work/',
+  email: 'mailto:manmohanbuildsproducts@gmail.com',
+  jobTitle: 'Lead PM',
+  worksFor: { '@type': 'Organization', name: 'GobbleCube' },
+  alumniOf: { '@type': 'CollegeOrUniversity', name: 'IIT Roorkee' },
+  homeLocation: { '@type': 'Place', name: 'Gurugram, India' },
+  sameAs: [
+    'https://www.linkedin.com/in/maciitr',
+    'https://x.com/ManmohanBuilds',
+    'https://github.com/ManmohanBuildsProducts',
+  ],
 };
-
-const stats = resources.join(" · ");
 ---
-<Home title={title} description={description}>
-  <Fragment set:html={`<style>${ageCss}</style>`} />
-  <script type="application/ld+json" set:html={JSON.stringify(person)} />
-  <p class="sr" aria-live="polite" data-live></p>
-  <header class="top">
-    <a class="brand" href="/">Manmohan</a>
-    <nav aria-label="Primary">
-      <a href="#ages">Ages</a>
-      <a href="#build">How I build</a>
-      <a href="#contact">Contact</a>
-      {showWriting && <a href="/writing/">Writing</a>}
-    </nav>
-  </header>
-  <main id="content">
-    <div class="saga">
-      <div class="pin">
-        <div class="intro-card">
-          <p class="intro-kicker">A chronicle</p>
-          <h2 class="intro-title">Welcome to the Age of Manmohan</h2>
-          <button type="button" class="quiet intro-skip" data-skip-intro>Skip intro</button>
-        </div>
-        <IslandScene />
-        <div class="veil">
-          <p class="kicker">manmohan.work</p>
-          <h1>Manmohan Singh Charan</h1>
-          <p class="position">AI-native product leader. Lead PM at GobbleCube.</p>
-          <p class="stats">{stats}</p>
-          <div class="cta">
-            <a class="btn solid" href={contact.linkedin} target="_blank" rel="me noopener noreferrer">LinkedIn<span class="sr"> (opens in a new tab)</span></a>
-            <a class="btn solid" href={`mailto:${contact.email}`}>Email</a>
-            <a class="icon" href={contact.x} target="_blank" rel="me noopener noreferrer" aria-label="X, @ManmohanBuilds (opens in a new tab)">
-              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M14.7 10.3 22.4 1h-1.8l-6.7 8.1L8.2 1H1.5l8.1 12.2L1.5 23h1.8l7.1-8.6L15.8 23h6.7zM4 2.5h2.8l13.2 19h-2.8z"/></svg>
-            </a>
-            <a class="icon" href={contact.github} target="_blank" rel="me noopener noreferrer" aria-label="GitHub (opens in a new tab)">
-              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.2-3.4-1.2-.4-1.1-1-1.4-1-1.4-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.4-1.1.6-1.3-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.8 1a9.6 9.6 0 0 1 5 0c2-1.3 2.8-1 2.8-1 .5 1.4.2 2.4.1 2.7.7.7 1 1.6 1 2.7 0 3.9-2.3 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5A10 10 0 0 0 12 2"/></svg>
-            </a>
-            {cv.available && <a class="btn solid" href={cv.href}>CV</a>}
-          </div>
-          <a class="quiet" href="#summary">Skip the island</a>
-        </div>
-      </div>
-      <div class="chapters" id="ages">
-        <h2 class="sr">The ages</h2>
-        {ages.map((age) => (
-          <article
-            class:list={["age", { wonder: age.wonder }]}
-            id={age.id}
-            tabindex="-1"
-            data-age-card
-            data-order={age.order}
-            data-numeral={age.age}
-            data-name={age.name}
-            data-wonder={age.wonder ? "true" : "false"}
-            data-speaker={age.speaker}
-            data-banner-kicker={age.bannerKicker}
-            data-banner-title={age.bannerTitle}
-            data-banner-line={age.bannerLine}
-          >
-            <p class="kicker">{age.wonder ? `Age ${age.age} · the wonder` : `Age ${age.age}`}</p>
-            <h3>{age.name}</h3>
-            {age.role && <p class="role">{age.role}</p>}
-            {age.dates && <p class="when">{age.dates}</p>}
-            <p class="grand">{age.grand}</p>
-            <p class="lives">{age.lives}</p>
-            {age.could && <p class="toward"><span>Built toward</span> {age.could}</p>}
-            {age.extra.length > 0 && (
-              <dl class="rows">
-                {age.extra.map((row) => (
-                  <div>
-                    <dt>{row.label}</dt>
-                    <dd>{row.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            )}
-          </article>
-        ))}
+<Base title={title} description={description} jsonLd={person}>
+  <main id="main">
+    <div class="row intro">
+      <div aria-hidden="true"></div>
+      <div>
+        <p class="name">Manmohan Singh Charan <span><span class="dot-m" aria-hidden="true">· </span>Lead PM at GobbleCube · IIT Roorkee</span></p>
+        <h1>The PM who ships AI to production.</h1>
+        <p class="lede">Seven years in product: at scale, from zero, and now from one to ten.</p>
+        <p class="summary">I learned operations at scale at Blinkit. I co-founded two companies from zero, Tago Care and Badho. Now I’m at GobbleCube, growing an AI-first product. On the side, I build with AI. <a class="ln" href="https://github.com/ManmohanBuildsProducts">It’s on GitHub<span class="ar" aria-hidden="true">↗</span></a></p>
       </div>
     </div>
-    <div class="wrap lower">
 
-    <section class="summary" id="summary">
-      <h2>The five ages, plainly</h2>
-      <ol>
-        {ages.map((age) => (
-          <li>
-            <a href={`#${age.id}`}>{age.name}</a>
-            {age.role ? <span> · {age.role}</span> : null}
-            <span> — {age.grand}</span>
-          </li>
-        ))}
+    <section class="row" aria-labelledby="work-h">
+      <h2 id="work-h">Work</h2>
+      <ol class="work">
+        <li><span class="yr">2019–20</span><p><a class="ln co" href="https://blinkit.com">Blinkit</a> <span class="role">· Associate Product Manager, offline stores</span><span class="what">Store operations at scale.</span></p></li>
+        <li><span class="yr">2021</span><p><a class="ln co" href="https://bijak.in">Bijak</a> <span class="role">· Product consultant / Senior PM</span><span class="what">A new product line for mandi trade.</span></p></li>
+        <li><span class="yr">2021–22</span><p><a class="ln co" href="https://in.linkedin.com/company/tagocare">Tago Care</a> <span class="role">· Co-founder & Head of Product</span><span class="what">A health locker for families.</span></p></li>
+        <li><span class="yr">2022–26</span><p><a class="ln co" href="https://play.google.com/store/apps/details?id=com.badhobuyer">Badho</a> <span class="role">· Co-founder & Head of Product</span><span class="what">A digital channel for general trade.</span></p></li>
+        <li><span class="yr">2026–</span><p><a class="ln co" href="https://gobblecube.ai">GobbleCube</a> <span class="role">· Lead PM</span><span class="what">AI-first pricing and promotions.</span></p></li>
       </ol>
     </section>
 
-    <section class="block" id="build" aria-labelledby="build-title">
-      <p class="kicker">Badho</p>
-      <h2 id="build-title">How I build with AI</h2>
-      <p class="proof">10+ production agent workflows. Hybrid search went from 9% to 28% of DAU in under 100ms, with zero LLM calls.</p>
-      <h3 class="subhead">{workshop.title}</h3>
-      <div class="benches">
-        {workshop.benches.map((bench) => (
-          <article class="card">
-            <h3>{bench.title}</h3>
-            <p>{bench.body}</p>
-            {bench.href && bench.linkLabel && (
-              <p style="margin-top:10px">
-                <a class="outlink" href={bench.href} target="_blank" rel="noopener noreferrer">
-                  {bench.linkLabel}<span aria-hidden="true"> ↗</span>
-                  <span class="sr"> (opens in a new tab)</span>
-                </a>
-              </p>
-            )}
-          </article>
-        ))}
-      </div>
-    </section>
-
-    <section class="block" id="islands" aria-labelledby="islands-title">
-      <h2 id="islands-title">The next island</h2>
-      <div class="islands">
-        {fog.map((island) => (
-          <article class="card" id={`island-${island.id}`}>
-            <p class="kicker">In the fog</p>
-            <h3>{island.name}</h3>
-            <p>{island.teaser}</p>
-            <p style="margin-top:8px">{island.scouted}</p>
-          </article>
-        ))}
-      </div>
-    </section>
-
-    <section class="block contact" id="contact" aria-labelledby="contact-title">
+    <section class="row" aria-labelledby="writing-h" id="writing">
+      <h2 id="writing-h">Writing</h2>
       <div>
-        <h2 id="contact-title">Send a messenger</h2>
-        <p>{contact.line}</p>
-      </div>
-      <div class="actions">
-        <a class="btn primary" href={`mailto:${contact.email}`}>Email me</a>
-        <a class="btn ghost" href={contact.github} target="_blank" rel="me noopener noreferrer">GitHub<span class="sr"> (opens in a new tab)</span></a>
-        <a class="btn ghost" href={contact.x} target="_blank" rel="me noopener noreferrer">{contact.xLabel}<span class="sr"> (opens in a new tab)</span></a>
-        <a class="btn ghost" href={contact.linkedin} target="_blank" rel="me noopener noreferrer">LinkedIn<span class="sr"> (opens in a new tab)</span></a>
+        <p class="lead">Notes on building products with AI, and what I learn along the way.</p>
+        {essays.length === 0 ? (
+          <p class="empty">Writing soon.</p>
+        ) : (
+          <>
+            <PostList posts={essays.slice(0, 3)} />
+            <p class="more"><a class="ln" href="/writing">All writing →</a><a class="ln" href="/rss.xml">RSS</a></p>
+          </>
+        )}
       </div>
     </section>
-    </div>
+
+    <section class="row" aria-labelledby="contact-h" id="contact">
+      <h2 id="contact-h">Contact</h2>
+      <div>
+        <p class="ask">I’m looking for PM roles at AI labs and AI-first companies, remote from India or with relocation.</p>
+        <p class="summary">The fastest way to reach me is email.</p>
+        <ul class="links">
+          <li><a class="ln primary" href="mailto:manmohanbuildsproducts@gmail.com">manmohanbuildsproducts@gmail.com</a></li>
+          <li><a class="ln" href="https://www.linkedin.com/in/maciitr">LinkedIn<span class="ar" aria-hidden="true">↗</span></a></li>
+          <li><a class="ln" href="https://x.com/ManmohanBuilds">X<span class="ar" aria-hidden="true">↗</span></a></li>
+          <li><a class="ln" href="https://github.com/ManmohanBuildsProducts">GitHub<span class="ar" aria-hidden="true">↗</span></a></li>
+        </ul>
+      </div>
+    </section>
   </main>
-  <footer class="wrap foot">
-    <span>manmohan.work</span>
-    <nav aria-label="Footer">
-      <a href="/rss.xml">RSS</a>
-      <a href={`mailto:${contact.email}`}>Email</a>
-      <a href={contact.x} target="_blank" rel="me noopener noreferrer">X @ManmohanBuilds<span class="sr"> (opens in a new tab)</span></a>
-      <a href={contact.github} target="_blank" rel="me noopener noreferrer">GitHub<span class="sr"> (opens in a new tab)</span></a>
-      <a href={contact.linkedin} target="_blank" rel="me noopener noreferrer">LinkedIn<span class="sr"> (opens in a new tab)</span></a>
-      {showWriting && <a href="/writing/">Writing</a>}
-    </nav>
-  </footer>
-</Home>
+</Base>

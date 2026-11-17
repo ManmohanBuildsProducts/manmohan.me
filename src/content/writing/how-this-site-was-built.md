@@ -1,7 +1,7 @@
 ---
 title: How this site was built
 description: A home page made with agents, a single WebGL canvas and five chapters that snap into place.
-date: 2026-10-11
+pubDate: 2026-10-11
 draft: true
 tags: [building, agents]
 ---

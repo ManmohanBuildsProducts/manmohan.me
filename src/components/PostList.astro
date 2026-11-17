@@ -1,0 +1,26 @@
+---
+import { fmt, isoDate } from '../lib';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  posts: CollectionEntry<'writing'>[];
+  showDescription?: boolean;
+}
+
+const { posts, showDescription = false } = Astro.props;
+---
+<ol class="posts">
+  {posts.map((p) => (
+    <li>
+      {showDescription ? (
+        <div>
+          <a href={`/writing/${p.id}`}><span>{p.data.title}</span></a>
+          <p class="what">{p.data.description}</p>
+        </div>
+      ) : (
+        <a href={`/writing/${p.id}`}><span>{p.data.title}</span></a>
+      )}
+      <time datetime={isoDate(p.data.pubDate)}>{fmt(p.data.pubDate)}</time>
+    </li>
+  ))}
+</ol>
