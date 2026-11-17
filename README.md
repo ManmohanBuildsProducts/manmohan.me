@@ -26,7 +26,7 @@ You can do this from the GitHub website (Add file → Create new file) with no l
 
 ## Local
 
-Needs Node 22.12 or newer.
+Needs Node 22.12 or newer. `.node-version` pins 22.23.4, which the Workers Builds image already has installed.
 
 ```sh
 npm install
